@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect } from 'react';
 import {
   View,
   Text,
@@ -6,48 +6,33 @@ import {
   StyleSheet,
   Modal,
   FlatList,
-} from "react-native";
+} from 'react-native';
 
+// ➕ Padded 01–31 days
 const days = Array.from({ length: 31 }, (_, i) =>
-  (i + 1).toString().padStart(2, "0")
+  (i + 1).toString().padStart(2, '0')
 );
 const months = [
-  "Jan",
-  "Feb",
-  "Mar",
-  "Apr",
-  "May",
-  "Jun",
-  "Jul",
-  "Aug",
-  "Sep",
-  "Oct",
-  "Nov",
-  "Dec",
+  'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+  'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
 ];
-const years = ["2023", "2024", "2025", "2026", "2027"];
+const years = ['2023', '2024', '2025', '2026', '2027'];
 
-export default function DateSelectPopup({ visible, onCancel, onOk }) {
+const DateSelectPopup = ({ visible, onCancel, onOk }) => {
   const now = new Date();
 
-  const [selectedDay, setSelectedDay] = useState(now.getDate().toString());
-
- 
-  const [selectedMonth, setSelectedMonth] = useState(
-    months[now.getMonth()]
-  );
-
-  const [selectedYear, setSelectedYear] = useState(
-    now.getFullYear().toString()
-  );
+  // ✅ Pad day for match with days array
+  const [selectedDay, setSelectedDay] = useState(String(now.getDate()).padStart(2, '0'));
+  const [selectedMonth, setSelectedMonth] = useState(months[now.getMonth()]);
+  const [selectedYear, setSelectedYear] = useState(now.getFullYear().toString());
 
   const dayRef = useRef(null);
   const monthRef = useRef(null);
   const yearRef = useRef(null);
 
-  const itemHeight = 40; // height of each item
-  const visibleItems = 3; // 5 items visible: 2 above, 1 center, 2 below
-  const pickerHeight = itemHeight * visibleItems; // total picker height = 200
+  const itemHeight = 40;
+  const visibleItems = 3;
+  const pickerHeight = itemHeight * visibleItems;
 
   const renderPicker = (data, selected, setSelected, ref) => (
     <View style={[styles.pickerContainer, { height: pickerHeight }]}>
@@ -58,13 +43,13 @@ export default function DateSelectPopup({ visible, onCancel, onOk }) {
         showsVerticalScrollIndicator={false}
         snapToInterval={itemHeight}
         decelerationRate="fast"
-        getItemLayout={(data, index) => ({
+        getItemLayout={(_, index) => ({
           length: itemHeight,
           offset: itemHeight * index,
           index,
         })}
         contentContainerStyle={{
-          paddingVertical: (pickerHeight - itemHeight) / 2, // center item in middle
+          paddingVertical: (pickerHeight - itemHeight) / 2,
         }}
         onMomentumScrollEnd={(event) => {
           const offsetY = event.nativeEvent.contentOffset.y;
@@ -72,7 +57,7 @@ export default function DateSelectPopup({ visible, onCancel, onOk }) {
           setSelected(data[index]);
         }}
         renderItem={({ item }) => (
-          <View style={{ height: itemHeight, justifyContent: "center" }}>
+          <View style={{ height: itemHeight, justifyContent: 'center' }}>
             <Text
               style={[
                 styles.item,
@@ -84,37 +69,33 @@ export default function DateSelectPopup({ visible, onCancel, onOk }) {
           </View>
         )}
       />
-      {/* Top and Bottom Highlight Lines */}
       <View
-        style={[
-          styles.highlightLine,
-          { top: pickerHeight / 2 - itemHeight / 2 },
-        ]}
+        style={[styles.highlightLine, { top: pickerHeight / 2 - itemHeight / 2 }]}
       />
       <View
-        style={[
-          styles.highlightLine,
-          { top: pickerHeight / 2 + itemHeight / 2 },
-        ]}
+        style={[styles.highlightLine, { top: pickerHeight / 2 + itemHeight / 2 }]}
       />
     </View>
   );
 
-  // Scroll to the selected item on initial render
+  // ✅ Scroll to correct positions on open
   useEffect(() => {
-    if (dayRef.current) {
-      const dayIndex = days.indexOf(selectedDay);
+    if (!visible) return;
+
+    const dayIndex = days.indexOf(selectedDay);
+    const monthIndex = months.indexOf(selectedMonth);
+    const yearIndex = years.indexOf(selectedYear);
+
+    if (dayRef.current && dayIndex >= 0) {
       dayRef.current.scrollToIndex({ index: dayIndex, animated: false });
     }
-    if (monthRef.current) {
-      const monthIndex = months.indexOf(selectedMonth);
+    if (monthRef.current && monthIndex >= 0) {
       monthRef.current.scrollToIndex({ index: monthIndex, animated: false });
     }
-    if (yearRef.current) {
-      const yearIndex = years.indexOf(selectedYear);
+    if (yearRef.current && yearIndex >= 0) {
       yearRef.current.scrollToIndex({ index: yearIndex, animated: false });
     }
-  }, [visible, selectedDay, selectedMonth, selectedYear]);
+  }, [visible]);
 
   return (
     <Modal visible={visible} transparent animationType="fade">
@@ -150,66 +131,68 @@ export default function DateSelectPopup({ visible, onCancel, onOk }) {
       </View>
     </Modal>
   );
-}
+};
+
+export default DateSelectPopup;
 
 const styles = StyleSheet.create({
   centered: {
     flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "rgba(0,0,0,0.3)",
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0,0,0,0.3)',
   },
   popup: {
     width: 274,
-    backgroundColor: "#fff",
+    backgroundColor: '#fff',
     borderRadius: 16,
     padding: 24,
     gap: 24,
   },
   selectedDate: {
     fontSize: 16,
-    fontWeight: "500",
+    fontWeight: '600',
     letterSpacing: -0.02,
-    color: "#000",
-    textAlign: "center",
+    color: 'black',
+    textAlign: 'center',
   },
   dateRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
+    flexDirection: 'row',
+    justifyContent: 'space-between',
     gap: 2,
   },
   pickerContainer: {
     width: 74,
-    position: "relative",
-    overflow: "hidden",
+    position: 'relative',
+    overflow: 'hidden',
   },
   item: {
     width: 74,
-    textAlign: "center",
+    textAlign: 'center',
     fontSize: 16,
-    fontWeight: "500",
+    fontWeight: '500',
   },
   faded: {
-    color: "rgba(0, 0, 0, 0.4)",
+    color: 'rgba(0, 0, 0, 0.4)',
   },
   selected: {
-    color: "#000",
-    fontWeight: "600",
+    color: 'black',
+    fontWeight: '600',
   },
   highlightLine: {
-    position: "absolute",
-    width: "100%",
+    position: 'absolute',
+    width: '100%',
     height: 1,
-    backgroundColor: "#000",
+    backgroundColor: '#000',
   },
   buttonRow: {
-    flexDirection: "row",
-    justifyContent: "flex-end",
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
     gap: 24,
   },
   buttonText: {
     fontSize: 16,
-    fontWeight: "500",
-    color: "#000",
+    fontWeight: '500',
+    color: '#000',
   },
 });

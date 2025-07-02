@@ -208,7 +208,7 @@ const ClientInfoCard: React.FC<Props> = ({enquiry}) => {
         Toast.show({
           type: 'success',
           text1: `${data.message}`,
-          visibilityTime: 5000,
+          //visibilityTime: 5000,
         });
         setTokenModel(false);
 
@@ -2166,7 +2166,7 @@ const ClientInfoCard: React.FC<Props> = ({enquiry}) => {
               style={Sstyles.input}>
               <Text>
                 {!selectedDate ? (
-                  <Text style={{color: 'gray'}}>Date</Text>
+                  <Text style={{color: 'black'}}>Date</Text>
                 ) : (
                   <Text>
                     {`${selectedDate?.day}-${selectedDate?.month}-${selectedDate?.year}`}
