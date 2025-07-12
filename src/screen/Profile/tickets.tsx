@@ -231,13 +231,14 @@ const Tickets: React.FC = () => {
 
       const data = await response.json();
       setTickets(data);
+      auth?.setTicketNumber(data.length)
     } catch (error) {
       console.error('Error fetching tickets:', error);
     }
   };
 
   const addTicket = async () => {
-    console.log(newTicket);
+    
     
     try {
       const response = await fetch(`https://api.reparv.in/sales/tickets/add`, {

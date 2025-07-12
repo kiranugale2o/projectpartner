@@ -205,6 +205,7 @@ export type RootStackParamList = {
     salespersonid: number | null;
     booktype: string;
   };
+  KYC:undefined,
   EnquiryDetail: {enquiry: Enquirer};
 
   // add other screens here

@@ -10,17 +10,13 @@ import {
   Image,
   StyleSheet,
   ScrollView,
+  Alert,
 } from 'react-native';
 import { Calendar } from 'react-native-calendars';
-import {
-  startOfWeek,
-  endOfWeek,
-  startOfMonth,
-  endOfMonth,
-  format,
-} from 'date-fns';
+ 
 import { Calendar1 } from 'lucide-react-native';
 import { AuthContext } from '../context/AuthContext';
+import { format } from 'date-fns';
 //import { FilterIcon } from 'lucide-react-native';
 
 const shortcuts = [
@@ -80,28 +76,55 @@ const EnquiryCustomeDatePicker = () => {
   const auth=useContext(AuthContext)
 
 
-  const onDaySelect = (day) => {
-    const date = day.dateString; // yyyy-MM-dd
-    const { startDate, endDate } = range;
+  // const onDaySelect = (day) => {
+   
+  //   const date = day.dateString; // yyyy-MM-dd
+  //   const { startDate, endDate } = range;
 
-    if (!startDate || (startDate && endDate)) {
-      // first tap OR restarting
-      setRange({ startDate: date, endDate: null });
-       auth?.setDateRange({ startDate: date, endDate: null })
-    } else {
-      // second tap
-      if (date < startDate) {
-        // tapped before start -> swap
-        setRange({ startDate: date, endDate: startDate });
-          auth?.setDateRange({ startDate: date, endDate: startDate })
-      } else {
-        setRange({ startDate, endDate: date });
-         auth?.setDateRange({ startDate, endDate: date })
-      }
-    }
-  };
+  //   if (!startDate || (startDate && endDate)) {
+  //     // first tap OR restarting
+  //     setRange({ startDate: date, endDate: null });
+  //      auth?.setDateRange({ startDate: date, endDate: null })
+  //   } else {
+  //     // second tap
+  //     if (date < startDate) {
+  //       // tapped before start -> swap
+  //       setRange({ startDate: date, endDate: startDate });
+  //         auth?.setDateRange({ startDate: date, endDate: startDate })
+  //     } else {
+  //       setRange({ startDate, endDate: date });
+  //     //   auth?.setDateRange({ startDate, endDate: date })
+  //        auth?.setDateRange({ startDate:date, endDate: null })
+  //     }
+  //   }
+  // };
 
    
+  const onDaySelect = (day) => {
+  const date = day.dateString; // Format: 'yyyy-MM-dd'
+  const { startDate, endDate } = range;
+
+
+ 
+  if (!startDate || (startDate && endDate)) {
+    // First tap OR restarting the range
+    setRange({ startDate: date, endDate: null });
+    auth?.setDateRange({ startDate: date, endDate: date });
+
+  } else {
+    // Second tap
+    if (date < startDate) {
+      // Tapped before start -> swap
+      setRange({ startDate: date, endDate: startDate });
+      auth?.setDateRange({ startDate: date, endDate: startDate });
+    } else {
+      // Normal range
+      setRange({ startDate, endDate: date });
+      auth?.setDateRange({ startDate, endDate: date }); // ✅ This was missing
+    }
+  }
+};
+
 
   const applyShortcut = (sc) => {
     const [start, end] = sc.getValue().map((d) => format(d, 'yyyy-MM-dd'));

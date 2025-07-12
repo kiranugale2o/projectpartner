@@ -58,6 +58,7 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: '600',
     marginBottom: 10,
+     color:'black'
   },
   message: {
     fontSize: 15,

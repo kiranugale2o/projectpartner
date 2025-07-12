@@ -45,6 +45,7 @@ const CustomPicker: React.FC<CustomPickerProps> = ({
           style={{
             flexDirection: 'row',
             gap: 2,
+            
           }}>
           <View
             style={[
@@ -129,6 +130,7 @@ const CustomPicker: React.FC<CustomPickerProps> = ({
                   <Text
                     style={{
                       fontSize: 16,
+                      color:'black'
                     }}>
                     {option.label}
                   </Text>

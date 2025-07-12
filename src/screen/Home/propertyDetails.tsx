@@ -17,13 +17,14 @@ import PropertyOverviewCard from '../../component/PropertyOverviewCard';
 import {RouteProp, useRoute} from '@react-navigation/native';
 import {PropertyInfo, RootStackParamList} from '../../types';
 import {FormatPrice} from '../../utils';
-import {MapPin, Star, X, XCircle} from 'lucide-react-native';
+import {CheckCheck, MapPin, Star, X, XCircle} from 'lucide-react-native';
 import Wings from '../../component/Wings';
 import SuccessModal from '../../component/PaymentModules/SuccessModel';
 import ConfirmBookingPopup from '../../component/ConfirmBookingPopup';
 import {AuthContext} from '../../context/AuthContext';
 import {payNow} from '../../utils/razorpay';
 import SiteVisitModal from '../../component/SiteVisitPopUp';
+import PropertyOverview from '../../component/PropertyOverviewCard';
 
 const {width} = Dimensions.get('window');
 
@@ -177,7 +178,7 @@ const PropertyDetails: React.FC = () => {
     const num = Number(val);
     return isNaN(num) ? 0 : num;
   };
-  console.log(propertyData);
+  //console.log(propertyData);
 
   const basePrice = parse(propertyData?.totalOfferPrice);
 
@@ -201,30 +202,38 @@ const PropertyDetails: React.FC = () => {
     maintenance +
     other;
 
+      const showApprovedBy = propertyData?.propertyCategory !== 'FarmLand';
+  const showRERA = ['NewFlat', 'NewPlot'].includes(propertyData?.propertyCategory);
+
+
   return (
     <>
       <ScrollView style={{flex: 1, width: '100%', backgroundColor: 'white'}}>
         <View style={styles.container}>
-          <ScrollView
-            ref={scrollRef}
-            horizontal
-            pagingEnabled
-            showsHorizontalScrollIndicator={false}
-            style={styles.scrollView}
-            onScroll={e => {
-              const index = Math.round(e.nativeEvent.contentOffset.x / width);
-              setCurrentIndex(index);
-            }}
-            scrollEventThrottle={16}>
-            {images.map((img, index) => (
-              <Image
-                key={index}
-                source={{uri: `https://api.reparv.in${img}`}}
-                style={styles.image}
-                resizeMode="cover"
-              />
-            ))}
-          </ScrollView>
+       <ScrollView
+  ref={scrollRef}
+  horizontal
+  pagingEnabled
+  showsHorizontalScrollIndicator={false}
+  style={styles.scrollView}
+  onScroll={e => {
+    const index = Math.round(e.nativeEvent.contentOffset.x / width);
+    setCurrentIndex(index);
+  }}
+  scrollEventThrottle={16}
+>
+  {images
+    .filter(img => img && img !== '')
+    .map((img, index) => (
+      <Image
+        key={index}
+        source={{ uri: `https://api.reparv.in${img}` }}
+        style={styles.image}
+        resizeMode="cover"
+      />
+    ))}
+</ScrollView>
+
 
           {/* Back Arrow */}
           {currentIndex > 0 && (
@@ -274,302 +283,67 @@ const PropertyDetails: React.FC = () => {
           )}
         </View>
 
-        <View
-          style={{
-            width: '90%',
-            alignSelf: 'center', // centers the container horizontally
-            marginTop: 20,
-            // marginInline: 10,
-            flexDirection: 'row',
-            flexWrap: 'wrap', // enables wrapping to next line
-            gap: 10, // gap is supported in recent React Native versions; otherwise use margin on children
-          }}>
-          {propertyData?.frontView && (
-            <TouchableOpacity
-              onPress={() => {
-                const uri = propertyData?.frontView
-                  ? `https://api.reparv.in${
-                      JSON.parse(propertyData.frontView)[0]
-                    }`
-                  : null;
-                if (uri) {
-                  setSelectedImageUri(uri);
-                  setModalVisible(true);
-                }
-              }}
-              style={styles.box}>
-              <Image
-                source={
-                  propertyData?.frontView
-                    ? {
-                        uri: `https://api.reparv.in${
-                          propertyData?.frontView
-                            ? JSON.parse(propertyData.frontView)[0]
-                            : null
-                        }`,
-                      }
-                    : require('../../../assets/home/notfound.png')
-                }
-                style={styles.boximage}
-                resizeMode="cover"
-              />
-              <Text
-                style={{
-                  fontSize: 11,
-                  display: !propertyData?.frontView ? 'none' : 'flex',
-                  alignItems: 'center',
-                  textAlign: 'center',
-                }}>
-                front View
-              </Text>
-            </TouchableOpacity>
-          )}
-          {propertyData?.sideView && (
-            <TouchableOpacity
-              onPress={() => {
-                const uri = propertyData?.sideView
-                  ? `https://api.reparv.in${
-                      JSON.parse(propertyData.sideView)[0]
-                    }`
-                  : null;
-                if (uri) {
-                  setSelectedImageUri(uri);
-                  setModalVisible(true);
-                }
-              }}
-              style={styles.box}>
-              <Image
-                source={
-                  propertyData?.sideView
-                    ? {
-                        uri: `https://api.reparv.in${
-                          propertyData?.sideView
-                            ? JSON.parse(propertyData.sideView)[0]
-                            : null
-                        }`,
-                      }
-                    : require('../../../assets/home/notfound.png')
-                }
-                style={styles.boximage}
-                resizeMode="cover"
-              />
-              <Text
-                style={{
-                  fontSize: 11,
-                  display: !propertyData?.sideView ? 'none' : 'flex',
-                  alignItems: 'center',
-                  textAlign: 'center',
-                }}>
-                Side View
-              </Text>
-            </TouchableOpacity>
-          )}
-          {propertyData?.balconyView && (
-            <TouchableOpacity
-              onPress={() => {
-                const uri = propertyData?.balconyView
-                  ? `https://api.reparv.in${
-                      JSON.parse(propertyData.balconyView)[0]
-                    }`
-                  : null;
-                if (uri) {
-                  setSelectedImageUri(uri);
-                  setModalVisible(true);
-                }
-              }}
-              style={styles.box}>
-              <Image
-                source={
-                  propertyData?.balconyView
-                    ? {
-                        uri: `https://api.reparv.in${
-                          propertyData?.balconyView
-                            ? JSON.parse(propertyData.balconyView)[0]
-                            : null
-                        }`,
-                      }
-                    : require('../../../assets/home/notfound.png')
-                }
-                style={styles.boximage}
-                resizeMode="cover"
-              />
-              <Text
-                style={{
-                  fontSize: 11,
-                  display: !propertyData?.balconyView ? 'none' : 'flex',
-                  alignItems: 'center',
-                  textAlign: 'center',
-                }}>
-                Balcony View
-              </Text>
-            </TouchableOpacity>
-          )}
+    <View
+  style={{
+    width: '95%',
+    alignSelf: 'center',
+    marginTop: 20,
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'flex-start', // ✅ aligns all to the start
+    gap: 1, // optional, if your RN version supports it
+  }}
+>
+  {[
+    { key: 'frontView', label: 'Front View' },
+    { key: 'sideView', label: 'Side View' },
+    { key: 'balconyView', label: 'Balcony View' },
+    { key: 'bedroomView', label: 'Bedroom View' },
+    { key: 'bathroomView', label: 'Bathroom View' },
+    { key: 'kitchenView', label: 'Kitchen View' },
+    { key: 'hallView', label: 'Hall View' },
+    { key: 'nearestLandmark', label: 'Landmark' },
+    { key: 'developedAmenities', label: 'Amenities' },
+  ].map(({ key, label }) => {
+    const value = propertyData?.[key];
+    if (!value) return null;
 
-          {propertyData?.bedroomView && (
-            <TouchableOpacity
-              onPress={() => {
-                const uri = propertyData?.bedroomView
-                  ? `https://api.reparv.in${
-                      JSON.parse(propertyData.bedroomView)[0]
-                    }`
-                  : null;
-                if (uri) {
-                  setSelectedImageUri(uri);
-                  setModalVisible(true);
-                }
-              }}
-              style={styles.box}>
-              <Image
-                source={
-                  propertyData?.bedroomView
-                    ? {
-                        uri: `https://api.reparv.in${
-                          propertyData?.bedroomView
-                            ? JSON.parse(propertyData.bedroomView)[0]
-                            : null
-                        }`,
-                      }
-                    : require('../../../assets/home/notfound.png')
-                }
-                style={styles.boximage}
-                resizeMode="cover"
-              />
-              <Text
-                style={{
-                  fontSize: 11,
-                  display: !propertyData?.bedroomView ? 'none' : 'flex',
-                  alignItems: 'center',
-                  textAlign: 'center',
-                }}>
-                Bedroom View
-              </Text>
-            </TouchableOpacity>
-          )}
-          {propertyData?.bathroomView && (
-            <TouchableOpacity
-              onPress={() => {
-                const uri = propertyData?.bathroomView
-                  ? `https://api.reparv.in${
-                      JSON.parse(propertyData.bathroomView)[0]
-                    }`
-                  : null;
-                if (uri) {
-                  setSelectedImageUri(uri);
-                  setModalVisible(true);
-                }
-              }}
-              style={styles.box}>
-              <Image
-                source={
-                  propertyData?.bathroomView
-                    ? {
-                        uri: `https://api.reparv.in${
-                          propertyData?.bathroomView
-                            ? JSON.parse(propertyData.bathroomView)[0]
-                            : null
-                        }`,
-                      }
-                    : require('../../../assets/home/notfound.png')
-                }
-                style={styles.boximage}
-                resizeMode="cover"
-              />
-              <Text
-                style={{
-                  fontSize: 11,
-                  display: !propertyData?.bathroomView ? 'none' : 'flex',
-                  alignItems: 'center',
-                  textAlign: 'center',
-                }}>
-                Bathroom View
-              </Text>
-            </TouchableOpacity>
-          )}
-          {propertyData?.kitchenView && (
-            <TouchableOpacity
-              onPress={() => {
-                const uri = propertyData?.kitchenView
-                  ? `https://api.reparv.in${
-                      JSON.parse(propertyData.kitchenView)[0]
-                    }`
-                  : null;
-                if (uri) {
-                  setSelectedImageUri(uri);
-                  setModalVisible(true);
-                }
-              }}
-              style={styles.box}>
-              <Image
-                source={
-                  propertyData?.kitchenView
-                    ? {
-                        uri: `https://api.reparv.in${
-                          propertyData?.kitchenView
-                            ? JSON.parse(propertyData.kitchenView)[0]
-                            : null
-                        }`,
-                      }
-                    : require('../../../assets/home/notfound.png')
-                }
-                style={styles.boximage}
-                resizeMode="cover"
-              />
-              <Text
-                style={{
-                  fontSize: 11,
-                  display: !propertyData?.kitchenView ? 'none' : 'flex',
-                  alignItems: 'center',
-                  textAlign: 'center',
-                }}>
-                Kitchen View
-              </Text>
-            </TouchableOpacity>
-          )}
-          {propertyData?.hallView && (
-            <TouchableOpacity
-              onPress={() => {
-                const uri = propertyData?.hallView
-                  ? `https://api.reparv.in${
-                      JSON.parse(propertyData.hallView)[0]
-                    }`
-                  : null;
-                if (uri) {
-                  setSelectedImageUri(uri);
-                  setModalVisible(true);
-                }
-              }}
-              style={{
-                width: 110,
-                flexDirection: 'column',
-                borderRadius: 10,
-              }}>
-              <Image
-                source={
-                  propertyData?.hallView
-                    ? {
-                        uri: `https://api.reparv.in${
-                          propertyData?.hallView
-                            ? JSON.parse(propertyData.hallView)[0]
-                            : null
-                        }`,
-                      }
-                    : require('../../../assets/home/notfound.png')
-                }
-                style={{width: '100%', height: 71, borderRadius: 10}}
-                resizeMode="cover"
-              />
-              <Text
-                style={{
-                  fontSize: 11,
-                  display: !propertyData?.hallView ? 'none' : 'flex',
-                  alignItems: 'center',
-                  textAlign: 'center',
-                }}>
-                Hall View
-              </Text>
-            </TouchableOpacity>
-          )}
-        </View>
+    const imageUri = `https://api.reparv.in${JSON.parse(value)[0]}`;
+    return (
+      <TouchableOpacity
+        key={key}
+        onPress={() => {
+          setSelectedImageUri(imageUri);
+          setModalVisible(true);
+        }}
+        style={{
+          width: 100,
+          margin: 6,
+          flexDirection: 'column',
+          borderRadius: 10,
+          overflow: 'hidden',
+          alignItems: 'center',
+        }}
+      >
+        <Image
+          source={{ uri: imageUri }}
+          style={{ width: '100%', height: 71, borderRadius: 10 }}
+          resizeMode="cover"
+        />
+        <Text
+          style={{
+            fontSize: 11,
+            marginTop: 4,
+            textAlign: 'center',
+          }}
+        >
+          {label}
+        </Text>
+      </TouchableOpacity>
+    );
+  })}
+</View>
+
         {/* Image Show model */}
         <Modal
           visible={modalVisible}
@@ -599,62 +373,165 @@ const PropertyDetails: React.FC = () => {
         </Modal>
 
         {/* Flat Selection & Wings */}
-        <View
-          style={{
-            flex: 1,
-            width: '95%',
-            marginTop: 20,
-            marginInline: 'auto',
-            backgroundColor: '#fff',
-            borderColor: 'gray',
-            borderRadius: 10,
-            borderWidth: 0.5,
-          }}>
-          {typeof propertyData?.propertyCategory === 'string' &&
-            ['NewPlot', 'NewFlat', 'CommercialFlat', 'CommercialPlot'].includes(
-              propertyData.propertyCategory,
-            ) && (
-              <Wings
-                pdata={propertyData}
-                eid={enquirersid}
-                sid={salespersonid}
-              />
-            )}
-        </View>
+      <View
+  style={{
+    flex: 1,
+    width: '95%',
+    marginTop: 20,
+    marginHorizontal: 'auto',
+    backgroundColor: '#fff0f0', // light red background
+    borderColor: '#d32f2f',     // red border
+    borderWidth: 1,
+    borderRadius: 12,
+    padding: 12,
+    shadowColor: '#d32f2f',
+    shadowOpacity: 0.3,
+    shadowOffset: { width: 0, height: 4 },
+    shadowRadius: 6,
+    elevation: 5,
+  }}
+>
+  {typeof propertyData?.propertyCategory === 'string' &&
+    ['NewPlot', 'NewFlat', 'CommercialFlat', 'CommercialPlot'].includes(
+      propertyData.propertyCategory,
+    ) && (
+      <Wings
+        pdata={propertyData}
+        eid={enquirersid}
+        sid={salespersonid}
+      />
+    )}
+</View>
 
+
+       
         <View style={styles.cardContainer}>
           {/* Heading Section */}
           <View style={styles.headingContainer}>
             <Text style={styles.headingText}>{propertyData?.propertyName}</Text>
           </View>
+ <View style={{ flexDirection: 'row', gap: 12, marginVertical: 0 }}>
+      {/* Available */}
+      <View
+        style={{
+          paddingVertical: 6,
+          paddingHorizontal: 16,
+          backgroundColor: '#eeffec',
+          borderRadius: 12,
+          flexDirection: 'row',
+          alignItems: 'center',
+          justifyContent: 'center',
+        }}
+      >
+        <Text style={{ color: '#047857', marginRight: 8 }}>Available</Text>
+        <View
+          style={{
+            backgroundColor: '#ffffff',
+            paddingVertical: 2,
+            paddingHorizontal: 8,
+            borderRadius: 8,
+          }}
+        >
+          <Text style={{ fontSize: 12,color:'black' }}>{propertyData?.availableCount}</Text>
+        </View>
+      </View>
 
+      {/* Booked */}
+      <View
+        style={{
+          paddingVertical: 6,
+          paddingHorizontal: 16,
+          backgroundColor: '#fee2e2',
+          borderRadius: 12,
+          flexDirection: 'row',
+          alignItems: 'center',
+          justifyContent: 'center',
+        }}
+      >
+        <Text style={{ color: '#ef4444', marginRight: 8 }}>Booked</Text>
+        <View
+          style={{
+            backgroundColor: '#ffffff',
+            paddingVertical: 2,
+            paddingHorizontal: 8,
+            borderRadius: 8,
+          }}
+        >
+          <Text style={{ fontSize: 12,color:'black' }}>{propertyData?.bookedCount}</Text>
+        </View>
+      </View>
+    </View>
           {/* Details Section */}
-          <View style={styles.detailsContainer}>
-            {/* Facilities and Badges */}
-            <View style={styles.facilitiesRow}>
-              <View style={styles.badge}>
-                <Text style={styles.badgeText}>
-                  {propertyData?.propertyApprovedBy}
-                </Text>
-              </View>
-              <View style={styles.badge}>
-                <Text style={styles.badgeText}>
-                  {propertyData?.distanceFromCityCenter}Km From
-                  {propertyData?.city}
-                </Text>
-              </View>
-              {(propertyData?.propertyCategory === 'NewFlat' ||
-                propertyData?.propertyCategory === 'NewPlot') && (
-                <View style={styles.badge}>
-                  <Text style={styles.badgeText}>RERA Approved</Text>
-                </View>
-              )}
-            </View>
+          <View
+      style={{
+        flexDirection: 'row',
+        flexWrap: 'wrap',
+        gap: 8,
+        marginTop: 4,
+      }}
+    >
+      {/* Approved By */}
+      {showApprovedBy && (
+        <View
+          style={{
+            flexDirection: 'row',
+            paddingVertical: 4,
+            paddingHorizontal: 12,
+            backgroundColor: '#eeffec',
+            borderRadius: 12,
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: 4,
+          }}
+        >
+        
+           <CheckCheck size={17} color="#047857"  />
+          <Text style={{ fontSize: 11, color: '#4B5563' }}>
+            {propertyData?.propertyApprovedBy}
+          </Text>
+        </View>
+      )}
 
-            {/* Additional Info Row */}
+      
+
+      {/* RERA Approved */}
+      {showRERA && (
+        <View
+          style={{
+            flexDirection: 'row',
+            paddingVertical: 4,
+            paddingHorizontal: 12,
+            backgroundColor: '#eeffec',
+            borderRadius: 12,
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: 4,
+          }}
+        >
+       <CheckCheck size={17} color="#047857"  />
+          <Text style={{ fontSize: 11, color: '#4B5563' }}>RERA Approved</Text>
+        </View>
+      )}
+
+      {/* Distance From City Center */}
+      <View
+        style={{
+          paddingVertical: 4,
+          paddingHorizontal: 12,
+          backgroundColor: '#0000000F',
+          borderRadius: 12,
+        }}
+      >
+        <Text style={{ fontSize: 11, color: '#4B5563' }}>
+          {propertyData?.distanceFromCityCenter} KM Distance from city center
+        </Text>
+      </View>
+    </View>
+
+   {/* Additional Info Row */}
             <View
               style={{
-                width: '95%',
+                width: '100%',
                 margin: 'auto',
                 justifyContent: 'space-between',
                 flexDirection: 'row',
@@ -674,7 +551,7 @@ const PropertyDetails: React.FC = () => {
                   {
                     gap: 2,
                     flexDirection: 'row',
-                    width: 55,
+                    width: 105,
                     alignSelf: 'flex-end',
                   },
                 ]}>
@@ -690,8 +567,6 @@ const PropertyDetails: React.FC = () => {
                 </Text>
               </TouchableOpacity>
             </View>
-          </View>
-
           {/* Verified Badge */}
           <View
             style={{
@@ -736,7 +611,7 @@ const PropertyDetails: React.FC = () => {
               borderRadius: 12,
               borderWidth: 0.1,
               padding: 16,
-              width: '90%',
+              width: '95%',
               alignSelf: 'center',
               elevation: 0.5,
               shadowColor: '#000',
@@ -751,7 +626,7 @@ const PropertyDetails: React.FC = () => {
               <View>
                 <Text style={{fontSize: 13, color: 'gray'}}>EMI starts at</Text>
                 <Text style={{fontSize: 18, fontWeight: 'bold', color: '#000'}}>
-                  ₹{propertyData?.emi} /mo
+                  ₹{(propertyData?.emi.toLocaleString('en-IN'))} /mo
                 </Text>
               </View>
               <View style={{alignItems: 'flex-end', marginTop: 10}}>
@@ -788,7 +663,7 @@ const PropertyDetails: React.FC = () => {
               style={{flexDirection: 'row', justifyContent: 'space-between'}}>
               <View>
                 <Text style={{fontSize: 18, fontWeight: '600', color: '#000'}}>
-                  ₹{propertyData?.totalOfferPrice}
+                 ₹{Number(propertyData?.totalOfferPrice || 0).toLocaleString('en-IN')}  
                 </Text>
                 <Text style={{fontSize: 13, color: 'gray'}}>
                   +Other Charged
@@ -823,8 +698,17 @@ const PropertyDetails: React.FC = () => {
           </View>
         </View>
 
+<View style={{width:'95%',margin:'auto',marginTop:0,padding:5}}>
+  <Text style={{fontSize:18,fontWeight:'600',color:'black'}}>Property Details</Text>
+<View style={{}}>
+   <Text style={{fontSize:14,fontWeight:'500',marginTop:15}}>{
+    propertyData?.propertyName}</Text>
+</View>
+</View>
+      
         {/* property overView */}
-        <PropertyOverviewCard data={propertyData}></PropertyOverviewCard>
+        {/* <PropertyOverviewCard data={propertyData}></PropertyOverviewCard> */}
+        <PropertyOverview propertyInfo={propertyData}></PropertyOverview>
         {/* Featured and benifits */}
         <View style={{width: '95%', margin: 'auto', marginTop: 10}}>
           <View style={{alignSelf: 'stretch'}}>
@@ -1322,8 +1206,8 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     borderRadius: 10,
     borderColor: 'gray',
-    borderWidth: 0.5,
-    marginTop: 40,
+   // borderWidth: 0.5,
+    marginTop: 20,
     gap: 16, // Use marginBottom on children if your RN version < 0.71
     width: '95%',
     alignSelf: 'center', // instead of margin: 'auto'

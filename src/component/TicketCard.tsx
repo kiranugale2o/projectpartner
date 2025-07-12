@@ -143,7 +143,7 @@ const TicketCard: React.FC<TicketCardProps> = ({
   };
 
   return (
-    <View style={styles.cardWrapper}>
+    <View style={[styles.cardWrapper,  borderColorStyles[status] ]}>
       {/* Top Row */}
       <View style={styles.topRow}>
         <View style={[styles.statusDot, dotColorStyles[status]]} />
@@ -220,29 +220,51 @@ const TicketCard: React.FC<TicketCardProps> = ({
 };
 
 const dotColorStyles = StyleSheet.create({
-  Open: {backgroundColor: '#0BB501'},
+  Open: {backgroundColor: 'green'},
   Closed: {backgroundColor: '#FF4D4F'},
-  In_Progress: {backgroundColor: '#FFCA00'},
+   Resolved: { backgroundColor: '#0BB501' },
+  In_Progress: {backgroundColor: 'yellow'},
+  Pending:{backgroundColor:'red'}
 });
 
+const borderColorStyles = StyleSheet.create({
+  Open:        { borderLeftColor: 'green' },
+  Closed:      { borderLeftColor: '#FF4D4F' },
+  Resolved:    { borderLeftColor: '#0BB501' },
+  In_Progress: { borderLeftColor: 'yellow' },
+  Pending:     { borderLeftColor: 'red' },
+});
+
+
 const statusTextColor = StyleSheet.create({
-  Open: {color: '#0BB501'},
+  Open: {color: 'green'},
+  Resolved:   {color: '#0BB501'},
   Closed: {color: '#FF4D4F'},
-  In_Progress: {color: '#FFCA00'},
+  In_Progress: {color: 'yellow'},
+Pending: {color: 'red'},
 });
 
 const styles = StyleSheet.create({
-  cardWrapper: {
-    // marginHorizontal: 16,
-    marginTop: 15,
-    marginHorizontal: 'auto',
-    width: '90%',
-    backgroundColor: '#FFFFFF',
-    borderColor: '#E7E7E7',
-    borderWidth: 1,
-    borderRadius: 4,
-    padding: 12,
-  },
+ cardWrapper: {
+  marginTop: 15,
+  marginHorizontal: 'auto',
+  width: '90%',
+  backgroundColor: '#FFFFFF',
+
+  borderWidth: 1,
+  borderColor: '#E7E7E7',
+  borderLeftWidth: 5,              // Emphasized left border
+
+  borderTopLeftRadius: 12,         // Rounded only left side
+  borderBottomLeftRadius: 12,
+
+  borderTopRightRadius: 4,         // Optional: slightly round other corners
+  borderBottomRightRadius: 4,
+
+  padding: 12,
+},
+
+
   topRow: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -285,6 +307,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
     marginBottom: 10,
+    color:'black'
   },
   picker: {
     height: 50,
@@ -294,6 +317,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     paddingVertical: 10,
+     color:'black'
   },
   checkbox: {
     width: 18,
@@ -313,6 +337,7 @@ const styles = StyleSheet.create({
   },
   optionText: {
     fontSize: 14,
+     color:'black'
   },
   issueTitle: {
     fontFamily: 'Montserrat',
@@ -348,9 +373,9 @@ const styles = StyleSheet.create({
   statusText: {
     fontFamily: 'Montserrat',
     fontSize: 14,
-    fontWeight: '500',
+    fontWeight: '700',
     color: '#FFCA00',
-    textDecorationLine: 'underline',
+    // textDecorationLine: 'underline',
   },
 });
 

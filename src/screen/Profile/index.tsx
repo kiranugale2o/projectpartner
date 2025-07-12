@@ -22,8 +22,9 @@ import {
   launchCamera,
   launchImageLibrary,
 } from 'react-native-image-picker';
-import {Edit, SquarePen} from 'lucide-react-native';
+import {Edit, Lock, SquarePen} from 'lucide-react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import PasswordUpdateModal from '../../component/PasswordUpdateModel';
 const {width} = Dimensions.get('window');
 
 const Profile: React.FC = () => {
@@ -58,36 +59,9 @@ const Profile: React.FC = () => {
       },
     );
   };
-  console.log(profileImage, 'sd');
+  
 
-  // const handleUpdate = async () => {
-  //   try {
-  //     const token = await AsyncStorage.getItem('salesPersonToken'); // Retrieve stored JWT
-
-  //     const response = await fetch('https://api.reparv.in/sales/profile/edit', {
-  //       method: 'PUT',
-  //       headers: {
-  //         'Content-Type': 'application/json',
-  //         Authorization: `Bearer ${token}`, // Attach token
-  //       },
-
-  //       body: JSON.stringify({
-  //         username: userName,
-  //         fullname: editedName,
-  //         contact: editedMobile,
-  //         email: editedEmail,
-  //       }),
-  //     });
-
-  //     const data = await response.json();
-  //     console.log('Update response:', data);
-  //     getProfile();
-  //     // navigation.navigate("")
-  //   } catch (error) {
-  //     console.error('Error updating user:', error);
-  //   }
-  // };
-
+  
   const handleUpdate = async () => {
     try {
       const token = await AsyncStorage.getItem('salesPersonToken');
@@ -153,6 +127,8 @@ const Profile: React.FC = () => {
       getProfile();
     }, []),
   );
+
+  const[isPasswordModalVisible,setPasswordModalVisible]=useState(false);
   return (
     <View style={styles.container}>
       
@@ -227,7 +203,35 @@ const Profile: React.FC = () => {
           </TouchableOpacity>
         </View>
       </View>
-
+<TouchableOpacity
+      onPress={() => navigation.navigate('KYC')} // Replace 'KYC' with your actual screen name
+      activeOpacity={0.8}
+      style={{
+        width: 320,
+        height: 40,
+        backgroundColor: '#FFFFFF',
+        borderRadius: 20,
+        justifyContent: 'center',
+        alignItems: 'center',
+        shadowColor: '#000000',
+        shadowOpacity: 0.1,
+        shadowOffset: { width: 0, height: 2 },
+        shadowRadius: 4,
+        elevation: 4,
+        marginVertical: 10,
+      }}
+    >
+      <Text
+        style={{
+          fontSize: 16,
+          lineHeight: 20,
+          fontWeight: '600',
+          color: 'green',
+        }}
+      >
+        KYC Details
+      </Text>
+    </TouchableOpacity>
       <View style={styles.card}>
         {/* Name */}
         <View style={styles.row}>
@@ -439,8 +443,27 @@ const Profile: React.FC = () => {
           </View>
           <Text style={[styles.updateButtonText,{color:'black'}]}>Update Profile</Text>
         </TouchableOpacity>
+          <TouchableOpacity style={[styles.button,{
+          }]} onPress={()=>{setPasswordModalVisible(true)}}>
+          <View style={styles.iconWrapper}>
+          <Lock color={'black'}/>
+          </View>
+            <Text style={[styles.updateButtonText,{color:'black',width:100,marginInline:-20}]}>Update Password</Text>
+  
+        </TouchableOpacity>
+        
       </View>
 
+
+{/* Password Update */}
+  
+   <PasswordUpdateModal
+  visible={isPasswordModalVisible}
+  onClose={() => setPasswordModalVisible(false)}
+  onUpdatePassword={(data) => {
+    console.log('Password data:', data);
+    // Call API here
+  }}/>
       {/* update Profile model */}
      
 
@@ -457,6 +480,7 @@ const Profile: React.FC = () => {
       <TextInput
         style={styles.input}
         placeholder="Username"
+        placeholderTextColor={'gray'}
         value={userName}
         onChangeText={setuserName}
       />
@@ -466,6 +490,7 @@ const Profile: React.FC = () => {
         style={styles.input}
         placeholder="Name"
         value={editedName}
+         placeholderTextColor={'gray'}
         onChangeText={setEditedName}
       />
 
@@ -473,6 +498,7 @@ const Profile: React.FC = () => {
       <TextInput
         style={styles.input}
         placeholder="Email"
+         placeholderTextColor={'gray'}
         value={editedEmail}
         onChangeText={setEditedEmail}
         keyboardType="email-address"
@@ -483,6 +509,7 @@ const Profile: React.FC = () => {
         style={styles.input}
         placeholder="Mobile"
         value={editedMobile}
+         placeholderTextColor={'gray'}
         onChangeText={setEditedMobile}
         keyboardType="phone-pad"
       />
@@ -560,7 +587,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     padding: 16,
     margin: 16,
-    marginTop: '10%',
+    marginTop: '0%',
     // elevation: 4,
   },
   row: {
@@ -637,12 +664,15 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: 'bold',
     marginBottom: 10,
+     color:'black'
   },
   input: {
     borderWidth: 1,
     borderColor: '#ccc',
     borderRadius: 5,
     padding: 10,
+     color:'black',
+     
     marginBottom: 10,
   },
   modalButtons: {

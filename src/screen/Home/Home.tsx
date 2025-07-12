@@ -19,7 +19,7 @@ import {useNavigation} from '@react-navigation/native';
 import {Enquirer, RootStackParamList} from '../../types';
 import ClientInfoCard from '../../component/ClientInfoCard';
 import Svg, {Path} from 'react-native-svg';
-import {optionsL, optionsR} from '../../utils';
+import {formatIndianAmount, optionsL, optionsR} from '../../utils';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import LinearGradient from 'react-native-linear-gradient';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -141,7 +141,12 @@ const Home: React.FC = () => {
     }
   };
 
+  useEffect(()=>{
+    fetchStates();
+  },[])
   useEffect(() => {
+        fetchCountData();
+    
     fetchEnquiries(); // initial fetch
     const interval = setInterval(fetchEnquiries, 5000); // fetch every 30s
     return () => clearInterval(interval); // cleanup on unmount
@@ -166,7 +171,7 @@ const Home: React.FC = () => {
   const fetchCountData = async () => {
     try {
       const response = await fetch(
-        `https://api.reparv.in/sales/dashboard/count`,
+        `https://api.reparv.in/territory-partner/dashboard/count`,
         {
           method: 'GET',
           credentials: 'include',
@@ -275,10 +280,9 @@ const Home: React.FC = () => {
     }
   };
 
-  useEffect(() => {
-    fetchCountData();
-    fetchStates();
-  }, []);
+  
+
+ 
 
   useEffect(() => {
     if (newEnquiry.state != '') {
@@ -291,16 +295,23 @@ const Home: React.FC = () => {
 const filteredData = useMemo(() => {
   const query = search.toLowerCase().trim();
 
-  const hasDateRange =
-    !!auth?.dateRange?.startDate && !!auth?.dateRange?.endDate;
+  const startRaw = auth?.dateRange?.startDate;
+  const endRaw = auth?.dateRange?.endDate;
+
+  const hasStart = !!startRaw;
+  const hasEnd = !!endRaw;
 
   let startDate: Date | null = null;
   let endDate: Date | null = null;
 
-  if (hasDateRange) {
-    startDate = new Date(auth.dateRange.startDate); // '2025-08-07'
-    endDate = new Date(auth.dateRange.endDate);     // '2025-08-14'
-    endDate.setHours(23, 59, 59, 999);              // Extend endDate to full day
+  if (hasStart) {
+    startDate = new Date(startRaw); // e.g., '2025-08-07'
+    startDate.setHours(0, 0, 0, 0); // Ensure beginning of day
+  }
+
+  if (hasEnd) {
+    endDate = new Date(endRaw); // e.g., '2025-08-14'
+    endDate.setHours(23, 59, 59, 999); // Ensure end of day
   }
 
   const result = enquiries.filter((item) => {
@@ -312,23 +323,29 @@ const filteredData = useMemo(() => {
 
     let matchesDate = true;
 
-    if (hasDateRange && item.created_at) {
-      const rawDate = item.created_at.split('|')[0]?.trim(); // "07 Aug 2025"
+    if ((hasStart || hasEnd) && item.created_at) {
+      const rawDate = item.created_at.split('|')[0]?.trim(); // e.g. "07 Aug 2025"
       const createdAt = parse(rawDate, 'dd MMM yyyy', new Date());
 
       if (!isValid(createdAt)) return false;
 
-      matchesDate = isWithinInterval(createdAt, {
-        start: startDate!,
-        end: endDate!,
-      });
+      if (hasStart && hasEnd) {
+        matchesDate = isWithinInterval(createdAt, {
+          start: startDate!,
+          end: endDate!,
+        });
+      } else if (hasStart) {
+        matchesDate = createdAt >= startDate!;
+      } else if (hasEnd) {
+        matchesDate = createdAt <= endDate!;
+      }
     }
 
     return matchesSearch && matchesDate;
   });
 
-  // Optional fallback: if date filter returns nothing, show only search results
-  if (hasDateRange && result.length === 0) {
+  // Optional fallback: if filtering returns nothing
+  if ((hasStart || hasEnd) && result.length === 0) {
     return enquiries.filter((item) => {
       return (
         query === '' ||
@@ -338,13 +355,26 @@ const filteredData = useMemo(() => {
       );
     });
   }
-console.log(result,'ssssssssss');
 
+  console.log(result, 'Filtered Enquiries');
   return result;
-}, [search, enquiries, auth?.dateRange,auth?.setDateRange]);
+}, [search, enquiries, auth?.dateRange, auth?.setDateRange]);
 
   if (loading) return <Loader />;
+ const fetchTickets = async () => {
+    try {
+      const response = await fetch(`https://api.reparv.in/sales/tickets/`, {
+        method: 'GET',
+      });
 
+      const data = await response.json();
+      auth?.setTicketNumber(data.length)
+    } catch (error) {
+      console.error('Error fetching tickets:', error);
+    }
+  };
+  
+  
   return (
     <View style={{flex: 1, backgroundColor: 'white'}}>
       {/* Main ScrollView for the entire screen */}
@@ -355,6 +385,24 @@ console.log(result,'ssssssssss');
           marginTop: 10,
           display: `${showCards ? 'flex' : 'none'}`,
         }}>
+           <View
+  style={{
+    width: '100%',
+    height: 150,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.3,
+    shadowRadius: 6,
+    elevation: 1, // Android shadow
+    backgroundColor: 'white', // Needed to see shadow
+    borderRadius: 8, // Optional: soft corners
+   // marginVertical: 10, // spacing around
+  }}>
+        <ScrollView
+          style={{
+            width: '100%',
+height:250
+          }}>
         <View
           style={{
            width: '110%',
@@ -376,7 +424,7 @@ console.log(result,'ssssssssss');
                   />
                 </View>
               </View>
-              <Text style={styles.amount}>₹00 Lac</Text>
+              <Text style={styles.amount}>₹{formatIndianAmount(overviewCountData?.totalDealAmount)}</Text>
             </LinearGradient>
             {/* Card 1: No. of Deal Done */}
             <LinearGradient
@@ -393,7 +441,7 @@ console.log(result,'ssssssssss');
                   />
                 </View>
               </View>
-              <Text style={styles.amount}>0000</Text>
+              <Text style={styles.amount}>0</Text>
             </LinearGradient>
           </View>
           <View style={styles.box2}>
@@ -415,7 +463,7 @@ console.log(result,'ssssssssss');
                   />
                 </View>
               </View>
-              <Text style={styles.amount}>₹00K</Text>
+              <Text style={styles.amount}>₹{formatIndianAmount(overviewCountData?.selfEarning)}</Text>
             </LinearGradient>
 
             {/* Card 3: Deal in Sq. Ft. */}
@@ -433,9 +481,58 @@ console.log(result,'ssssssssss');
                   />
                 </View>
               </View>
-              <Text style={styles.amount}>000 Sq. Ft.</Text>
+             <Text style={styles.amount}>{overviewCountData?.totalDealInSquareFeet} Sq. Ft.</Text>
             </LinearGradient>
           </View>
+
+        </View>
+         <View
+          style={{
+           width: '110%',
+            margin:'auto',
+            marginInline:40
+            
+          }}>
+          <View style={styles.box2}>
+            <LinearGradient
+              colors={['#0BB501', '#076300']}
+              start={{x: 1, y: 0}}
+              end={{x: 0.5, y: 0.5}}
+              style={styles.card}>
+              <View style={styles.content}>
+                <Text style={styles.label}>No of Enquiry</Text>
+             
+              </View>
+              <Text style={styles.amount}>{enquiries.length}</Text>
+            </LinearGradient>
+            <TouchableOpacity  onPress={()=>{navigation.navigate('Tickets')}}>
+          
+             <LinearGradient
+              colors={['#0BB501', '#076300']}
+              start={{x: 1, y: 0}}
+              end={{x: 0.5, y: 0.5}}
+              style={styles.card}>
+              <View style={styles.content}>
+                <View style={{flexDirection: 'column'}}>
+                  <Text style={styles.label}>Total Tickets</Text>
+                 
+                </View>
+              
+              </View>
+              <Text style={styles.amount}>{overviewCountData.totalTicket}</Text>
+            </LinearGradient>
+          </TouchableOpacity>
+          </View>
+          <View style={[styles.box2,{margin:0}]}>
+            {/* Card 2: Self Earning */}
+          
+
+          
+          </View>
+          
+        </View>
+
+        </ScrollView>
         </View>
       </Animated.View>
       {/* Cards List */}
@@ -447,12 +544,12 @@ console.log(result,'ssssssssss');
           right: 0,
           zIndex: 10,
         }}>
-        <TouchableOpacity>
+        {/* <TouchableOpacity>
           <Text style={[styles.text, {padding: 2}]}>.</Text>
-        </TouchableOpacity>
+        </TouchableOpacity> */}
 
         {/* Animated Inquiry Section */}
-        <Animated.View style={[styles.frameContainer]}>
+        <Animated.View style={[styles.frameContainer,{marginTop:20}]}>
           {/* Search Container */}
      <View
             style={{
@@ -559,6 +656,8 @@ console.log(result,'ssssssssss');
                 margin: 'auto',
                 marginTop: 10,
                 fontWeight: '600',
+
+                color:'black'
               }}>
               Not Found Any Enquiries !
             </Text>
@@ -663,23 +762,30 @@ console.log(result,'ssssssssss');
                   setaddEnquiryVisible(false);
                 }}
               />
+              
             </View>
+            <View style={{width:'100%',borderWidth:0.2,backgroundColor:'black',
+              height:0.5
+            }}></View>
 
+    
             <ScrollView style={{height: 500}}>
+              
               <View style={{gap: 16, padding: 12}}>
-                <Text style={{fontSize: 14}}>Full Name</Text>
+                <Text style={{fontSize: 14,color:'gray'}}>Full Name</Text>
                 <TextInput
                   style={[Sstyles.input, {color: 'black'}]}
                   value={newEnquiry?.customer}
+                  placeholderTextColor={'gray'}
                   onChangeText={text => handleEnquiryChange('customer', text)}
                 />
-                <Text style={{fontSize: 14}}>Contact Number</Text>
+                <Text style={{fontSize: 14,color:'gray'}}>Contact Number</Text>
                 <TextInput
                   style={[Sstyles.input, {color: 'black'}]}
                   value={newEnquiry?.contact}
                   onChangeText={text => handleEnquiryChange('contact', text)}
                 />
-                <Text style={{fontSize: 14}}>Min-Budget</Text>
+                <Text style={{fontSize: 14,color:'gray'}}>Min-Budget</Text>
                 <TextInput
                   style={[Sstyles.input, {color: 'black'}]}
                   value={newEnquiry?.minbudget?.toString() || ''}
@@ -692,7 +798,7 @@ console.log(result,'ssssssssss');
                   }}
                 />
 
-                <Text style={{fontSize: 14}}>Max-Budget</Text>
+                <Text style={{fontSize: 14,color:'gray'}}>Max-Budget</Text>
                 <TextInput
                   style={[Sstyles.input, {color: 'black'}]}
                   value={newEnquiry?.maxbudget?.toString() || ''}
@@ -808,7 +914,7 @@ console.log(result,'ssssssssss');
                     style={{
                       fontSize: 14,
                       fontWeight: '500',
-                      color: 'black',
+                      color: 'gray',
                     }}>
                     Select City
                   </Text>
@@ -844,18 +950,20 @@ console.log(result,'ssssssssss');
                     </Picker>
                   </View>
                 </View>
-                <Text style={{fontSize: 14}}>Location</Text>
+                <Text style={{fontSize: 14,color:'gray'}}>Location</Text>
                 <TextInput
                   style={[Sstyles.input, {color: 'black'}]}
                   value={newEnquiry?.location}
+                  placeholderTextColor={'gray'}
                   onChangeText={text => {
                     handleEnquiryChange('location', text);
                   }}
                 />
-                <Text style={{fontSize: 14}}>Message</Text>
+                <Text style={{fontSize: 14,color:'gray'}}>Message</Text>
                 <TextInput
                   style={[Sstyles.input, {color: 'black'}]}
                   value={newEnquiry?.message}
+                  placeholderTextColor={'gray'}
                   onChangeText={text => {
                     handleEnquiryChange('message', text);
                   }}
@@ -877,6 +985,19 @@ console.log(result,'ssssssssss');
                   <TouchableOpacity
                     style={Sstyles.cancel}
                     onPress={() => {
+setNewEnquiry(
+{ customer: '',
+    contact: '',
+    minbudget: null,
+    maxbudget: null,
+    category: '',
+    state: '',
+    city: '',
+    location: '',
+    message: '',
+    salesPersonName: auth?.user?.name ?? '',
+    salesPersonContact: auth?.user?.contact ?? '',
+  })
                       setaddEnquiryVisible(false);
                     }}>
                     <Text style={Sstyles.buttonText}>Cancel</Text>
@@ -1006,14 +1127,17 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 4, // Android shadow
     zIndex: 1,
+    padding:5
+    
   },
 
   searchContainer: {
     flexDirection: 'row',
-    marginLeft: 25,
+   // marginLeft: 25,
     marginTop: 0,
+    margin:'auto',
     gap: 8, // Not supported in all RN versions; use margin as fallback if needed
-    width: '65%',
+    width: '70%',
     justifyContent: 'flex-start',
     backgroundColor: 'rgba(0, 0, 0, 0.01)',
     borderWidth: 1,
@@ -1158,11 +1282,13 @@ const Sstyles = StyleSheet.create({
   title: {
     fontSize: 18,
     fontWeight: 'bold',
+    color:'black'
   },
   input: {
     borderWidth: 1,
     borderColor: '#ccc',
-    padding: 9,
+    padding:10,
+    color:'black',
     borderRadius: 8,
   },
   buttonContainer: {

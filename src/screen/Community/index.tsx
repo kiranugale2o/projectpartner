@@ -3,7 +3,7 @@ import {
   useFocusEffect,
   useNavigation,
 } from '@react-navigation/native';
-import React, {useCallback, useEffect, useMemo, useState} from 'react';
+import React, {useCallback, useContext, useEffect, useMemo, useState} from 'react';
 import {
   View,
   Text,
@@ -21,6 +21,7 @@ import UserProfilePopUp from '../../component/community/UserProfilePopUp';
 import {RootStackParamList} from '../../types';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import {all} from 'axios';
+import { AuthContext } from '../../context/AuthContext';
 
 interface SalesPerson {
   id: number;
@@ -48,7 +49,7 @@ interface SalesPerson {
   created_at: string; // Use Date if you parse to Date object
 }
 const Community: React.FC = () => {
-  type NavigationProp = NativeStackNavigationProp<RootStackParamList, 'SignIn'>;
+  type NavigationProp = NativeStackNavigationProp<RootStackParamList, 'Sign_In'>;
   const navigation = useNavigation<NavigationProp>();
 
   const [searchText, setSearchText] = useState('');
@@ -58,7 +59,8 @@ const Community: React.FC = () => {
   );
   const [isAdded, setIsAdded] = useState(false);
   const [users, setUsers] = useState<SalesPerson[]>([]);
-
+const [followers, setFollowers] = useState<any[]>([]);
+  const [following, setFollowing] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   const fetchUsers = async () => {
@@ -66,6 +68,8 @@ const Community: React.FC = () => {
       const response = await fetch('https://api.reparv.in/salesapp/user/'); // Update with your actual domain
       const data = await response.json();
       setUsers(data);
+      console.log(data,'dddddd');
+      
     } catch (error) {
       console.error('Failed to fetch users:', error);
     } finally {
@@ -91,8 +95,11 @@ const Community: React.FC = () => {
         throw new Error(`API error: ${data.message} (${data.error.code})`);
       }
 
-      setPost(data); // Only if it's a valid post list
-      console.log(data, 'ss');
+       // Only if it's a valid post list
+      const sortedPosts = sortPosts(data, auth?.user, following);
+      setPost(sortedPosts);
+// console.log(sortedPosts,'sortt');
+      console.log(posts, 'ss');
     } catch (error) {
       console.error('Failed to fetch post:', error || error);
       Alert.alert('Error', 'Something went wrong');
@@ -100,25 +107,84 @@ const Community: React.FC = () => {
       setLoading(false);
     }
   };
+const auth=useContext(AuthContext)
+  const fetchFollowingPosts = async () => {
+  try {
+    const res = await fetch(`https://api.reparv.in/salesapp/user/${auth?.user?.id}/following-posts`);
+    const data = await res.json();
+    setPost(data);
+    console.log(data,'ff');
+    
+  } catch (err) {
+    console.error('Error fetching following posts:', err);
+  } finally {
+    setLoading(false);
+  }
+};
 
-  useFocusEffect(
-    useCallback(() => {
-      getPosts();
-      fetchUsers();
-    }, []),
-  );
+
+
+
+ useFocusEffect(
+  useCallback(() => {
+    if (selectedTab === 'discussions') {
+       const fetchFollowersAndFollowing = () => {
+    fetch(`https://api.reparv.in/salesapp/user/${auth?.user?.id}/followers`)
+      .then(res => res.json())
+      .then(setFollowers);
+
+    fetch(`https://api.reparv.in/salesapp/user/${auth?.user?.id}/following`)
+      .then(res => res.json())
+      .then(setFollowing);
+  };
+      getPosts();       // All posts
+    } else if (selectedTab === 'follow') {
+      fetchFollowingPosts(); // Only posts from followed users
+    }
+    fetchUsers();        // Common for both
+  }, [selectedTab]) // dependency on tab change
+);
+
+
+const sortPosts = (posts:any, currentUser:any, followedIds:any) => {
+  return posts.sort((a:any, b:any) => {
+    const score = (post:any) => {
+      let s = 0;
+      if (followedIds.includes(post.userId)) s += 1000; // highest weight
+      if (post.address === currentUser.address) s += 500;
+      s += Math.min(100, post.likes); // up to 100
+      s += new Date(post.created_at).getTime() / 1000000000; // recency
+      return s;
+    };
+    return score(b) - score(a); // Descending
+  });
+};
+
+// useEffect(()=>{
+
+
+// },[])
+
+
+
 
   const [searchTerm, setSearchTerm] = useState('');
 
   // Filter data based on fullname or city
-  const filteredPosts = useMemo(() => {
-    const lower = searchTerm.toLowerCase();
+ const filteredPosts = useMemo(() => {
+  const lower = searchTerm.toLowerCase();
+
+  if (Array.isArray(posts)) {
     return posts.filter(
       item =>
         item?.fullname?.toLowerCase().includes(lower) ||
-        item?.city?.toLowerCase().includes(lower),
+        item?.city?.toLowerCase().includes(lower)
     );
-  }, [searchTerm, posts]);
+  }
+
+  return [];
+}, [searchTerm, posts]);
+
 
   return (
     <View
@@ -302,6 +368,7 @@ const Community: React.FC = () => {
             <ScrollView>
               {users.map((d, i) => {
                 return (
+                  <>{d?.status==='Active'?
                   <TouchableOpacity
                     onPress={() => {
                       navigation.navigate('UserProfile', {user: d});
@@ -350,7 +417,7 @@ const Community: React.FC = () => {
                         />
                       </Svg>
                     </TouchableOpacity> */}
-                  </TouchableOpacity>
+                  </TouchableOpacity>:null}</>
                 );
               })}
             </ScrollView>
@@ -515,7 +582,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     padding: 16,
     gap: 31,
-    width: '95%',
+    width: '100%',
     height: 74,
     marginInline: 'auto',
     borderTopWidth: 0,

@@ -1,4 +1,4 @@
-import React, {useCallback, useContext, useState} from 'react';
+import React, {useCallback, useContext, useEffect, useState} from 'react';
 import {
   View,
   Text,
@@ -10,12 +10,14 @@ import {
   Modal,
   Animated,
   Dimensions,
+  Alert,
 } from 'react-native';
 import BookingClientInfoCard from '../../component/BookingClientInfo';
 import {RootStackParamList} from '../../types';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import {useFocusEffect, useNavigation} from '@react-navigation/native';
 import {AuthContext} from '../../context/AuthContext';
+import { MeetingFollowUp } from '../Calender';
 
 const screenHeight = Dimensions.get('window').height;
 
@@ -123,6 +125,45 @@ const Booking: React.FC = () => {
       setViewAll(false); // Reset when screen is focused
     }, []),
   );
+   const [meeting, setMeetings] = useState<MeetingFollowUp[]>([]);
+const [updatedMeeting, setUpdatedMeetings] = useState<MeetingFollowUp[]>([]);
+
+  const fetchMeetings = async () => {
+      try {
+        const response = await fetch(
+          'https://api.reparv.in/sales/calender/meetings',
+          {
+            method: 'GET',
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${auth?.token}`,
+              // or real JWT token if using auth middleware
+            },
+          },
+        );
+  
+        const data = await response.json();
+  
+        if (!response.ok) {
+          console.error('API error:', data.message);
+          Alert.alert('Error', data.message);
+          return;
+        }
+  
+        console.log('Fetched meetings:', data);
+        setMeetings(data);
+        setUpdatedMeetings(data);
+      } catch (error) {
+        console.error('Network error:', error);
+        Alert.alert('Error', 'Failed to fetch meetings');
+      }
+    };
+
+     useEffect(() => {
+        fetchMeetings();
+        const interval = setInterval(fetchMeetings, 3000); //tch every 30s
+        return () => clearInterval(interval); // cleanup on unmount
+      }, []);
 
   return (
     <View style={styles.screen}>
@@ -238,12 +279,12 @@ const Booking: React.FC = () => {
       {/* Client Info Cards */}
       <ScrollView style={{marginTop: 0}} onScroll={handleCardScroll}>
         <View>
-          {bookingData &&
-            bookingData.map((d, i) => (
+          {meeting &&
+            meeting.map((d, i) => (
               <BookingClientInfoCard key={i} data={d} />
             ))}
 
-          {bookingData.length === 0 && (
+          {meeting.length === 0 && (
             <Text
               style={{
                 margin: 'auto',

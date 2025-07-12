@@ -13,6 +13,11 @@ import {
   Pressable,
   Alert,
   ToastAndroid,
+  KeyboardAvoidingView,
+  TouchableWithoutFeedback,
+  Keyboard,
+  ScrollView,
+  Platform,
 } from 'react-native';
 import {RootStackParamList} from '../types';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
@@ -51,6 +56,9 @@ const SignIn = (): JSX.Element => {
   //     return false;
   //   }
   // };
+
+  const [referral, setReferral] = useState('');
+
 
   const showToast = async (data: string) => {
     Toast.show({
@@ -113,6 +121,26 @@ const SignIn = (): JSX.Element => {
         );
       }, 500); // Delay slightly (500ms) to allow toast to display
 
+        if(referral!==''){
+        fetch('https://api.reparv.in/salesapp/user/updaterefer', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+  },
+  body: JSON.stringify({
+    referenceno: referral,
+    userId:auth?.user?.id ,
+  }),
+})
+  .then(response => response.json())
+  .then(data => {
+    console.log('Response:', data);
+  })
+  .catch(error => {
+    console.error('Error:', error);
+  });
+
+      }
       // You could now navigate or store the user using context or AsyncStorage
     } catch (error) {
       console.error(error);
@@ -187,11 +215,25 @@ const SignIn = (): JSX.Element => {
         </Svg>
       </View>
 
+   <KeyboardAvoidingView
+  behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+  style={{ flex: 1 ,backgroundColor:'#E3FFDF'}}>
+  <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+    <ScrollView
+      contentContainerStyle={{ flexGrow: 1 }}
+      keyboardShouldPersistTaps="handled">
       <View
         style={{
-          margin: 'auto',
           width: '100%',
-          //marginInline: 20,
+          marginTop: 0,
+          flex: 1,
+          backgroundColor: '#E3FFDF',
+        }}>
+        <View style={styles.loginBox}>
+           <View
+        style={{
+          width: '100%',
+       //   margin: 'auto',
           marginTop: 0,
         }}>
         <View style={styles.loginBox}>
@@ -238,28 +280,22 @@ const SignIn = (): JSX.Element => {
               <View
                 style={[styles.inputBox, , {justifyContent: 'space-between'}]}>
                 <TextInput
-                  style={[styles.input,{width:'90%'}]}
+                  style={styles.input}
                   placeholder="password"
                   placeholderTextColor="rgba(0, 0, 0, 0.4)"
                   // value={password}
-                    secureTextEntry={!showPassword}
-            value={password}
                   onChangeText={setPassword}
                 />
-                <TouchableOpacity
-            style={styles.iconWrapper}
-            onPress={() => setShowPassword(!showPassword)}>
-            {/* <Icon
-              name={showPassword ? 'eye-off' : 'eye'}
-              size={22}
-              color="rgba(0,0,0,0.5)"
-            /> */}
-            {showPassword ? (
-              <Eye color={'gray'} size={15} />
-            ) : (
-              <EyeOff color={'gray'} size={15} />
-            )}
-          </TouchableOpacity>
+                <Svg width="16" height="17" viewBox="0 0 16 17" fill="none">
+                  <Path
+                    d="M7.05671 7.55794C6.8067 7.80804 6.66628 8.14721 6.66634 8.50085C6.6664 8.85448 6.80694 9.1936 7.05704 9.44361C7.30714 9.69362 7.64631 9.83404 7.99994 9.83398C8.35358 9.83392 8.6927 9.69338 8.94271 9.44328M11.1207 11.6154C10.1855 12.2005 9.1031 12.5073 8 12.5C5.6 12.5 3.6 11.1667 2 8.50002C2.848 7.08669 3.808 6.04802 4.88 5.38402M6.78667 4.62002C7.18603 4.53917 7.59254 4.49897 8 4.50002C10.4 4.50002 12.4 5.83335 14 8.50002C13.556 9.24002 13.0807 9.87802 12.5747 10.4134M2 2.5L14 14.5"
+                    stroke="rgba(0, 0, 0, 0.4)"
+                    stroke-opacity="0.4"
+                    stroke-width="1.3"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  />
+                </Svg>
               </View>
               {error.password !== '' && (
                 <Text style={styles.errorText}>{error.password}</Text>
@@ -283,11 +319,16 @@ const SignIn = (): JSX.Element => {
           </View>
 
           {/* Login Button */}
-          <TouchableOpacity onPress={handleSignIn} style={[styles.loginBtn]}>
+          <TouchableOpacity style={[styles.loginBtn]} onPress={handleSignIn}>
             <Text style={styles.loginBtnText}>Log In</Text>
           </TouchableOpacity>
         </View>
       </View>
+        </View>
+      </View>
+    </ScrollView>
+  </TouchableWithoutFeedback>
+</KeyboardAvoidingView>
       <Toast />
     </View>
   );
@@ -303,12 +344,12 @@ const styles = StyleSheet.create({
   },
   loginBox: {
     display: 'flex',
-    padding: 10,
+   padding: 5,
     flex: 0,
     gap: 24,
     margin:'auto',
-    width: '90%',
-    marginTop: 50,
+    width: '95%',
+    marginTop: 10,
    // marginInline:,
     // height: 380,
     backgroundColor: '#FFFFFF',

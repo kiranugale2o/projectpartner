@@ -40,7 +40,7 @@ export const getStatusStyle = (
 const EnquiryRemarkList: React.FC<Props> = ({remarkList}) => {
   return (
     <View style={{width: '100%'}}>
-      <Text style={{fontWeight: '600', fontSize: 16, marginTop: 24}}>
+      <Text style={{fontWeight: '600', fontSize: 16, marginTop: 24,color:'black'}}>
         Enquiry Remark List
       </Text>
 

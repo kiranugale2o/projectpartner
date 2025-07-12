@@ -1,3 +1,6 @@
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useFocusEffect } from '@react-navigation/native';
+import { useCallback, useState } from 'react';
 import {
   Alert,
   Image,
@@ -19,7 +22,7 @@ const Refer: React.FC = () => {
   const screenWidth = Dimensions.get('window').width;
   const leftPosition = screenWidth * 0.4; // 35% of screen width
   const referralText =
-    'Hey! Join me on Reparv and earn ₹500. Download here: https://reparv.in';
+    'Hey! Join me on Reparv and earn ₹500. Download here: https://partners.reparv.in/#registrationForm';
   const logoUrl =
     'https://firebasestorage.googleapis.com/v0/b/movielover-838fb.appspot.com/o/ic_launcher.png?alt=media&token=fd337fe0-76d1-4dec-8b63-4bf3bd267afe'; // your hosted logo
 
@@ -58,6 +61,35 @@ const Refer: React.FC = () => {
       );
     }
   };
+
+  const [referData,setReferData]=useState(null)
+   const getProfile = async () => {
+    try {
+      const token = await AsyncStorage.getItem('salesPersonToken'); // Retrieve stored JWT
+
+      const response = await fetch('https://api.reparv.in/sales/profile/', {
+        method: 'GET',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`, // Attach token
+        },
+      });
+
+      const data = await response.json();
+      console.log('Update response:', data);
+     setReferData(data)
+      // navigation.navigate("")
+    } catch (error) {
+      console.error('Error updating user:', error);
+    }
+  };
+
+   useFocusEffect(
+      useCallback(() => {
+        getProfile();
+      }, []),
+    );
 
   return (
     <View style={{flex: 1, top: -100, backgroundColor: 'white'}}>
@@ -125,6 +157,10 @@ const Refer: React.FC = () => {
             </View>
           </View>
 
+    <View style={styles.referralBox}>
+          <Text style={styles.referralLabel}>Your Referral No.</Text>
+          <Text style={styles.referralValue}>{referData?.referalno}</Text>
+        </View>
           <View
             style={{
               width: '100%',
@@ -511,6 +547,33 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     zIndex: 0,
   },
+
+
+   referralBox: {
+  position: 'absolute',
+  top: 190, // Adjust as needed
+  right: 16,
+  backgroundColor: '#FFFFFF',
+  borderRadius: 12,
+  paddingVertical: 8,
+  paddingHorizontal: 14,
+  elevation: 4,
+  shadowColor: '#00000066',
+  shadowOffset: { width: 0, height: 2 },
+  shadowOpacity: 0.25,
+  shadowRadius: 2,
+  alignItems: 'center',
+},
+referralLabel: {
+  fontSize: 12,
+  color: '#6B6B6B',
+},
+referralValue: {
+  fontSize: 18,
+  fontWeight: '700',
+  color: '#111417',
+},
+
 });
 
 function SmallGreenShape() {

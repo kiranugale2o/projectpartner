@@ -33,6 +33,7 @@ import moment from 'moment';
 import {EllipsisVertical, X} from 'lucide-react-native';
 import EnquiryRemarkList, {getStatusStyle} from './EnquiryRemarkList';
 import ModalSelector from 'react-native-modal-selector';
+import dayjs from 'dayjs';
 interface Props {
   enquiry: Enquirer;
 }
@@ -97,7 +98,7 @@ const ClientInfoCard: React.FC<Props> = ({enquiry}) => {
   const [remark, setRemark] = useState('');
   const [dealAmount, setDealAmount] = useState('');
   const [states, setStates] = useState<StateOption[]>([]);
-
+ const[tokenamount,setTokenAmount]=useState('');
   const [cities, setCities] = useState<CityOptions[]>([]);
   const [imageUri, setImageUri] = useState<any>();
   const [followRemark, setFollowUpRemark] = useState('');
@@ -348,10 +349,11 @@ const ClientInfoCard: React.FC<Props> = ({enquiry}) => {
     const formData = new FormData();
 
     formData.append('paymenttype', paymentType);
+     formData.append('tokenamount', tokenamount);
     formData.append('remark', remark);
     formData.append('dealamount', dealAmount);
     formData.append('enquiryStatus', 'Token');
-
+console.log(formData)
     if (imageUri) {
       formData.append('paymentimage', {
         uri: imageUri.uri,
@@ -741,7 +743,7 @@ const ClientInfoCard: React.FC<Props> = ({enquiry}) => {
       setSelectedValue(enquiry?.status);
     }, 5000); // fetch every 30s
     return () => clearInterval(interval); // cleanup on unmount
-  }, [changeStatus]);
+  }, [changeStatus,updateEnquiryVisible]);
 
   useEffect(() => {
     if (enquiryUpdateDetails?.state !== '') {
@@ -859,7 +861,13 @@ const ClientInfoCard: React.FC<Props> = ({enquiry}) => {
     } SqFt | ₹${formatIndianAmount(property?.totalOfferPrice)}`,
   }));
 
+
+  
+
   return (
+     <>{
+      enquiry?.status!=='Token'?
+  <>
     <TouchableOpacity
       style={styles.container}
       onPress={() => {
@@ -995,6 +1003,7 @@ const ClientInfoCard: React.FC<Props> = ({enquiry}) => {
                     <Text
                       style={[
                         styles.optionText,
+                        
                         {
                           color: `${item.color}`,
                         },
@@ -1092,6 +1101,8 @@ const ClientInfoCard: React.FC<Props> = ({enquiry}) => {
             <TextInput
               style={[Sstyles.input, {color: 'black'}]}
               placeholder="Enter Remark"
+
+              placeholderTextColor={'gray'}
               onChangeText={text => handleChange('remark', text)}
             />
 
@@ -1165,8 +1176,9 @@ const ClientInfoCard: React.FC<Props> = ({enquiry}) => {
                   fontWeight: 'bold',
                   marginBottom: 16,
                   textAlign: 'center',
+                     color:'black'
                 }}>
-                Change Enquiry Status
+                Token Generated
               </Text>
               <X
                 size={30}
@@ -1177,53 +1189,70 @@ const ClientInfoCard: React.FC<Props> = ({enquiry}) => {
               />
             </View>
 
-            <Text
-              style={{
-                fontSize: 12,
-              }}>
-              Payment Type
-            </Text>
-            <TextInput
-              placeholder="Payment Type"
-              value={paymentType}
-              onChangeText={setPaymentType}
-              style={{
-                borderWidth: 1,
-                borderColor: '#ccc',
-                borderRadius: 10,
-                padding: 12,
-                marginBottom: 12,
-              }}
-            />
+       <View style={{marginBottom: 12}}>
+  <Text style={{fontSize: 12, marginBottom: 6,   color:'black'}}>Payment Type</Text>
+  <View
+    style={{
+      borderWidth: 1,
+      borderColor: '#ccc',
+      borderRadius: 10,
+     
+      overflow: 'hidden',
+    }}>
+    <Picker
+      selectedValue={paymentType}
+      onValueChange={(itemValue, itemIndex) => setPaymentType(itemValue)}
+      style={{
+        height: 50,
+        paddingHorizontal: 12,
+            color:'black',
+      }}>
+      <Picker.Item label="Select Payment Type" value="" />
+      <Picker.Item label="Cash" value="cash" />
+      <Picker.Item label="Cheque" value="cheque" />
+       <Picker.Item label="UPI" value="upi" />
+    </Picker>
+  </View>
+</View>
 
-            <Text
+              <Text
               style={{
                 fontSize: 12,
+                    color:'black',
               }}>
-              Remark
+             Token Amount
             </Text>
-            <TextInput
-              placeholder="Remark"
-              value={remark}
-              onChangeText={setRemark}
-              style={{
-                borderWidth: 1,
-                borderColor: '#ccc',
-                borderRadius: 10,
-                padding: 12,
-                marginBottom: 12,
-              }}
-            />
+           <TextInput
+  placeholder="Enter Token Amount"
+  placeholderTextColor={'gray'}
+  value={tokenamount}
+  onChangeText={text => {
+    const numericText = text.replace(/[^0-9]/g, '');
+    setTokenAmount(numericText);
+  }}
+  keyboardType="numeric"
+  style={{
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 10,
+    padding: 12,
+    color:'black',
+    marginBottom: 12,
+  }}
+/>
 
-            <Text
+
+ <Text
               style={{
                 fontSize: 12,
+                    color:'black',
               }}>
               Deal Amount
             </Text>
             <TextInput
               placeholder="Deal Amount"
               value={dealAmount}
+              placeholderTextColor={'gray'}
               onChangeText={setDealAmount}
               keyboardType="numeric"
               style={{
@@ -1234,6 +1263,28 @@ const ClientInfoCard: React.FC<Props> = ({enquiry}) => {
                 marginBottom: 20,
               }}
             />
+            <Text
+              style={{
+                fontSize: 12,
+                    color:'black',
+              }}>
+              Remark
+            </Text>
+            <TextInput
+              placeholder="Remark"
+              value={remark}
+              placeholderTextColor={'gray'}
+              onChangeText={setRemark}
+              style={{
+                borderWidth: 1,
+                borderColor: '#ccc',
+                borderRadius: 10,
+                padding: 12,
+                marginBottom: 12,
+              }}
+            />
+
+           
             {imageUri && (
               <Image
                 source={{uri: imageUri.uri}}
@@ -1278,6 +1329,7 @@ const ClientInfoCard: React.FC<Props> = ({enquiry}) => {
               style={{
                 flexDirection: 'row',
                 justifyContent: 'space-between',
+              
               }}>
               <Text style={Sstyles.title}>Change Enquiry Status</Text>
               <X
@@ -1292,6 +1344,7 @@ const ClientInfoCard: React.FC<Props> = ({enquiry}) => {
             <Text
               style={{
                 fontSize: 12,
+                color:'black'
               }}>
               Enquiry Status
             </Text>
@@ -1305,12 +1358,15 @@ const ClientInfoCard: React.FC<Props> = ({enquiry}) => {
             <Text
               style={{
                 fontSize: 12,
+                   color:'black'
               }}>
               Enquiry Remark
             </Text>
             <TextInput
               style={[Sstyles.input, {color: 'black'}]}
               placeholder="Enter Remark"
+
+              placeholderTextColor={'gray'}
               onChangeText={text => setFollowUpRemark(text)}
               multiline
             />
@@ -1346,24 +1402,28 @@ const ClientInfoCard: React.FC<Props> = ({enquiry}) => {
             <Text
               style={{
                 fontSize: 12,
+                   color:'black'
               }}>
               Enquiry Status
             </Text>
             <TextInput
               style={[Sstyles.input, {color: 'gray'}]}
               value="Cancelled"
+              placeholderTextColor={'gray'}
               editable={false}
               disableKeyboardShortcuts={true}
             />
             <Text
               style={{
                 fontSize: 12,
+                   color:'black'
               }}>
               Cancelled Remark
             </Text>
             <TextInput
               style={[Sstyles.input, {color: 'black'}]}
               placeholder="Enter Remark"
+              placeholderTextColor={'gray'}
               onChangeText={text => setCancelRemark(text)}
               multiline
             />
@@ -1378,419 +1438,145 @@ const ClientInfoCard: React.FC<Props> = ({enquiry}) => {
         </View>
       </Modal>
       {/* View */}
-      {/* Visit Module */}
-      <Modal transparent visible={enquiryVisible} animationType="slide">
-        <View style={Sstyles.overlay}>
-          <View style={Sstyles.modal}>
-            <View
-              style={{
-                flexDirection: 'row',
-                justifyContent: 'space-between',
-              }}>
-              <Text style={Sstyles.title}>Enquiry Details</Text>
-              <X
-                size={30}
-                color={'gray'}
-                onPress={() => {
-                  setShowEnquiry(false);
-                }}
-              />
-            </View>
+  
+   <Modal transparent visible={enquiryVisible} animationType="slide">
+  <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.6)', justifyContent: 'flex-end' }}>
+    <View style={{
+      backgroundColor: '#fff',
+      borderTopLeftRadius: 30,
+      borderTopRightRadius: 30,
+      paddingHorizontal: 24,
+      paddingTop: 20,
+      paddingBottom: 30,
+      maxHeight: '92%',
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: -4 },
+      shadowOpacity: 0.15,
+      shadowRadius: 10,
+      elevation: 12,
+    }}>
+      {/* Header */}
+      <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
+        <Text style={{ fontSize: 20, fontWeight: 'bold', color: 'black' }}>Enquiry Details</Text>
+        <X size={30} color={'#555'} onPress={() => setShowEnquiry(false)} />
+      </View>
 
-            <ScrollView style={{height: 500}}>
-              <View style={{gap: 16, padding: 12}}>
-                <Text style={{fontSize: 14, fontWeight: '600'}}>
-                  Territory Partner
+      <Text style={{ fontSize: 13, fontWeight: '600', color: '#43A047', marginBottom: 12 }}>
+        {enquiryDetails?.source || 'Onsite'} | {enquiryDetails?.territorystatus}
+      </Text>
+
+      <ScrollView showsVerticalScrollIndicator={false}>
+        <View style={{ gap: 20 }}>
+
+          {/* Commission */}
+          <View>
+            <Text style={{ fontSize: 14, fontWeight: '600', color: '#37474F' }}>Commission Amount</Text>
+            {enquiry?.commissionAmount ? (
+              <View style={{ backgroundColor: '#E8F5E9', borderRadius: 16, paddingVertical: 10, paddingHorizontal: 14, marginTop: 6 }}>
+                <Text style={{ color: 'green', fontWeight: 'bold', fontSize: 15 }}>
+                  ₹{formatIndianAmount(enquiry?.commissionAmount * 0.4)}
                 </Text>
-                {enquiry.territoryName !== '' &&
-                enquiry.territoryContact !== '' &&
-                enquiry.territorypartnerid !== null ? (
-                  <>
-                    (
-                    <Text
-                      style={[
-                        {
-                          fontSize: 14,
-                          //  marginTop: -20,
-                          fontWeight: '700',
-                          color: '#0BB501',
-                        },
-                      ]}>
-                      {enquiry.territoryName + '     '}
-                      <View style={{marginTop: 16}}>
-                        <View style={[{flexDirection: 'row', gap: '5'}]}>
-                          <View style={[styles.iconBlueCircle, {marginTop: 5}]}>
-                            <Svg
-                              width="12"
-                              height="13"
-                              viewBox="0 0 12 13"
-                              fill="none">
-                              <Path
-                                d="M8.37124 8.10403L8.0679 8.40603C8.0679 8.40603 7.3459 9.12336 5.3759 7.16469C3.4059 5.20603 4.1279 4.48869 4.1279 4.48869L4.31857 4.29803C4.7899 3.83003 4.83457 3.07803 4.42324 2.52869L3.58324 1.40669C3.0739 0.726694 2.09057 0.636694 1.50724 1.21669L0.460571 2.25669C0.171904 2.54469 -0.0214293 2.91669 0.001904 3.33003C0.061904 4.38803 0.540571 6.66336 3.2099 9.31803C6.04124 12.1327 8.6979 12.2447 9.7839 12.1434C10.1279 12.1114 10.4266 11.9367 10.6672 11.6967L11.6139 10.7554C12.2539 10.12 12.0739 9.03003 11.2552 8.58536L9.9819 7.89269C9.44457 7.60136 8.79124 7.68669 8.37124 8.10403Z"
-                                fill="#0068FF"
-                              />
-                            </Svg>
-                          </View>
-                          <TouchableOpacity
-                            onPress={() => {
-                              Linking.openURL(
-                                `tel:${enquiry.territoryContact}`,
-                              );
-                            }}>
-                            <Text style={styles.phone}>
-                              {enquiry.territoryContact}
-                            </Text>
-                          </TouchableOpacity>
-                        </View>
-                      </View>
-                    </Text>
-                    )
-                  </>
-                ) : (
-                  <>
-                    <View
-                      style={[
-                        // styles.container2,
-                        {
-                          backgroundColor: `${`#0BB501`}20`,
-                          borderRadius: 20,
-                          // width: '30%',
-                          padding: 8,
-                        },
-                      ]}>
-                      <Text
-                        style={[
-                          styles.label,
-                          {
-                            color: `black`,
-                            width: '100%',
-                          },
-                        ]}>
-                        Not Assign Any Territory Partner
-                      </Text>
-                    </View>
-                  </>
-                )}
-                <Text style={{fontSize: 14, fontWeight: '600'}}>
-                  Last Follow Up
-                </Text>
-                {lastRemark && Object.keys(lastRemark).length > 0 ? (
-                  <>
-                    {' '}
-                    (
-                    <View style={{flexDirection: 'column'}}>
-                      <View style={{width: '100%', marginTop: 1}}>
-                        <Text
-                          style={{
-                            fontSize: 14,
-                            fontWeight: '500',
-                            color: '#00000066',
-                            marginBottom: 4,
-                          }}>
-                          <Text
-                            style={{
-                              paddingHorizontal: 8,
-                              paddingVertical: 4,
-                              borderRadius: 6,
-                              backgroundColor: statusStyle.backgroundColor,
-                              color: statusStyle.color,
-                            }}>
-                            {getDate(lastRemark.created_at)} -
-                            {lastRemark?.status}
-                          </Text>
-                        </Text>
-
-                        <View
-                          style={{
-                            backgroundColor: '#0BB50120',
-                            borderRadius: 20,
-                            width: 'auto',
-                            padding: 15,
-                          }}>
-                          <Text
-                            style={{
-                              fontSize: 14,
-                              fontWeight: '500',
-                              color: 'black',
-                              width: '100%',
-                            }}>
-                            {lastRemark?.remark === ''
-                              ? ''
-                              : lastRemark?.remark}
-                          </Text>
-                        </View>
-                      </View>
-                    </View>
-                    )
-                  </>
-                ) : (
-                  <>
-                    <>
-                      <View
-                        style={[
-                          // styles.container2,
-                          {
-                            backgroundColor: `${`#0BB501`}20`,
-                            borderRadius: 20,
-                            // width: '30%',
-                            padding: 8,
-                          },
-                        ]}>
-                        <Text
-                          style={[
-                            styles.label,
-                            {
-                              color: `black`,
-                              width: '100%',
-                            },
-                          ]}>
-                          Not taken any follow up
-                        </Text>
-                      </View>
-                    </>
-                  </>
-                )}
-
-                <View
-                  style={{
-                    flexDirection: 'row',
-                    justifyContent: 'flex-start',
-                    gap: 5,
-                  }}>
-                  {enquiryDetails?.visitdate !== null && (
-                    <View style={{flexDirection: 'column'}}>
-                      <Text
-                        style={[
-                          styles.label,
-                          {
-                            color: `black`,
-                          },
-                        ]}>
-                        Visit Date
-                      </Text>
-                      <View
-                        style={{flexDirection: 'row', gap: 10, marginTop: 5}}>
-                        <View
-                          style={[
-                            {
-                              backgroundColor: `${`#0BB501`}20`,
-                              borderRadius: 20,
-                              width: 'auto',
-                              padding: 8,
-                            },
-                          ]}>
-                          <Text
-                            style={[
-                              styles.label,
-                              {
-                                color: `black`,
-                                width: '100%',
-                              },
-                            ]}>
-                            {enquiryDetails?.visitdate}
-                          </Text>
-                        </View>
-                        {enquiryDetails?.source !== '' && (
-                          <View
-                            style={[
-                              {
-                                backgroundColor: `${`#0BB501`}20`,
-                                borderRadius: 20,
-                                width: 'auto',
-                                padding: 8,
-                              },
-                            ]}>
-                            <Text
-                              style={[
-                                styles.label,
-                                {
-                                  color: `black`,
-                                  width: '100%',
-                                },
-                              ]}>
-                              {enquiryDetails?.source}
-                            </Text>
-                          </View>
-                        )}
-                      </View>
-                    </View>
-                  )}
-                </View>
-
-                <Text style={{fontSize: 14, fontWeight: '600'}}>
-                  Customer Details
-                </Text>
-
-                <View
-                  style={{
-                    flexDirection: 'row',
-                    justifyContent: 'flex-start',
-                    gap: 5,
-                  }}>
-                  <View
-                    style={[
-                      {
-                        backgroundColor: `${`#0BB501`}20`,
-                        borderRadius: 20,
-                        width: 'auto',
-                        padding: 8,
-                      },
-                    ]}>
-                    <Text
-                      style={[
-                        styles.label,
-                        {
-                          color: `black`,
-                          width: '100%',
-                        },
-                      ]}>
-                      {enquiryDetails?.customer}
-                    </Text>
-                  </View>
-                  <View
-                    style={[
-                      {
-                        backgroundColor: `${`#0BB501`}20`,
-                        borderRadius: 20,
-                        width: 'auto',
-                        padding: 8,
-                      },
-                    ]}>
-                    <Text
-                      style={[
-                        styles.label,
-                        {
-                          color: `black`,
-                          width: '100%',
-                        },
-                      ]}>
-                      {enquiryDetails?.contact}
-                    </Text>
-                  </View>
-                </View>
-
-                <Text style={{fontSize: 14, fontWeight: '600'}}> Budget</Text>
-                <View style={{marginTop: 10}}>
-                  <View style={{flexDirection: 'row', gap: 8}}>
-                    {/* Min Budget Card */}
-                    <View
-                      style={{
-                        backgroundColor: '#0BB50120',
-                        borderRadius: 20,
-                        padding: 10,
-                        marginRight: 8,
-                      }}>
-                      <Text style={[styles.label, {color: 'gray'}]}>
-                        <Text style={{color: 'black'}}>
-                          ₹{formatIndianAmount(enquiryDetails?.minbudget)}- ₹
-                          {formatIndianAmount(enquiryDetails?.maxbudget)}
-                        </Text>
-                      </Text>
-                    </View>
-
-                    {/* Max Budget Card
-                    <View
-                      style={{
-                        backgroundColor: '#0BB50120',
-                        borderRadius: 20,
-                        padding: 10,
-                        marginRight: 8,
-                      }}>
-                      <Text style={[styles.label, {color: 'gray'}]}>
-                        Max-Budget:{' '}
-                        <Text style={{color: 'black'}}>
-                          ₹{enquiryDetails?.maxbudget}
-                        </Text>
-                      </Text>
-                    </View> */}
-
-                    {/* Add more cards here if needed */}
-                  </View>
-                </View>
-
-                <Text style={{fontSize: 14, fontWeight: '600'}}>
-                  Property Category
-                </Text>
-                <View
-                  style={[
-                    {
-                      backgroundColor: `${`#0BB501`}20`,
-                      borderRadius: 20,
-                      width: '30%',
-                      padding: 8,
-                    },
-                  ]}>
-                  <Text
-                    style={[
-                      styles.label,
-                      {
-                        color: `black`,
-                        // width: '100%',
-                        // padding: 'auto',
-                        // margin: 'auto',
-                        marginInline: 'auto',
-                      },
-                    ]}>
-                    {enquiryDetails?.category}
-                  </Text>
-                </View>
-
-                <Text style={{fontSize: 14, fontWeight: '600'}}>
-                  Enquired Property Location
-                </Text>
-                <View
-                  style={[
-                    {
-                      backgroundColor: `${`#0BB501`}20`,
-                      borderRadius: 20,
-                      // width: '30%',
-                      padding: 15,
-                    },
-                  ]}>
-                  <Text
-                    style={[
-                      styles.label,
-                      {
-                        color: `black`,
-                        width: '100%',
-                      },
-                    ]}>
-                    {enquiryDetails?.location}
-                    {', \n'}
-                    {enquiryDetails?.city}
-                    {' , '}
-                    {enquiryDetails?.state}
-                  </Text>
-                </View>
-
-                <Text style={{fontSize: 14, fontWeight: '600'}}>Message</Text>
-                <View
-                  style={[
-                    {
-                      backgroundColor: `${`#0BB501`}20`,
-                      borderRadius: 20,
-                      // width: '30%',
-                      padding: 15,
-                    },
-                  ]}>
-                  <Text
-                    style={[
-                      styles.label,
-                      {
-                        color: `black`,
-                        width: '100%',
-                      },
-                    ]}>
-                    {enquiryDetails?.message}
-                  </Text>
-                </View>
-
-                <EnquiryRemarkList remarkList={remarkList} />
               </View>
-            </ScrollView>
+            ) : (
+              <Text style={{ color: '#D32F2F', fontSize: 13, marginTop: 6 }}>No commission amount available</Text>
+            )}
           </View>
+
+          {/* Territory Partner */}
+          <View>
+            <Text style={{ fontSize: 14, fontWeight: '600', color: '#37474F' }}>Territory Partner</Text>
+            {enquiry.territoryName && enquiry.territoryContact && enquiry.territorypartnerid !== null ? (
+              <View style={{ marginTop: 6 }}>
+                <Text style={{ fontSize: 14, fontWeight: '700', color: '#2E7D32' }}>{enquiry?.territoryName}</Text>
+                <TouchableOpacity
+                  onPress={() => Linking.openURL(`tel:${enquiry.territoryContact}`)}
+                  style={{ flexDirection: 'row', alignItems: 'center', marginTop: 6 }}>
+                  <Svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#1E88E5" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <Path d="M22 16.92V21a2 2 0 0 1-2.18 2A19.86 19.86 0 0 1 3 5.18 2 2 0 0 1 5 3h4.09a2 2 0 0 1 2 1.72c.12.81.31 1.6.57 2.36a2 2 0 0 1-.45 2.11l-1.27 1.27a16 16 0 0 0 6.13 6.13l1.27-1.27a2 2 0 0 1 2.11-.45c.76.26 1.55.45 2.36.57a2 2 0 0 1 1.72 2z" />
+                  </Svg>
+                  <Text style={[styles.phone, { marginLeft: 8 }]}>{enquiry?.territoryContact}</Text>
+                </TouchableOpacity>
+              </View>
+            ) : (
+              <Text style={{ color: '#999', fontSize: 13, marginTop: 6 }}>Not Assigned Any Territory Partner</Text>
+            )}
+          </View>
+
+          {/* Last Follow Up */}
+          <View>
+            <Text style={{ fontSize: 14, fontWeight: '600', color: '#37474F' }}>Last Follow Up</Text>
+            {lastRemark ? (
+              <View style={{ marginTop: 6 }}>
+                <Text style={{ fontSize: 13, fontWeight: '600', color: statusStyle.color, backgroundColor: statusStyle.backgroundColor, padding: 6, borderRadius: 6 }}>
+                  {dayjs(lastRemark?.created_at).format('DD MMM YYYY')} - {lastRemark?.status}
+                </Text>
+                <View style={{ backgroundColor: '#F1F8E9', borderRadius: 14, padding: 10, marginTop: 8 }}>
+                  <Text style={{ color: '#333' }}>{lastRemark?.remark}</Text>
+                </View>
+              </View>
+            ) : (
+              <Text style={{ color: '#999', fontSize: 13, marginTop: 6 }}>Not taken any follow up</Text>
+            )}
+          </View>
+
+          {/* Visit Date */}
+          {enquiryDetails?.visitdate && (
+            <View>
+              <Text style={{ fontSize: 14, fontWeight: '600', color: '#37474F' }}>Visit Date</Text>
+              <Text style={{ marginTop: 6, color: '#1565C0', backgroundColor: '#E8F5E9', padding: 8, borderRadius: 16 }}>{enquiryDetails.visitdate}</Text>
+            </View>
+          )}
+
+          {/* Customer */}
+          <View>
+            <Text style={{ fontSize: 14, fontWeight: '600', color: '#37474F' }}>Customer Details</Text>
+            <View style={{ flexDirection: 'row', gap: 10, marginTop: 6 }}>
+              <Text style={{ backgroundColor: '#E8F5E9', padding: 8, borderRadius: 16 ,color:'black'}}>{enquiryDetails?.customer}</Text>
+              <Text style={{ backgroundColor: '#E8F5E9', padding: 8, borderRadius: 16 ,color:'black'}}>{enquiryDetails?.contact}</Text>
+            </View>
+          </View>
+
+          {/* Budget */}
+          <View>
+            <Text style={{ fontSize: 14, fontWeight: '600', color: '#37474F' }}>Budget</Text>
+            <Text style={{ backgroundColor: '#E8F5E9', padding: 10, borderRadius: 16, marginTop: 6, fontWeight: '700', color: 'green' }}>
+              ₹{formatIndianAmount(enquiryDetails?.minbudget)} - ₹{formatIndianAmount(enquiryDetails?.maxbudget)}
+            </Text>
+          </View>
+
+          {/* Property Category */}
+          <View>
+            <Text style={{ fontSize: 14, fontWeight: '600',color:'black' }}>Property Category</Text>
+            <Text style={{ backgroundColor: '#E8F5E9', padding: 8, borderRadius: 16, marginTop: 6, textAlign: 'center',color:'black' }}>{enquiry?.category}</Text>
+          </View>
+
+          {/* Location */}
+          <View>
+            <Text style={{ fontSize: 14, fontWeight: '600', color: '#37474F' }}>Enquired Property Location</Text>
+            <Text style={{ backgroundColor: '#E8F5E9', padding: 12, borderRadius: 16, marginTop: 6 ,color:'black'}}>
+              {`${enquiryDetails?.location}, ${enquiryDetails?.city}, ${enquiryDetails?.state}`}
+            </Text>
+          </View>
+
+          {/* Message */}
+          {enquiryDetails?.message && (
+            <View>
+              <Text style={{ fontSize: 14, fontWeight: '600', color: '#37474F' }}>Message</Text>
+              <Text style={{ backgroundColor: '#E8F5E9', padding: 12, borderRadius: 16, marginTop: 6,color:'black' }}>{enquiryDetails?.message}</Text>
+            </View>
+          )}
+
+          {/* Remarks List */}
+          <EnquiryRemarkList remarkList={remarkList} />
         </View>
-      </Modal>
+      </ScrollView>
+    </View>
+  </View>
+</Modal>
+
+
+
+
       {/*updat Module */}
       <Modal transparent visible={updateEnquiryVisible} animationType="slide">
         <View style={Sstyles.overlay}>
@@ -1809,13 +1595,25 @@ const ClientInfoCard: React.FC<Props> = ({enquiry}) => {
                 }}
               />
             </View>
+ <Text
+        style={{
+          fontSize: 14,
+          marginTop: -20,
+          fontWeight: '700',
+          color: 'green'
+        }}>
+        {enquiryDetails?.source==='' || enquiryDetails?.source===null?' Onsite ':enquiryDetails?.source}|{' '}{enquiryDetails?.territorystatus}
+      </Text> 
+            <View style={{width:'100%',borderWidth:0.2,backgroundColor:'black'}}></View>
 
             <ScrollView style={{height: 500}}>
               <View style={{gap: 16, padding: 12}}>
-                <Text style={{fontSize: 14}}>Full Name</Text>
+                <Text style={{fontSize: 14,color:'black'}}>Full Name</Text>
                 <TextInput
                   style={[Sstyles.input, {color: 'black'}]}
-                  value={enquiryUpdateDetails?.customer}
+                  value={enquiryUpdateDetails.customer}
+
+                  placeholderTextColor={'gray'}
                   onChangeText={text => {
                     setEnquiryUpdateDetails({
                       ...enquiryUpdateDetails,
@@ -1823,48 +1621,46 @@ const ClientInfoCard: React.FC<Props> = ({enquiry}) => {
                     });
                   }}
                 />
-                <Text style={{fontSize: 14}}>Contact Number</Text>
+                <Text style={{fontSize: 14,color:'black'}}>Contact Number</Text>
                 <TextInput
                   style={[Sstyles.input, {color: 'black'}]}
                   value={enquiryUpdateDetails?.contact}
+                  placeholderTextColor={'gray'}
                   onChangeText={text => {
                     setEnquiryUpdateDetails({
                       ...enquiryUpdateDetails,
-                      customer: text,
+                      contact: text,
                     });
                   }}
                 />
-                <Text style={{fontSize: 14}}>Min-Budget</Text>
-                <TextInput
-                  style={[Sstyles.input, {color: 'black'}]}
-                  value={
-                    enquiryUpdateDetails?.minbudget === null
-                      ? ''
-                      : enquiryUpdateDetails?.minbudget
-                  }
-                  onChangeText={text => {
-                    setEnquiryUpdateDetails({
-                      ...enquiryUpdateDetails,
-                      minbudget: text === '' ? null : Number(text),
-                    });
-                  }}
-                />
+               <Text style={{fontSize: 14,color:'black'}}>Min-Budget</Text>
+<TextInput
+  style={[Sstyles.input, { color: 'black' }]}
+  value={enquiryUpdateDetails?.minbudget ?? ''}
+  keyboardType="numeric"
+  placeholderTextColor={'gray'}
+  onChangeText={text => {
+    setEnquiryUpdateDetails({
+      ...enquiryUpdateDetails,
+      minbudget: text, // ✅ keep as string
+    });
+  }}
+/>
 
-                <Text style={{fontSize: 14}}>Max-Budget</Text>
-                <TextInput
-                  style={[Sstyles.input, {color: 'black'}]}
-                  value={
-                    enquiryUpdateDetails?.maxbudget === null
-                      ? ''
-                      : enquiryUpdateDetails?.maxbudget
-                  }
-                  onChangeText={text => {
-                    setEnquiryUpdateDetails({
-                      ...enquiryUpdateDetails,
-                      maxbudget: text === '' ? null : Number(text),
-                    });
-                  }}
-                />
+
+             <Text style={{fontSize: 14,color:'black'}}>Max-Budget</Text>
+<TextInput
+  style={[Sstyles.input, { color: 'black' }]}
+  value={enquiryUpdateDetails?.maxbudget ?? ''}
+  placeholderTextColor={'gray'}
+  keyboardType="numeric"
+  onChangeText={text => {
+    setEnquiryUpdateDetails({
+      ...enquiryUpdateDetails,
+      maxbudget: text, // ✅ keep as string
+    });
+  }}
+/>
 
                 <View style={{width: '100%', marginBottom: 16}}>
                   <Text
@@ -2018,7 +1814,7 @@ const ClientInfoCard: React.FC<Props> = ({enquiry}) => {
                     </Picker>
                   </View>
                 </View>
-                <Text style={{fontSize: 14}}>Location</Text>
+                <Text style={{fontSize: 14,color:'black'}}>Location</Text>
                 <TextInput
                   style={[Sstyles.input, {color: 'black'}]}
                   value={enquiryUpdateDetails?.location}
@@ -2029,7 +1825,7 @@ const ClientInfoCard: React.FC<Props> = ({enquiry}) => {
                     });
                   }}
                 />
-                <Text style={{fontSize: 14}}>Message</Text>
+                <Text style={{fontSize: 14,color:'black'}}>Message</Text>
                 <TextInput
                   style={[Sstyles.input, {color: 'black'}]}
                   value={enquiryUpdateDetails?.message}
@@ -2178,7 +1974,7 @@ const ClientInfoCard: React.FC<Props> = ({enquiry}) => {
             {showPicker && (
               <DateSelectPopup
                 visible={showPicker}
-                onCancel={() => setPopupVisible(false)}
+                onCancel={() => setShowPicker(false)}
                 onOk={handleOk}
               />
             )}
@@ -2195,66 +1991,79 @@ const ClientInfoCard: React.FC<Props> = ({enquiry}) => {
       </Modal>
       {/* Property Select Model */}
       <Modal transparent visible={propertyUpdateModel} animationType="slide">
-        <View style={Sstyles.overlay}>
-          <View style={Sstyles.modal}>
-            <View
-              style={{
-                flexDirection: 'row',
-                justifyContent: 'space-between',
-              }}>
-              <Text style={Sstyles.title}>Update Property to Enquiry</Text>
-              <X
-                size={30}
-                color={'gray'}
-                onPress={() => {
-                  setPropertyUpdateModel(false);
-                }}
-              />
-            </View>
-            <View style={{width: '100%', marginBottom: 16}}>
-              <Text
-                style={{
-                  fontSize: 18,
+  <View style={Sstyles.overlay}>
+    <View style={Sstyles.modal}>
+      <View
+        style={{
+          flexDirection: 'row',
+          justifyContent: 'space-between',
+        }}>
+        <Text style={Sstyles.title}>Update Property to Enquiry</Text>
+        <X
+          size={30}
+          color={'gray'}
+          onPress={() => {
+            setPropertyUpdateModel(false);
+          }}
+        />
+      </View>
 
-                  fontWeight: '500',
-                  color: '#00000066',
-                }}>
-                Select Property
-              </Text>
-              <ModalSelector
-                data={propertyOptions}
-                initValue="Select Property"
-                onChange={option => {
-                  setPropertyId(option?.key);
-                  setSelectedPropertyLabel(option?.label); // ✅ Set the selected label
-                }}
-                style={{
-                  borderWidth: 0.3,
-                  borderRadius: 6,
-                  borderColor: 'gray',
-                  padding: 10,
-                }}
-                initValueTextStyle={{color: 'black', fontSize: 16}}
-                selectTextStyle={{color: 'black', fontSize: 16}}
-                optionTextStyle={{fontSize: 18, color: 'black'}}>
-                <Text style={{color: 'black', fontSize: 16}}>
-                  {selectedPropertyLabel}
-                </Text>
-              </ModalSelector>
-            </View>
+      <View style={{width: '100%', marginBottom: 16}}>
+        <Text
+          style={{
+            fontSize: 18,
+            fontWeight: '500',
+            color: '#00000066',
+            marginBottom: 8,
+          }}>
+          Select Property
+        </Text>
 
-            <TouchableOpacity
-              style={[Sstyles.save, {width: '50%', margin: 'auto'}]}
-              onPress={updatePropertyToEnquiry}>
-              <Text style={[Sstyles.buttonText, {marginInline: 'auto'}]}>
-                Save
-              </Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </Modal>
+        {/* ✅ Check if propertyOptions is empty or null */}
+        {Array.isArray(propertyOptions) && propertyOptions.length > 0 ? (
+          <ModalSelector
+            data={propertyOptions}
+            initValue="Select Property"
+            onChange={option => {
+              setPropertyId(option?.key);
+              setSelectedPropertyLabel(option?.label);
+            }}
+            style={{
+              borderWidth: 0.3,
+              borderRadius: 6,
+              borderColor: 'gray',
+              padding: 10,
+            }}
+            initValueTextStyle={{color: 'black', fontSize: 16}}
+            selectTextStyle={{color: 'black', fontSize: 16}}
+            optionTextStyle={{fontSize: 18, color: 'black'}}>
+            <Text style={{color: 'black', fontSize: 16}}>
+              {selectedPropertyLabel || 'Select Property'}
+            </Text>
+          </ModalSelector>
+        ) : (
+          <Text style={{color: 'red', fontSize: 16}}>
+            Not Found Any properties based on your Budget .
+          </Text>
+        )}
+      </View>
+
+      <TouchableOpacity
+        style={[Sstyles.save, {width: '50%', margin: 'auto'}]}
+        onPress={updatePropertyToEnquiry}
+        disabled={!propertyOptions || propertyOptions.length === 0} // ✅ disable if no options
+      >
+        <Text style={[Sstyles.buttonText, {marginInline: 'auto'}]}>
+          Save
+        </Text>
+      </TouchableOpacity>
+    </View>
+  </View>
+     </Modal>
+
       <Toast />
     </TouchableOpacity>
+      </> :null }</>
   );
 };
 
@@ -2347,10 +2156,11 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     borderBottomColor: '#eee',
     borderBottomWidth: 1,
+    color:'black'
   },
   optionText: {
     fontSize: 16,
-    color: '#333',
+    color: 'black'
   },
   cancel: {
     textAlign: 'center',
@@ -2426,6 +2236,7 @@ const styles = StyleSheet.create({
   },
   soptionText: {
     fontSize: 14,
+    color:'black'
   },
   issueTitle: {
     fontFamily: 'Montserrat',
@@ -2451,11 +2262,12 @@ const Sstyles = StyleSheet.create({
   title: {
     fontSize: 18,
     fontWeight: 'bold',
+    color:'black'
   },
   input: {
     borderWidth: 1,
     borderColor: '#ccc',
-    padding: 16,
+    padding: 10,
     borderRadius: 8,
     color: 'black',
   },
@@ -2478,6 +2290,7 @@ const Sstyles = StyleSheet.create({
   },
   buttonText: {
     color: 'white',
+    margin:'auto'
   },
 });
 export default ClientInfoCard;

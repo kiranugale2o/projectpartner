@@ -1,39 +1,98 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react';
 import {
-  View,
-  Text,
-  TouchableOpacity,
-  StyleSheet,
-  Modal,
-  FlatList,
+  View, Text, TouchableOpacity, StyleSheet, Modal, FlatList,
 } from 'react-native';
 
-// ➕ Padded 01–31 days
-const days = Array.from({ length: 31 }, (_, i) =>
-  (i + 1).toString().padStart(2, '0')
-);
-const months = [
-  'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-  'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
+const monthLabels = [
+  'Jan','Feb','Mar','Apr','May','Jun',
+  'Jul','Aug','Sep','Oct','Nov','Dec',
 ];
-const years = ['2023', '2024', '2025', '2026', '2027'];
+
+const itemHeight = 40;
+const visibleItems = 3;
+const pickerHeight = itemHeight * visibleItems;
 
 const DateSelectPopup = ({ visible, onCancel, onOk }) => {
-  const now = new Date();
+  /* ---------- helpers ---------- */
+  const today       = useMemo(() => new Date(), []);
+  const thisYear    = today.getFullYear();
+  const thisMonthIx = today.getMonth();     // 0‑based
+  const thisDay     = today.getDate();      // 1‑31
 
-  // ✅ Pad day for match with days array
-  const [selectedDay, setSelectedDay] = useState(String(now.getDate()).padStart(2, '0'));
-  const [selectedMonth, setSelectedMonth] = useState(months[now.getMonth()]);
-  const [selectedYear, setSelectedYear] = useState(now.getFullYear().toString());
+  /** How many days in a month? */
+  const daysInMonth = useCallback((monthIx, year) =>
+    new Date(year, monthIx + 1, 0).getDate(), []);
 
-  const dayRef = useRef(null);
+  /* ---------- state ---------- */
+  const [year,  setYear]  = useState(thisYear.toString());
+  const [month, setMonth] = useState(monthLabels[thisMonthIx]);
+  const [day,   setDay]   = useState(String(thisDay).padStart(2, '0'));
+
+  /* ---------- refs (for scrollToIndex) ---------- */
+  const dayRef   = useRef(null);
   const monthRef = useRef(null);
-  const yearRef = useRef(null);
+  const yearRef  = useRef(null);
 
-  const itemHeight = 40;
-  const visibleItems = 3;
-  const pickerHeight = itemHeight * visibleItems;
+  /* ---------- dynamic data ---------- */
+  /** years: thisYear … 2027 */
+  const years = useMemo(
+    () => Array.from({ length: 2027 - thisYear + 1 }, (_, i) => (thisYear + i).toString()),
+    [thisYear],
+  );
 
+  /** months depends on the selected year */
+  const months = useMemo(() => {
+    if (parseInt(year, 10) === thisYear) {
+      return monthLabels.slice(thisMonthIx);                // current month → Dec
+    }
+    return monthLabels;                                      // all months
+  }, [year, thisYear, thisMonthIx]);
+
+  /** days depend on selected month & year */
+  const days = useMemo(() => {
+    const monthIx     = monthLabels.indexOf(month);
+    const totalDays   = daysInMonth(monthIx, parseInt(year, 10));
+    const startFrom   = (parseInt(year, 10) === thisYear && monthIx === thisMonthIx)
+                        ? thisDay                                     // today, not past
+                        : 1;
+    return Array.from(
+      { length: totalDays - startFrom + 1 },
+      (_, i) => String(startFrom + i).padStart(2, '0'),
+    );
+  }, [month, year, daysInMonth, thisYear, thisMonthIx, thisDay]);
+
+  /* ---------- keep selection valid ---------- */
+  useEffect(() => {
+    if (!years.includes(year)) {
+      setYear(years[0]);
+    }
+  }, [years, year]);
+
+  useEffect(() => {
+    if (!months.includes(month)) {
+      setMonth(months[0]);
+    }
+  }, [months, month]);
+
+  useEffect(() => {
+    if (!days.includes(day)) {
+      setDay(days[0]);
+    }
+  }, [days, day]);
+
+  /* ---------- jump to the correct rows when the modal opens ---------- */
+  useEffect(() => {
+    if (!visible) return;
+    const yIndex = years.indexOf(year);
+    const mIndex = months.indexOf(month);
+    const dIndex = days.indexOf(day);
+
+    if (yearRef.current   && yIndex >= 0) yearRef.current.scrollToIndex({ index: yIndex, animated: false });
+    if (monthRef.current  && mIndex >= 0) monthRef.current.scrollToIndex({ index: mIndex, animated: false });
+    if (dayRef.current    && dIndex >= 0) dayRef.current.scrollToIndex({ index: dIndex, animated: false });
+  }, [visible, years, months, days, year, month, day]);
+
+  /* ---------- generic wheel renderer ---------- */
   const renderPicker = (data, selected, setSelected, ref) => (
     <View style={[styles.pickerContainer, { height: pickerHeight }]}>
       <FlatList
@@ -51,64 +110,39 @@ const DateSelectPopup = ({ visible, onCancel, onOk }) => {
         contentContainerStyle={{
           paddingVertical: (pickerHeight - itemHeight) / 2,
         }}
-        onMomentumScrollEnd={(event) => {
-          const offsetY = event.nativeEvent.contentOffset.y;
-          const index = Math.round(offsetY / itemHeight);
-          setSelected(data[index]);
+        onMomentumScrollEnd={(e) => {
+          const offsetY = e.nativeEvent.contentOffset.y;
+          const idx     = Math.round(offsetY / itemHeight);
+          setSelected(data[idx]);
         }}
         renderItem={({ item }) => (
           <View style={{ height: itemHeight, justifyContent: 'center' }}>
-            <Text
-              style={[
-                styles.item,
-                item === selected ? styles.selected : styles.faded,
-              ]}
-            >
+            <Text style={[
+              styles.item,
+              item === selected ? styles.selected : styles.faded,
+            ]}>
               {item}
             </Text>
           </View>
         )}
       />
-      <View
-        style={[styles.highlightLine, { top: pickerHeight / 2 - itemHeight / 2 }]}
-      />
-      <View
-        style={[styles.highlightLine, { top: pickerHeight / 2 + itemHeight / 2 }]}
-      />
+      {/* top & bottom separator lines */}
+      <View style={[styles.highlightLine, { top: pickerHeight / 2 - itemHeight / 2 }]} />
+      <View style={[styles.highlightLine, { top: pickerHeight / 2 + itemHeight / 2 }]} />
     </View>
   );
 
-  // ✅ Scroll to correct positions on open
-  useEffect(() => {
-    if (!visible) return;
-
-    const dayIndex = days.indexOf(selectedDay);
-    const monthIndex = months.indexOf(selectedMonth);
-    const yearIndex = years.indexOf(selectedYear);
-
-    if (dayRef.current && dayIndex >= 0) {
-      dayRef.current.scrollToIndex({ index: dayIndex, animated: false });
-    }
-    if (monthRef.current && monthIndex >= 0) {
-      monthRef.current.scrollToIndex({ index: monthIndex, animated: false });
-    }
-    if (yearRef.current && yearIndex >= 0) {
-      yearRef.current.scrollToIndex({ index: yearIndex, animated: false });
-    }
-  }, [visible]);
-
+  /* ---------- render ---------- */
   return (
     <Modal visible={visible} transparent animationType="fade">
       <View style={styles.centered}>
         <View style={styles.popup}>
-          <Text style={styles.selectedDate}>
-            {`${selectedDay} ${selectedMonth} ${selectedYear}`}
-          </Text>
+          <Text style={styles.selectedDate}>{`${day} ${month} ${year}`}</Text>
 
           <View style={styles.dateRow}>
-            {renderPicker(days, selectedDay, setSelectedDay, dayRef)}
-            {renderPicker(months, selectedMonth, setSelectedMonth, monthRef)}
-            {renderPicker(years, selectedYear, setSelectedYear, yearRef)}
+            {renderPicker(days,   day,   setDay,   dayRef)}
+            {renderPicker(months, month, setMonth, monthRef)}
+            {renderPicker(years,  year,  setYear,  yearRef)}
           </View>
 
           <View style={styles.buttonRow}>
@@ -116,13 +150,7 @@ const DateSelectPopup = ({ visible, onCancel, onOk }) => {
               <Text style={styles.buttonText}>Cancel</Text>
             </TouchableOpacity>
             <TouchableOpacity
-              onPress={() =>
-                onOk({
-                  day: selectedDay,
-                  month: selectedMonth,
-                  year: selectedYear,
-                })
-              }
+              onPress={() => onOk({ day, month, year })}
             >
               <Text style={styles.buttonText}>Ok</Text>
             </TouchableOpacity>
@@ -135,64 +163,17 @@ const DateSelectPopup = ({ visible, onCancel, onOk }) => {
 
 export default DateSelectPopup;
 
+/* ───────────────────────── styles (unchanged) ───────────────────────── */
 const styles = StyleSheet.create({
-  centered: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: 'rgba(0,0,0,0.3)',
-  },
-  popup: {
-    width: 274,
-    backgroundColor: '#fff',
-    borderRadius: 16,
-    padding: 24,
-    gap: 24,
-  },
-  selectedDate: {
-    fontSize: 16,
-    fontWeight: '600',
-    letterSpacing: -0.02,
-    color: 'black',
-    textAlign: 'center',
-  },
-  dateRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    gap: 2,
-  },
-  pickerContainer: {
-    width: 74,
-    position: 'relative',
-    overflow: 'hidden',
-  },
-  item: {
-    width: 74,
-    textAlign: 'center',
-    fontSize: 16,
-    fontWeight: '500',
-  },
-  faded: {
-    color: 'rgba(0, 0, 0, 0.4)',
-  },
-  selected: {
-    color: 'black',
-    fontWeight: '600',
-  },
-  highlightLine: {
-    position: 'absolute',
-    width: '100%',
-    height: 1,
-    backgroundColor: '#000',
-  },
-  buttonRow: {
-    flexDirection: 'row',
-    justifyContent: 'flex-end',
-    gap: 24,
-  },
-  buttonText: {
-    fontSize: 16,
-    fontWeight: '500',
-    color: '#000',
-  },
+  centered:{flex:1,justifyContent:'center',alignItems:'center',backgroundColor:'rgba(0,0,0,0.3)'},
+  popup:{width:274,backgroundColor:'#fff',borderRadius:16,padding:24,gap:24},
+  selectedDate:{fontSize:16,fontWeight:'600',letterSpacing:-0.02,color:'black',textAlign:'center'},
+  dateRow:{flexDirection:'row',justifyContent:'space-between',gap:2},
+  pickerContainer:{width:74,position:'relative',overflow:'hidden'},
+  item:{width:74,textAlign:'center',fontSize:16,fontWeight:'500'},
+  faded:{color:'rgba(0,0,0,0.4)'},
+  selected:{color:'black',fontWeight:'600'},
+  highlightLine:{position:'absolute',width:'100%',height:1,backgroundColor:'#000'},
+  buttonRow:{flexDirection:'row',justifyContent:'flex-end',gap:24},
+  buttonText:{fontSize:16,fontWeight:'500',color:'#000'},
 });

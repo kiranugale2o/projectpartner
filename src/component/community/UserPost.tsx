@@ -1,3 +1,4 @@
+import { useNavigation } from '@react-navigation/native';
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
 import React, { useState } from 'react';
@@ -27,6 +28,7 @@ dayjs.extend(relativeTime);          // ⬅️  move extension outside component
 
 const UserPostCard: React.FC<{ post: PostProps }> = ({ post }) => {
   const [liked, setLiked] = useState(false);
+  const navigation = useNavigation(); // 👈 For navigation
 
   const addLike = async () => {
     setLiked(!liked);
@@ -38,6 +40,10 @@ const UserPostCard: React.FC<{ post: PostProps }> = ({ post }) => {
       .then((res) => res.json())
       .then((data) => console.log(data.message))
       .catch((err) => console.error('Like failed:', err));
+  };
+
+  const handleImagePress = () => {
+    navigation.navigate('PostDetailScreen', { post }); // 👈 Navigate with post data
   };
 
   return (
@@ -58,19 +64,20 @@ const UserPostCard: React.FC<{ post: PostProps }> = ({ post }) => {
             <Text style={styles.timeAgo}>{dayjs(post.created_at).fromNow()}</Text>
           </View>
         </View>
-        {/* If you want a ⋯ menu later, add it here */}
       </View>
 
-      {/* ── Image ─────────────────────────── */}
+      {/* ── Clickable Image ───────────────── */}
       {post.image && (
-        <ImageBackground
-          source={{ uri: `https://api.reparv.in${post.image}` }}
-          style={styles.postImage}
-          resizeMode="cover"
-        />
+        <TouchableOpacity onPress={handleImagePress}>
+          <ImageBackground
+            source={{ uri: `https://api.reparv.in${post.image}` }}
+            style={styles.postImage}
+            resizeMode="cover"
+          />
+        </TouchableOpacity>
       )}
 
-      {/* ── Footer (Like row + caption) ───── */}
+      {/* ── Footer (Like + Caption) ─────── */}
       <View style={styles.footer}>
         <TouchableOpacity style={styles.likeIconRow} onPress={addLike}>
           <Svg
@@ -88,7 +95,8 @@ const UserPostCard: React.FC<{ post: PostProps }> = ({ post }) => {
         </TouchableOpacity>
 
         <Text style={styles.likeCount}>
-          {liked ? post.likes + 1 : post.likes} {post.likes + (liked ? 1 : 0) === 1 ? 'like' : 'likes'}
+          {liked ? post.likes + 1 : post.likes}{' '}
+          {post.likes + (liked ? 1 : 0) === 1 ? 'like' : 'likes'}
         </Text>
       </View>
 
@@ -101,7 +109,6 @@ const UserPostCard: React.FC<{ post: PostProps }> = ({ post }) => {
     </View>
   );
 };
-
 export default UserPostCard;
 
 /* ─────────────────── Styles ─────────────────── */

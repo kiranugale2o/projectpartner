@@ -30,6 +30,8 @@ import EnquiryDetailScreen from "../screen/Home/EnauiryDetails";
 import PropertyDetails from "../screen/Home/propertyDetails";
 import { Printer } from "lucide-react-native";
 import ProfileUpdateSuccess from "../screen/Profile/ProfileUpdateSuccess";
+import KYC from "../screen/Profile/kyc";
+import PostDetailScreen from "../screen/Community/PostDetails";
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -304,10 +306,17 @@ function AppStack() {
           headerTintColor: "white", // back arrow & title color
         }}
       />
+      <Stack.Screen name="PostDetailScreen" component={PostDetailScreen}  options={{ headerTitle: "Post Details" }} />
+
       <Stack.Screen
         name="Tickets"
         component={Tickets}
         options={{ headerTitle: "Tickets" }}
+      />
+       <Stack.Screen
+        name="KYC"
+        component={KYC}
+        options={{ headerTitle: "KYC Details" }}
       />
     </Stack.Navigator>
   );

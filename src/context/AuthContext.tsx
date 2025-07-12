@@ -47,6 +47,7 @@ interface AuthContextType {
   propertyinfoId: number | null;
   siteVisitModel: boolean;
   dateRange: DateRangeType;
+  ticketNumber: number | null;
 
   setUser: (user: UserType | null) => void;
   setToken: (token: string | null) => void;
@@ -60,6 +61,7 @@ interface AuthContextType {
   setPropertyinfoId: (value: number | null) => void;
   setSiteVisitModel: (value: boolean) => void;
   setDateRange: (range: DateRangeType) => void;
+  setTicketNumber: (value: number | null) => void;
 }
 
 // ────────────────────────────────────────────────
@@ -88,6 +90,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     startDate: null,
     endDate: null,
   });
+  const[ticketNumber,setTicketNumber]=useState<number | null>(null);
 
   const login = () => {
     setToken('');
@@ -138,6 +141,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         flatName,
         setFlatName,
         user,
+        ticketNumber,
         setUser,
         setToken,
         setIsLoggedIn,
@@ -153,6 +157,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         setPropertyinfoId,
         siteVisitModel,
         setSiteVisitModel,
+        setTicketNumber
       }}
     >
       {children}
