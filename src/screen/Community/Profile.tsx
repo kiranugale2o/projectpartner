@@ -60,14 +60,18 @@ const UserProfile: React.FC = () => {
       setLoading(false);
     }
   };
+  console.log(user,'ssssssssssssss');
+  
+const[userType,setUserType]=useState(user?.role)
 
 
+ 
   const fetchFollowersAndFollowing = () => {
-    fetch(`https://api.reparv.in/salesapp/user/${user?.salespersonsid}/followers`)
+    fetch(`https://api.reparv.in/salesapp/user/add/${user?.salespersonsid}/${user?.role}/followers`)
       .then(res => res.json())
       .then(setFollowers);
 
-    fetch(`https://api.reparv.in/salesapp/user/${user?.salespersonsid}/following`)
+    fetch(`https://api.reparv.in/salesapp/user/add/${user?.salespersonsid}/${user?.role}/following`)
       .then(res => res.json())
       .then(setFollowing);
   };
@@ -88,14 +92,25 @@ const UserProfile: React.FC = () => {
 
 
   const toggleFollow = async () => {
+  
+
+   
+  //    body: JSON.stringify({
+  //   follower_id: 101,
+  //   follower_type: 'sales',
+  //   following_id: 204,
+  //   following_type: 'onboarding',
+  // }),
     const payload = {
       follower_id: auth?.user?.id,
       following_id: user?.salespersonsid,
+      follower_type: userType,
+    following_type: 'sales',
     };
 
     const url = isFollowing
-      ? 'https://api.reparv.in/salesapp/user/unfollow'
-      : 'https://api.reparv.in/salesapp/user/follow';
+      ? 'https://api.reparv.in/salesapp/user/add/unfollow'
+      : 'https://api.reparv.in/salesapp/user/add/follow';
 
     try {
       const res = await fetch(url, {
@@ -108,19 +123,19 @@ const UserProfile: React.FC = () => {
         console.log(res,'fgg');
         
         const data = await res.json();
-        // Toast.show({
-        //   type: 'success',
-        //   text1: isFollowing ? 'Unfollowed' : 'Followed',
-        //   text2: data?.status ?? '',
-        // });
+        Toast.show({
+          type: 'success',
+          text1: isFollowing ? 'Unfollowed' : 'Followed',
+          text2: data?.status ?? '',
+        });
         setIsFollowing(!isFollowing);
       } else {
          console.log(res,'fgg');
-        // Toast.show({
-        //   type: 'error',
-        //   text1: 'Error',
-        //   text2: 'Action failed.',
-        // });
+        Toast.show({
+          type: 'error',
+          text1: 'Error',
+          text2: 'Action failed.',
+        });
       }
     } catch (error: any) {
       // console.log(res,'fgg');
@@ -229,7 +244,7 @@ const UserProfile: React.FC = () => {
       {/* Info */}
       <View style={styles.infoRow}>
          <Info label="City" value={user.city || '—'} />
-        <Info label="" value={ '—'} />
+        <Info label="state" value={user?.state || '—'} />
        
       </View>
 
@@ -335,7 +350,7 @@ const styles = StyleSheet.create({
   followBtn: {
     marginTop: 12,
     alignSelf: 'stretch',
-    backgroundColor: '#0095f6',
+    backgroundColor: '#00C851',
     paddingVertical: 6,
     borderRadius: 6,
   },

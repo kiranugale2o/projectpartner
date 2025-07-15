@@ -6,11 +6,13 @@ import {
   ImageBackground,
   Image,
   TouchableOpacity,
+  Pressable,
 } from 'react-native';
 import Svg, {Path} from 'react-native-svg';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import {useNavigation} from '@react-navigation/native';
 import {PropertyInfo, RootStackParamList} from '../types';
+import { CheckCheck } from 'lucide-react-native';
 
 interface Property {
   propertyid: number;
@@ -115,10 +117,12 @@ const PropertyCard: React.FC<Props> = ({pdata}) => {
     }
   };
 
-  console.log(pdata);
+  const showApprovedBy = pdata?.propertyCategory !== 'FarmLand';
+  const showRERA = ['NewFlat', 'NewPlot'].includes(pdata?.propertyCategory);
+
 
   return (
-    <TouchableOpacity
+    <Pressable
       style={styles.card}
       onPress={() => {
         navigation.navigate('PropertyDetails', {
@@ -153,26 +157,10 @@ const PropertyCard: React.FC<Props> = ({pdata}) => {
               <Text style={styles.extra}>+Other Charges</Text>
             </View>
           </View>
-
-          <View style={styles.facilities}>
-            <View style={styles.tag}>
-              <Text style={styles.tagText}>{pdata?.propertyApprovedBy}</Text>
-            </View>
-            <View style={styles.tag}>
-              <Text style={styles.tagText}>
-                {pdata?.distanceFromCityCenter}Km From {pdata?.city}
-              </Text>
-            </View>
-            {(pdata?.propertyCategory === 'NewFlat' ||
-              pdata?.propertyCategory === 'NewPlot') && (
-              <View style={styles.tag}>
-                <Text style={styles.tagText}>RERA Approved</Text>
-              </View>
-            )}
-          </View>
+{/*  */}
         </View>
 
-        <View style={styles.assuredWrapper}>
+        {/* <View style={styles.assuredWrapper}>
           <View style={styles.assured}>
             <Image
               source={require('../../assets/booking/verify.png')}
@@ -180,8 +168,116 @@ const PropertyCard: React.FC<Props> = ({pdata}) => {
             />
             <Text style={styles.assuredText}>REPARV Assured</Text>
           </View>
+        </View> */}
+          {/* Details Section */}
+          <View
+      style={{
+        flexDirection: 'row',
+        flexWrap: 'wrap',
+        gap: 8,
+        marginTop: 4,
+      }}
+    >
+      {/* Approved By */}
+      {showApprovedBy && (
+        <View
+          style={{
+            flexDirection: 'row',
+            paddingVertical: 4,
+            paddingHorizontal: 12,
+            backgroundColor: '#eeffec',
+            borderRadius: 12,
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: 4,
+          }}
+        >
+        
+           <CheckCheck size={17} color="#047857"  />
+          <Text style={{ fontSize: 11, color: '#4B5563' }}>
+            {pdata?.propertyApprovedBy}
+          </Text>
         </View>
+      )}
+
+      
+
+      {/* RERA Approved */}
+      {showRERA && (
+        <View
+          style={{
+            flexDirection: 'row',
+            paddingVertical: 4,
+            paddingHorizontal: 12,
+            backgroundColor: '#eeffec',
+            borderRadius: 12,
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: 4,
+          }}
+        >
+       <CheckCheck size={17} color="#047857"  />
+          <Text style={{ fontSize: 11, color: '#4B5563' }}>RERA Approved</Text>
+        </View>
+      )}
+
+      {/* Distance From City Center */}
+      <View
+        style={{
+          paddingVertical: 4,
+          paddingHorizontal: 12,
+          backgroundColor: '#0000000F',
+          borderRadius: 12,
+        }}
+      >
+        <Text style={{ fontSize: 11, color: '#4B5563' }}>
+          {pdata?.distanceFromCityCenter} KM Distance from city center
+        </Text>
       </View>
+
+        
+    </View>
+
+     {/* Verified Badge */}
+     <View style={{width:'100%', 
+    borderTopWidth:0.2,
+   borderColor:'gray',marginTop:10}}>
+                <View
+                  style={{
+                    width: '95%',
+                    margin: 'auto',
+                    justifyContent: 'space-between',
+                    flexDirection: 'row',
+                  }}>
+                  <View style={styles.assuredWrapper}>
+                    <View style={styles.assured}>
+                      <Image
+                        source={require('../../assets/booking/verify.png')}
+                        style={styles.verifiedIcon}
+                      />
+                      <Text style={styles.assuredText}>REPARV Assured</Text>
+                    </View>
+                  </View>
+      
+                  <View
+                  
+                    style={styles.row2}>
+                    <Text
+                      style={[
+                        {
+                          color: 'black',
+                          fontSize: 13,
+                        
+                        },
+                      ]}>
+                      {pdata?.propertyCategory}
+                    </Text>
+                  </View>
+                </View>
+                </View>
+    
+      </View>
+
 
       <View style={styles.footer}>
         <View style={styles.locationIcon}>
@@ -197,7 +293,7 @@ const PropertyCard: React.FC<Props> = ({pdata}) => {
           {pdata?.location},{pdata?.city}
         </Text>
       </View>
-    </TouchableOpacity>
+    </Pressable>
   );
 };
 
@@ -218,6 +314,19 @@ const styles = StyleSheet.create({
   imageRadius: {
     borderTopLeftRadius: 16,
     borderTopRightRadius: 16,
+  },
+   row2: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    backgroundColor:'#0000000F',
+    padding:6,
+    marginTop:10,
+    
+    borderRadius:10,
+    alignItems: 'center',
+    gap: 2, // works on RN 0.71+, otherwise use marginLeft
+    textDecorationLine: 'underline',
+    alignSelf: 'center', // centers it horizontally like margin: 0 auto
   },
   overlay: {
     ...StyleSheet.absoluteFillObject,
@@ -247,7 +356,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   emi: {
-    fontSize: 16,
+    fontSize: 20,
     fontWeight: '600',
     color: '#000',
   },
@@ -260,7 +369,7 @@ const styles = StyleSheet.create({
     textDecorationLine: 'line-through',
   },
   actualPrice: {
-    fontSize: 16,
+    fontSize: 19,
     fontWeight: '700',
     color: '#000',
   },
@@ -286,9 +395,8 @@ const styles = StyleSheet.create({
     color: 'rgba(0, 9, 41, 0.4)',
   },
   assuredWrapper: {
-    borderColor: 'rgba(0, 0, 0, 0.06)',
-    borderTopWidth: 1,
-    marginTop: 12,
+   
+    marginTop: 1,
   },
   assured: {
     marginTop: 10,
@@ -296,9 +404,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: 'rgba(11, 181, 1, 0.1)',
     paddingHorizontal: 8,
-    paddingVertical: 4,
+    paddingVertical: 6,
     borderRadius: 4,
-    width: '45%',
   },
   verifiedIcon: {
     width: 16,
@@ -307,6 +414,7 @@ const styles = StyleSheet.create({
   },
   assuredText: {
     fontSize: 12,
+    fontWeight:'600',
     color: 'rgba(0, 0, 0, 0.6)',
   },
   footer: {

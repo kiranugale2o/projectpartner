@@ -267,6 +267,7 @@ const auth=useContext(AuthContext)
   }
 };
 
+
 const [previewImage, setPreviewImage] = useState<string | null>(null);
 const[imageShow,setimageShow]=useState(false)
  
@@ -368,7 +369,6 @@ const[imageShow,setimageShow]=useState(false)
     
     :null}
   
-
 
 
      <Modal transparent visible={opmodalVisible} animationType="fade">
@@ -628,7 +628,7 @@ const[imageShow,setimageShow]=useState(false)
             </Text>
             {payment?.created_at && (
               <Text style={styles.paymentDate}>
-                {payment?.created_at?.slice(0, 10)}
+                {payment?.created_at?.slice(0, 12)}
               </Text>
             )}
           </View>
@@ -771,6 +771,7 @@ const styles = StyleSheet.create({
 },
 
 paymentCardRow: {
+  paddingHorizontal:10,
   flexDirection: 'row',
   justifyContent: 'space-between',
   alignItems: 'center',
@@ -796,6 +797,7 @@ paymentAmount: {
 },
 
 paymentDate: {
+ 
   fontSize: 12,
   color: '#6C757D',
 },

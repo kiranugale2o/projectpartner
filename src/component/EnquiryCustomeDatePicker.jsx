@@ -112,6 +112,7 @@ const EnquiryCustomeDatePicker = () => {
     auth?.setDateRange({ startDate: date, endDate: date });
 
   } else {
+    
     // Second tap
     if (date < startDate) {
       // Tapped before start -> swap

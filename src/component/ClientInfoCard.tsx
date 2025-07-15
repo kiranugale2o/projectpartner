@@ -854,11 +854,13 @@ console.log(formData)
     }
   };
 
-  const propertyOptions = propertyList?.map((property, index) => ({
+ 
+
+const propertyOptions = propertyList
+  ?.filter(property => property.approve === "Approved" && property.status === "Active")
+  .map((property, index) => ({
     key: property.propertyid,
-    label: `${property.propertyName} \n | ${
-      property.builtUpArea
-    } SqFt | ₹${formatIndianAmount(property?.totalOfferPrice)}`,
+    label: `${property.propertyName} \n | ${property.builtUpArea} SqFt | ₹${formatIndianAmount(property?.totalOfferPrice)}`,
   }));
 
 
@@ -1935,6 +1937,8 @@ console.log(formData)
                   borderColor: '#00000033',
                   borderRadius: 4,
                   backgroundColor: 'white',
+                  
+                  
                 }}>
                 <Picker
                   selectedValue={territoryPartnerToAssign.territorypartnerid}
@@ -1943,12 +1947,15 @@ console.log(formData)
                       ...territoryPartnerToAssign,
                       territorypartnerid: itemValue,
                     })
-                  }>
+                  }
+                  style={{color:'black'}}
+                  >
                   <Picker.Item label="Select Territory Partner" value="" />
                   {territoryPartnerList
                     .filter(tp => tp?.status === 'Active')
                     .map((tp, index) => (
                       <Picker.Item
+                      
                         key={index}
                         label={`${tp?.fullname} | ${tp?.contact}`}
                         value={tp.id}
@@ -1957,6 +1964,15 @@ console.log(formData)
                 </Picker>
               </View>
             </View>
+             <Text
+                style={{
+                  fontSize: 14,
+                  color: '#00000066',
+                  fontWeight: '500',
+                  marginBottom: 8,
+                }}>
+                Select Date
+              </Text>
             <TouchableOpacity
               onPress={() => setShowPicker(true)}
               style={Sstyles.input}>
@@ -1964,7 +1980,7 @@ console.log(formData)
                 {!selectedDate ? (
                   <Text style={{color: 'black'}}>Date</Text>
                 ) : (
-                  <Text>
+                  <Text style={{color:'black'}}>
                     {`${selectedDate?.day}-${selectedDate?.month}-${selectedDate?.year}`}
                   </Text>
                 )}

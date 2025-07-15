@@ -383,6 +383,7 @@ const PropertyDetails: React.FC = () => {
     borderColor: '#d32f2f',     // red border
     borderWidth: 1,
     borderRadius: 12,
+ 
     padding: 12,
     shadowColor: '#d32f2f',
     shadowOpacity: 0.3,

@@ -14,6 +14,9 @@ import {
   Image,
   ActivityIndicator,
   Alert,
+  FlatList,
+  Dimensions,
+  Platform,
 } from 'react-native';
 import Svg, {Path} from 'react-native-svg';
 import UserPostCard from '../../component/community/UserPost';
@@ -22,6 +25,8 @@ import {RootStackParamList} from '../../types';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import {all} from 'axios';
 import { AuthContext } from '../../context/AuthContext';
+import Loader from '../../component/loader';
+import MyPost from '../../component/community/MyPost';
 
 interface SalesPerson {
   id: number;
@@ -48,13 +53,19 @@ interface SalesPerson {
   updated_at: string; // Use Date if you parse to Date object
   created_at: string; // Use Date if you parse to Date object
 }
+
+const screenWidth = Dimensions.get('window').width;
+const GRID_GAP = 2;
+const COLS = 3;
+const THUMB_SIZE = (screenWidth - GRID_GAP * (COLS + 1)) / COLS;
+
 const Community: React.FC = () => {
   type NavigationProp = NativeStackNavigationProp<RootStackParamList, 'Sign_In'>;
   const navigation = useNavigation<NavigationProp>();
 
   const [searchText, setSearchText] = useState('');
   const [posts, setPost] = useState([]);
-  const [selectedTab, setSelectedTab] = useState<'discussions' | 'follow'>(
+  const [selectedTab, setSelectedTab] = useState<'discussions' | 'follow' | 'MyPost'>(
     'discussions',
   );
   const [isAdded, setIsAdded] = useState(false);
@@ -62,22 +73,86 @@ const Community: React.FC = () => {
 const [followers, setFollowers] = useState<any[]>([]);
   const [following, setFollowing] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+ const [modalVisible, setModalVisible] = useState(false);
+  const [selectedPost, setSelectedPost] = useState<any | null>(null);
+ 
+  const [userPosts, setUserPosts] = useState<any[]>([]);
+     
+    /* Networking */
+  
+    const fetchUserPosts = async () => {
+      try {
+        setLoading(true);
+        const res = await fetch(
+          `https://api.reparv.in/salesapp/post/getUserPosts?id=${auth?.user?.id}`,
+        );
+        if (!res.ok) throw new Error(`Status ${res.status}`);
+        const data = await res.json();
+       setUserPosts(data)
+      } catch (e) {
+        console.error('Failed to fetch user posts', e);
+      } finally {
+        setLoading(false);
+      }
+    };
+  
+  console.log(users,'useeeeeee');
+  
 
-  const fetchUsers = async () => {
-    try {
-      const response = await fetch('https://api.reparv.in/salesapp/user/'); // Update with your actual domain
-      const data = await response.json();
-      setUsers(data);
-      console.log(data,'dddddd');
+  // const fetchUsers = async () => {
+  //   try {
+  //     const response = await fetch('https://api.reparv.in/salesapp/user/'); // Update with your actual domain
+  //     const data = await response.json();
+  //     setUsers(data);
+  //     console.log(data,'dddddd');
       
-    } catch (error) {
-      console.error('Failed to fetch users:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
+  //   } catch (error) {
+  //     console.error('Failed to fetch users:', error);
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
 
   //if (loading) return <ActivityIndicator size="large" color="#0000ff" />;
+
+
+  const fetchUsers = async () => {
+  try {
+    setLoading(true); // Start loading
+
+    // Fetch all user endpoints in parallel
+    const [salesRes, territoryRes, onboardingRes, partnerRes] = await Promise.all([
+      fetch('https://api.reparv.in/salesapp/user/'),
+      fetch('https://api.reparv.in/territoryapp/user/'),
+      fetch('https://api.reparv.in/onboardingapp/user/'),
+      fetch('https://api.reparv.in/projectpartnerRoute/user/')
+    ]);
+
+    // Parse JSON responses
+    const [salesData, territoryData, onboardingData, partnerData] = await Promise.all([
+      salesRes.json(),
+      territoryRes.json(),
+      onboardingRes.json(),
+      partnerRes.json()
+    ]);
+
+    // Combine all users into a single array
+    const combinedUsers = [
+      ...salesData,
+      ...territoryData,
+      ...onboardingData,
+      ...partnerData
+    ];
+
+    // Set combined data into state
+    setUsers(combinedUsers);
+    console.log(combinedUsers, 'Combined Users');
+  } catch (error) {
+    console.error('Failed to fetch users:', error);
+  } finally {
+    setLoading(false);
+  }
+};
 
   const getPosts = async () => {
     try {
@@ -140,6 +215,8 @@ const auth=useContext(AuthContext)
       getPosts();       // All posts
     } else if (selectedTab === 'follow') {
       fetchFollowingPosts(); // Only posts from followed users
+    }else{
+      fetchUserPosts();
     }
     fetchUsers();        // Common for both
   }, [selectedTab]) // dependency on tab change
@@ -160,11 +237,33 @@ const sortPosts = (posts:any, currentUser:any, followedIds:any) => {
   });
 };
 
-// useEffect(()=>{
 
+ const renderThumb = ({ item }: { item: any }) => {
+  const hasImage = !!item.image;
 
-// },[])
-
+  return (
+    <TouchableOpacity
+      onPress={() => {
+        setSelectedPost(item);
+        setModalVisible(true);
+      }}
+      style={styles.postThumbWrapper}
+    >
+      {hasImage ? (
+        <Image
+          source={{ uri: `https://api.reparv.in${item.image}` }}
+          style={styles.postThumb}
+        />
+      ) : (
+        <View style={[styles.postThumb, styles.textOnlyThumb]}>
+          <Text style={styles.textOnlyContent} numberOfLines={4}>
+            {item.postContent || 'No Content'}
+          </Text>
+        </View>
+      )}
+    </TouchableOpacity>
+  );
+};
 
 
 
@@ -184,6 +283,27 @@ const sortPosts = (posts:any, currentUser:any, followedIds:any) => {
 
   return [];
 }, [searchTerm, posts]);
+
+
+
+//user Filter 
+  const [usersearchTerm, setUserSearchTerm] = useState('');
+
+  // Filter data based on fullname or city
+ const filteredUser = useMemo(() => {
+  const lower = usersearchTerm.toLowerCase();
+
+  if (Array.isArray(users)) {
+    return users.filter(
+      item =>
+        item?.fullname?.toLowerCase().includes(lower) ||
+        item?.city?.toLowerCase().includes(lower) ||
+        item?.role?.toLowerCase().includes(lower)
+    );
+  }
+
+  return [];
+}, [usersearchTerm, users]);
 
 
   return (
@@ -251,98 +371,143 @@ const sortPosts = (posts:any, currentUser:any, followedIds:any) => {
             Follow
           </Text>
         </TouchableOpacity>
+
+         {/* My Post */}
+        <TouchableOpacity
+          style={styles.frame134}
+          onPress={() => setSelectedTab('MyPost')}>
+          <View
+            style={[
+              styles.iconCircle,
+              selectedTab === 'MyPost' ? styles.activeBg : styles.inactiveBg,
+            ]}>
+            <Svg width={21} height={20} viewBox="0 0 21 20" fill="none">
+              <Path
+                d="M1.33301 16.6667V14.3333C1.33301 13.8611 1.45454 13.4271 1.69759 13.0312C1.94065 12.6354 2.26356 12.3333 2.66634 12.125C3.52745 11.6944 4.40245 11.3715 5.29134 11.1562C6.18023 10.941 7.08301 10.8333 7.99968 10.8333C8.91634 10.8333 9.81912 10.941 10.708 11.1562C11.5969 11.3715 12.4719 11.6944 13.333 12.125C13.7358 12.3333 14.0587 12.6354 14.3018 13.0312C14.5448 13.4271 14.6663 13.8611 14.6663 14.3333V16.6667H1.33301ZM16.333 16.6667V14.1667C16.333 13.5555 16.1629 12.9687 15.8226 12.4062C15.4823 11.8437 14.9997 11.3611 14.3747 10.9583C15.083 11.0417 15.7497 11.184 16.3747 11.3854C16.9997 11.5868 17.583 11.8333 18.1247 12.125C18.6247 12.4028 19.0066 12.7118 19.2705 13.0521C19.5344 13.3924 19.6663 13.7639 19.6663 14.1667V16.6667H16.333ZM7.99968 9.99999C7.08301 9.99999 6.29829 9.67361 5.64551 9.02083C4.99273 8.36805 4.66634 7.58333 4.66634 6.66666C4.66634 5.74999 4.99273 4.96527 5.64551 4.31249C6.29829 3.65972 7.08301 3.33333 7.99968 3.33333C8.91634 3.33333 9.70106 3.65972 10.3538 4.31249C11.0066 4.96527 11.333 5.74999 11.333 6.66666C11.333 7.58333 11.0066 8.36805 10.3538 9.02083C9.70106 9.67361 8.91634 9.99999 7.99968 9.99999ZM16.333 6.66666C16.333 7.58333 16.0066 8.36805 15.3538 9.02083C14.7011 9.67361 13.9163 9.99999 12.9997 9.99999C12.8469 9.99999 12.6525 9.98263 12.4163 9.94791C12.1802 9.91319 11.9858 9.87499 11.833 9.83333C12.208 9.38888 12.4962 8.89583 12.6976 8.35416C12.899 7.81249 12.9997 7.24999 12.9997 6.66666C12.9997 6.08333 12.899 5.52083 12.6976 4.97916C12.4962 4.43749 12.208 3.94444 11.833 3.49999C12.0275 3.43055 12.2219 3.38541 12.4163 3.36458C12.6108 3.34374 12.8052 3.33333 12.9997 3.33333C13.9163 3.33333 14.7011 3.65972 15.3538 4.31249C16.0066 4.96527 16.333 5.74999 16.333 6.66666ZM2.99967 15H12.9997V14.3333C12.9997 14.1805 12.9615 14.0417 12.8851 13.9167C12.8087 13.7917 12.708 13.6944 12.583 13.625C11.833 13.25 11.0761 12.9687 10.3122 12.7812C9.54829 12.5937 8.77745 12.5 7.99968 12.5C7.2219 12.5 6.45106 12.5937 5.68717 12.7812C4.92329 12.9687 4.16634 13.25 3.41634 13.625C3.29134 13.6944 3.19065 13.7917 3.11426 13.9167C3.03787 14.0417 2.99967 14.1805 2.99967 14.3333V15ZM7.99968 8.33333C8.45801 8.33333 8.85037 8.17013 9.17676 7.84374C9.50315 7.51736 9.66634 7.12499 9.66634 6.66666C9.66634 6.20833 9.50315 5.81597 9.17676 5.48958C8.85037 5.16319 8.45801 4.99999 7.99968 4.99999C7.54134 4.99999 7.14898 5.16319 6.82259 5.48958C6.4962 5.81597 6.33301 6.20833 6.33301 6.66666C6.33301 7.12499 6.4962 7.51736 6.82259 7.84374C7.14898 8.17013 7.54134 8.33333 7.99968 8.33333Z"
+                fill={selectedTab === 'MyPost' ? '#076300' : 'gray'}
+              />
+            </Svg>
+          </View>
+          <Text
+            style={[
+              styles.tabText,
+
+              selectedTab === 'MyPost'
+                ? styles.activeText
+                : styles.inactiveText,
+              {marginTop: 5},
+            ]}>
+          My Posts
+          </Text>
+        </TouchableOpacity>
       </View>
 
       {selectedTab === 'discussions' ? (
-        <View style={{width: '100%', flex: 2, backgroundColor: 'white'}}>
-          {/* Button for new */}
+  <View style={{width: '100%', flex: 2, backgroundColor: 'white'}}>
+    {/* Button for new */}
+    <View style={styles.scontainer}>
+      {/* Search Input */}
+      <View style={styles.searchBox}>
+        <Svg width={24} height={24} viewBox="0 0 24 24" fill="none">
+          <Path
+            d="M19.6 21L13.3 14.7C12.8 15.1 12.225 15.4167 11.575 15.65C10.925 15.8833 10.2333 16 9.5 16C7.68333 16 6.14583 15.3708 4.8875 14.1125C3.62917 12.8542 3 11.3167 3 9.5C3 7.68333 3.62917 6.14583 4.8875 4.8875C6.14583 3.62917 7.68333 3 9.5 3C11.3167 3 12.8542 3.62917 14.1125 4.8875C15.3708 6.14583 16 7.68333 16 9.5C16 10.2333 15.8833 10.925 15.65 11.575C15.4167 12.225 15.1 12.8 14.7 13.3L21 19.6L19.6 21ZM9.5 14C10.75 14 11.8125 13.5625 12.6875 12.6875C13.5625 11.8125 14 10.75 14 9.5C14 8.25 13.5625 7.1875 12.6875 6.3125C11.8125 5.4375 10.75 5 9.5 5C8.25 5 7.1875 5.4375 6.3125 6.3125C5.4375 7.1875 5 8.25 5 9.5C5 10.75 5.4375 11.8125 6.3125 12.6875C7.1875 13.5625 8.25 14 9.5 14Z"
+            fill="rgba(0,0,0,0.4)"
+          />
+        </Svg>
+        <TextInput
+          style={styles.textInput}
+          placeholder="Search"
+          placeholderTextColor="rgba(0,0,0,0.4)"
+          value={searchTerm}
+          onChangeText={setSearchTerm}
+        />
+      </View>
 
-          <View style={styles.scontainer}>
-            {/* Search Input */}
-            <View style={styles.searchBox}>
-              <Svg width={24} height={24} viewBox="0 0 24 24" fill="none">
-                <Path
-                  d="M19.6 21L13.3 14.7C12.8 15.1 12.225 15.4167 11.575 15.65C10.925 15.8833 10.2333 16 9.5 16C7.68333 16 6.14583 15.3708 4.8875 14.1125C3.62917 12.8542 3 11.3167 3 9.5C3 7.68333 3.62917 6.14583 4.8875 4.8875C6.14583 3.62917 7.68333 3 9.5 3C11.3167 3 12.8542 3.62917 14.1125 4.8875C15.3708 6.14583 16 7.68333 16 9.5C16 10.2333 15.8833 10.925 15.65 11.575C15.4167 12.225 15.1 12.8 14.7 13.3L21 19.6L19.6 21ZM9.5 14C10.75 14 11.8125 13.5625 12.6875 12.6875C13.5625 11.8125 14 10.75 14 9.5C14 8.25 13.5625 7.1875 12.6875 6.3125C11.8125 5.4375 10.75 5 9.5 5C8.25 5 7.1875 5.4375 6.3125 6.3125C5.4375 7.1875 5 8.25 5 9.5C5 10.75 5.4375 11.8125 6.3125 12.6875C7.1875 13.5625 8.25 14 9.5 14Z"
-                  fill="rgba(0,0,0,0.4)"
-                />
-              </Svg>
-              <TextInput
-                style={styles.textInput}
-                placeholder="Search"
-                placeholderTextColor="rgba(0,0,0,0.4)"
-                value={searchTerm}
-                onChangeText={setSearchTerm}
-              />
-            </View>
-
-            {/* New Post Button */}
-            <TouchableOpacity
-              style={styles.newPostButton}
-              onPress={() => navigation.navigate('NewPost')}>
-              <View style={styles.siconCircle}>
-                <Svg width={20} height={20} viewBox="0 0 24 24" fill="none">
-                  <Path
-                    d="M12 5v14M5 12h14"
-                    stroke="#FFFFFF"
-                    strokeWidth={2}
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </Svg>
-              </View>
-              <Text style={styles.newPostText}>New Post</Text>
-            </TouchableOpacity>
-          </View>
-
-          {/* Post Rendering */}
-          <ScrollView>
-            <View
-              style={{
-                flex: 1,
-                width: '100%',
-                flexDirection: 'column',
-                gap: 20,
-                marginTop: 20,
-              }}>
-              {posts !== null ? (
-                <>
-                  {posts &&
-                    filteredPosts.map((d, index) => (
-                      <UserPostCard key={index} post={d} />
-                    ))}
-                </>
-              ) : (
-                <Text style={{fontSize: 15}}>Not Found Any Post !</Text>
-              )}
-              {filteredPosts.length === 0 && (
-                <Text
-                  style={{
-                    fontSize: 13,
-                    margin: 'auto',
-                    marginTop: 10,
-                    fontWeight: '600',
-                  }}>
-                  Not Found Any Post !
-                </Text>
-              )}
-            </View>
-          </ScrollView>
+      {/* New Post Button */}
+      <TouchableOpacity
+        style={styles.newPostButton}
+        onPress={() => navigation.navigate('NewPost')}>
+        <View style={styles.siconCircle}>
+          <Svg width={20} height={20} viewBox="0 0 24 24" fill="none">
+            <Path
+              d="M12 5v14M5 12h14"
+              stroke="#FFFFFF"
+              strokeWidth={2}
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </Svg>
         </View>
-      ) : (
-        // Followers
-        <View
-          style={{
-            width: '100%',
-            flex: 1,
-            marginTop: 20,
-            backgroundColor: 'white',
-          }}>
-          {/* <UserProfilePopUp /> */}
+        <Text style={styles.newPostText}>New Post</Text>
+      </TouchableOpacity>
+    </View>
 
-          <View style={styles.container}>
-            {/* Row with icon + text */}
-            <View style={styles.row}>
-              <Svg
+    {/* Post Rendering */}
+    <ScrollView>
+      <View
+        style={{
+          flex: 1,
+          width: '100%',
+          flexDirection: 'column',
+          gap: 20,
+          marginTop: 20,
+        }}>
+        {posts !== null ? (
+          <>
+            {filteredPosts.map((d, index) => (
+              <UserPostCard key={index} post={d} />
+            ))}
+          </>
+        ) : (
+          <Text style={{fontSize: 15}}>Not Found Any Post !</Text>
+        )}
+        {filteredPosts.length === 0 && (
+          <Text
+            style={{
+              fontSize: 13,
+              margin: 'auto',
+              marginTop: 10,
+              fontWeight: '600',
+            }}>
+            Not Found Any Post !
+          </Text>
+        )}
+      </View>
+    </ScrollView>
+  </View>
+) : selectedTab === 'follow' ? (
+  <View
+    style={{
+      width: '100%',
+      flex: 1,
+    //  marginTop: 20,
+      backgroundColor: 'white',
+    }}>
+       {/* Button for new */}
+    <View style={[styles.scontainer,{marginTop:0}]}>
+      {/* Search Input */}
+      <View style={styles.searchBox}>
+        <Svg width={24} height={24} viewBox="0 0 24 24" fill="none">
+          <Path
+            d="M19.6 21L13.3 14.7C12.8 15.1 12.225 15.4167 11.575 15.65C10.925 15.8833 10.2333 16 9.5 16C7.68333 16 6.14583 15.3708 4.8875 14.1125C3.62917 12.8542 3 11.3167 3 9.5C3 7.68333 3.62917 6.14583 4.8875 4.8875C6.14583 3.62917 7.68333 3 9.5 3C11.3167 3 12.8542 3.62917 14.1125 4.8875C15.3708 6.14583 16 7.68333 16 9.5C16 10.2333 15.8833 10.925 15.65 11.575C15.4167 12.225 15.1 12.8 14.7 13.3L21 19.6L19.6 21ZM9.5 14C10.75 14 11.8125 13.5625 12.6875 12.6875C13.5625 11.8125 14 10.75 14 9.5C14 8.25 13.5625 7.1875 12.6875 6.3125C11.8125 5.4375 10.75 5 9.5 5C8.25 5 7.1875 5.4375 6.3125 6.3125C5.4375 7.1875 5 8.25 5 9.5C5 10.75 5.4375 11.8125 6.3125 12.6875C7.1875 13.5625 8.25 14 9.5 14Z"
+            fill="rgba(0,0,0,0.4)"
+          />
+        </Svg>
+        <TextInput
+          style={styles.textInput}
+          placeholder="Search"
+          placeholderTextColor="rgba(0,0,0,0.4)"
+          value={usersearchTerm}
+          onChangeText={setUserSearchTerm}
+        />
+      </View>
+
+     
+    </View>
+    <View style={[styles.container,{paddingHorizontal:20}]}>
+      
+      <View style={styles.row}>
+        <Svg
                 width="30"
                 height="30"
                 style={styles.icon}
@@ -353,77 +518,150 @@ const sortPosts = (posts:any, currentUser:any, followedIds:any) => {
                   fill="#076300"
                 />
               </Svg>
-              <Text style={styles.title}>Follow Sale People</Text>
-            </View>
+       
+        <Text style={styles.title}>Follow Sale People</Text>
+      </View>
+      <Text style={styles.subText}>Connect with people</Text>
+    </View>
 
-            {/* Subtext */}
-            <Text style={styles.subText}>Connect with people</Text>
-          </View>
+    <View style={{width: '100%', marginTop: 20}}>
+      <ScrollView>
+        {filteredUser.length!==0 ?(<>
+        {filteredUser.map((d, i) => (
+        (( d?.status === 'Active' && (d?.salespersonsid!==auth?.user?.id))) && (
 
-          <View
-            style={{
-              width: '100%',
-              marginTop: 20,
-            }}>
-            <ScrollView>
-              {users.map((d, i) => {
-                return (
-                  <>{d?.status==='Active'?
-                  <TouchableOpacity
-                    onPress={() => {
-                      navigation.navigate('UserProfile', {user: d});
-                    }}
-                    key={i}
-                    style={styles.container3}>
-                    {/* Profile Info */}
-                    <View style={styles.profileContainer}>
-                      <Image
-                        source={
-                          d.userimage
-                            ? {
-                                uri: `https://api.reparv.in${d.userimage}`,
-                              }
-                            : require('../../../assets/community/user.png') // Replace with your actual path
-                        }
-                        style={styles.avatar}
-                      />
+            <TouchableOpacity
+              onPress={() => {
+                navigation.navigate('UserProfile', {user: d});
+              }}
+              key={i}
+              style={styles.container3}>
+              <View style={styles.profileContainer}>
+                <Image
+                  source={
+                    d.userimage
+                      ? {uri: `https://api.reparv.in${d.userimage}`}
+                      : require('../../../assets/community/user.png')
+                  }
+                  style={styles.avatar}
+                />
+                <View style={styles.textContainer}>
+                  <Text style={styles.name}>{d.fullname}</Text>
+                  <Text style={{fontSize
+                    :13,color:'black'
+                  }}>{d.role}</Text>
+                </View>
+              </View>
+            </TouchableOpacity>
+          )
+        ))}
+        </>): (
+          <Text style={{fontSize: 18,color:'black',padding:20}}>Not Found Any User !</Text>
+        )
+         }
+      </ScrollView>
+    </View>
+  </View>
+) : selectedTab === 'MyPost' ? (
+ <View style={{ flex: 1, backgroundColor: 'white', width: '100%' }}>
+      {/* Header */}
+      <View
+        style={{
+          height: Platform.OS === 'ios' ? 100 : 70,
+          paddingTop: Platform.OS === 'ios' ? 50 : 20,
+          flexDirection: 'row',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          paddingHorizontal: 16,
+          backgroundColor: '#fff',
+          borderBottomWidth: 0.3,
+          borderBottomColor: '#ccc',
+          shadowColor: '#000',
+          shadowOffset: { width: 0, height: 1 },
+          shadowOpacity: 0.05,
+          shadowRadius: 2,
+          elevation: 1,
+        }}
+      >
+        <TouchableOpacity onPress={() => navigation.goBack()} style={{ width: 32 }}>
+          {/* <Icon name="chevron-back" size={24} color="#000" /> */}
+        </TouchableOpacity>
 
-                      <View style={styles.textContainer}>
-                        <Text style={styles.name}>{d.fullname}</Text>
-                      </View>
-                    </View>
+        <Text
+          style={{
+            fontSize: 18,
+            fontWeight: '700',
+            color: '#000',
+            flex: 1,
+            textAlign: 'center',
+            marginLeft: -32,
+          }}
+        >
+          My Posts
+        </Text>
 
-                    {/* Icon */}
-                    {/* Toggle Icon */}
-                    {/* <TouchableOpacity
-                      style={styles.iconContainer}
-                      onPress={() => {
-                        setIsAdded(!isAdded);
-                      }}>
-                      <Svg
-                        width={24}
-                        height={24}
-                        viewBox="0 0 24 24"
-                        fill="none">
-                        <Path
-                          d={
-                            isAdded
-                              ? // "Add Person" SVG path
-                                'M18 14V11H15V9H18V6H20V9H23V11H20V14H18ZM9 12C7.9 12 6.95833 11.6083 6.175 10.825C5.39167 10.0417 5 9.1 5 8C5 6.9 5.39167 5.95833 6.175 5.175C6.95833 4.39167 7.9 4 9 4C10.1 4 11.0417 4.39167 11.825 5.175C12.6083 5.95833 13 6.9 13 8C13 9.1 12.6083 10.0417 11.825 10.825C11.0417 11.6083 10.1 12 9 12ZM1 20V17.2C1 16.6333 1.14583 16.1125 1.4375 15.6375C1.72917 15.1625 2.11667 14.8 2.6 14.55C3.63333 14.0333 4.68333 13.6458 5.75 13.3875C6.81667 13.1292 7.9 13 9 13C10.1 13 11.1833 13.1292 12.25 13.3875C13.3167 13.6458 14.3667 14.0333 15.4 14.55C15.8833 14.8 16.2708 15.1625 16.5625 15.6375C16.8542 16.1125 17 16.6333 17 17.2V20H1ZM3 18H15V17.2C15 17.0167 14.9542 16.85 14.8625 16.7C14.7708 16.55 14.65 16.4333 14.5 16.35C13.6 15.9 12.6917 15.5625 11.775 15.3375C10.8583 15.1125 9.93333 15 9 15C8.06667 15 7.14167 15.1125 6.225 15.3375C5.30833 15.5625 4.4 15.9 3.5 16.35C3.35 16.4333 3.22917 16.55 3.1375 16.7C3.04583 16.85 3 17.0167 3 17.2V18ZM9 10C9.55 10 10.0208 9.80417 10.4125 9.4125C10.8042 9.02083 11 8.55 11 8C11 7.45 10.8042 6.97917 10.4125 6.5875C10.0208 6.19583 9.55 6 9 6C8.45 6 7.97917 6.19583 7.5875 6.5875C7.19583 6.97917 7 7.45 7 8C7 8.55 7.19583 9.02083 7.5875 9.4125C7.97917 9.80417 8.45 10 9 10Z'
-                              : // "Remove Person" SVG path
-                                'M16 11V9H22V11H16ZM9 12C7.9 12 6.95833 11.6083 6.175 10.825C5.39167 10.0417 5 9.1 5 8C5 6.9 5.39167 5.95833 6.175 5.175C6.95833 4.39167 7.9 4 9 4C10.1 4 11.0417 4.39167 11.825 5.175C12.6083 5.95833 13 6.9 13 8C13 9.1 12.6083 10.0417 11.825 10.825C11.0417 11.6083 10.1 12 9 12ZM1 20V17.2C1 16.6333 1.14583 16.1125 1.4375 15.6375C1.72917 15.1625 2.11667 14.8 2.6 14.55C3.63333 14.0333 4.68333 13.6458 5.75 13.3875C6.81667 13.1292 7.9 13 9 13C10.1 13 11.1833 13.1292 12.25 13.3875C13.3167 13.6458 14.3667 14.0333 15.4 14.55C15.8833 14.8 16.2708 15.1625 16.5625 15.6375C16.8542 16.1125 17 16.6333 17 17.2V20H1ZM3 18H15V17.2C15 17.0167 14.9542 16.85 14.8625 16.7C14.7708 16.55 14.65 16.4333 14.5 16.35C13.6 15.9 12.6917 15.5625 11.775 15.3375C10.8583 15.1125 9.93333 15 9 15C8.06667 15 7.14167 15.1125 6.225 15.3375C5.30833 15.5625 4.4 15.9 3.5 16.35C3.35 16.4333 3.22917 16.55 3.1375 16.7C3.04583 16.85 3 17.0167 3 17.2V18ZM9 10C9.55 10 10.0208 9.80417 10.4125 9.4125C10.8042 9.02083 11 8.55 11 8C11 7.45 10.8042 6.97917 10.4125 6.5875C10.0208 6.19583 9.55 6 9 6C8.45 6 7.97917 6.19583 7.5875 6.5875C7.19583 6.97917 7 7.45 7 8C7 8.55 7.19583 9.02083 7.5875 9.4125C7.97917 9.80417 8.45 10 9 10Z'
-                          }
-                          fill={isAdded ? '#4361EE' : '#969696'}
-                        />
-                      </Svg>
-                    </TouchableOpacity> */}
-                  </TouchableOpacity>:null}</>
-                );
-              })}
-            </ScrollView>
-          </View>
+        <TouchableOpacity onPress={() => {}} style={{ width: 32, alignItems: 'flex-end' }}>
+          {/* <Icon name="add-outline" size={24} color="#000" /> */}
+        </TouchableOpacity>
+      </View>
+
+      {/* Loader */}
+      {loading && (
+        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', marginTop: 50 }}>
+          <ActivityIndicator size="large" color="#999" />
         </View>
       )}
+
+      {/* Post List or Placeholder */}
+      {!loading && (
+        <ScrollView
+          contentContainerStyle={{
+            padding: 16,
+            paddingBottom: 60,
+          }}
+          showsVerticalScrollIndicator={false}
+        >
+          {userPosts.length > 0 ? (
+            userPosts.map((d, index) => (
+              <View
+                key={index}
+                style={{
+                  backgroundColor: '#fff',
+                  borderRadius: 12,
+                  padding: 12,
+                  marginBottom: 16,
+                  shadowColor: '#000',
+                  shadowOpacity: 0.05,
+                  shadowRadius: 4,
+                  elevation: 2,
+                }}
+              >
+                <MyPost post={d} />
+              
+              </View>
+            ))
+          ) : (
+            <View
+              style={{
+                justifyContent: 'center',
+                alignItems: 'center',
+                marginTop: 80,
+              }}
+            >
+              {/* <Image
+                source={require('../../../assets/icons/nopost.png')}
+                style={{ width: 100, height: 100, marginBottom: 12, tintColor: '#aaa' }}
+                resizeMode="contain"
+              /> */}
+              <Text style={{ fontSize: 16, color: '#999' }}>No posts yet</Text>
+            </View>
+          )}
+        </ScrollView>
+      )}
+    </View>
+) : null}
+
+
     </View>
   );
 };
@@ -440,7 +678,8 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     paddingHorizontal: 16,
-    gap: 98,
+    
+   gap: 38,
   },
   frame120: {
     flexDirection: 'row',
@@ -467,7 +706,7 @@ const styles = StyleSheet.create({
   tabText: {
     fontFamily: 'Inter',
     fontSize: 14,
-    lineHeight: 12,
+    
   },
   activeText: {
     fontWeight: '700',
@@ -624,6 +863,88 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
+  postCard: {
+    backgroundColor: '#FFF',
+    borderRadius: 12,
+    padding: 15,
+    marginBottom: 15,
+    shadowColor: '#000',
+    shadowOpacity: 0.05,
+    shadowOffset: { width: 0, height: 2 },
+    shadowRadius: 5,
+    elevation: 3,
+  },
+  postImage: {
+    width: '100%',
+    height: 180,
+    borderRadius: 10,
+    marginBottom: 10,
+  },
+  postTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    marginBottom: 4,
+  },
+  postContent: {
+    fontSize: 14,
+    color: '#333',
+    marginBottom: 6,
+  },
+  postTime: {
+    fontSize: 12,
+    color: '#777',
+    textAlign: 'right',
+  },
+   postThumb: {
+    width: THUMB_SIZE,
+    height: THUMB_SIZE,
+    margin: GRID_GAP,
+    backgroundColor: '#ddd',
+  },
+postThumbWrapper: {
+  margin: GRID_GAP,
+  width: THUMB_SIZE,
+  height: THUMB_SIZE,
+},
+
+textOnlyThumb: {
+  backgroundColor: '#f0f0f0',
+  justifyContent: 'center',
+  alignItems: 'center',
+  padding: 6,
+},
+
+textOnlyContent: {
+  fontSize: 12,
+  color: '#333',
+  textAlign: 'center',
+},
+
+  noPostBox: {
+    alignItems: 'center',
+    marginTop: 60,
+    gap: 12,
+  },
+  noPostText: { fontSize: 18, color: '#4b5563' },
+
+  modalContent: {
+    flex: 1,
+    backgroundColor: '#fff',
+    paddingTop: 50,
+  },
+  closeBtn: {
+    position: 'absolute',
+    top: 0,
+    right: 20,
+    zIndex: 10,
+    padding: 10,
+  },
+  closeText: {
+    color: '#007aff',
+    fontSize: 16,
+    fontWeight: '600',
+  },
+
 });
 
 export default Community;

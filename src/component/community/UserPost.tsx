@@ -1,6 +1,7 @@
 import { useNavigation } from '@react-navigation/native';
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
+import { EllipsisVertical } from 'lucide-react-native';
 import React, { useState } from 'react';
 import {
   View,
@@ -9,6 +10,7 @@ import {
   StyleSheet,
   TouchableOpacity,
   ImageBackground,
+  Modal,
 } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
 
@@ -29,7 +31,7 @@ dayjs.extend(relativeTime);          // ⬅️  move extension outside component
 const UserPostCard: React.FC<{ post: PostProps }> = ({ post }) => {
   const [liked, setLiked] = useState(false);
   const navigation = useNavigation(); // 👈 For navigation
-
+ const [opmodalVisible, setOpModalVisible] = useState(false);
   const addLike = async () => {
     setLiked(!liked);
     fetch('https://api.reparv.in/salesapp/post/addlike', {
@@ -43,7 +45,7 @@ const UserPostCard: React.FC<{ post: PostProps }> = ({ post }) => {
   };
 
   const handleImagePress = () => {
-    navigation.navigate('PostDetailScreen', { post }); // 👈 Navigate with post data
+    navigation.navigate('PostDetailScreen', { post }); // 
   };
 
   return (
@@ -63,7 +65,9 @@ const UserPostCard: React.FC<{ post: PostProps }> = ({ post }) => {
             <Text style={styles.name}>{post.fullname}</Text>
             <Text style={styles.timeAgo}>{dayjs(post.created_at).fromNow()}</Text>
           </View>
+         
         </View>
+     
       </View>
 
       {/* ── Clickable Image ───────────────── */}
@@ -106,6 +110,10 @@ const UserPostCard: React.FC<{ post: PostProps }> = ({ post }) => {
           {post.postContent}
         </Text>
       )}
+
+
+    
+      
     </View>
   );
 };

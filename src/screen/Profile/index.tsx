@@ -465,9 +465,7 @@ const Profile: React.FC = () => {
     // Call API here
   }}/>
       {/* update Profile model */}
-     
-
-      <Modal
+     <Modal
   visible={isModalVisible}
   animationType="slide"
   transparent
