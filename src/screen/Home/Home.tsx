@@ -280,9 +280,55 @@ const Home: React.FC = () => {
     }
   };
 
-  
+ // For Sale
+const saleMinBudgetOptions = [
+  { label: '10 Lakh', value: 1000000 },
+  { label: '25 Lakh', value: 2500000 },
+  { label: '50 Lakh', value: 5000000 },
+  { label: '1 Crore', value: 10000000 },
+  { label: '2 Crore', value: 20000000 },
+  { label: '3 Crore', value: 30000000 },
+  { label: '4 Crore', value: 40000000 },
+  { label: '5 Crore', value: 50000000 },
+];
 
- 
+const saleMaxBudgetOptions = [
+  ...saleMinBudgetOptions,
+  { label: '6 Crore', value: 60000000 },
+];
+
+// For Rental
+const rentalMinBudgetOptions = [
+  { label: '10 Thousand', value: 10000 },
+  { label: '25 Thousand', value: 25000 },
+  { label: '50 Thousand', value: 50000 },
+  { label: '75 Thousand', value: 75000 },
+  { label: '1 Lakh', value: 100000 },
+];
+
+const rentalMaxBudgetOptions = [
+  ...rentalMinBudgetOptions,
+  { label: '1.25 Lakh', value: 125000 },
+];
+
+const isRentalCategory = (category:any) =>
+  category === 'RentalFlat' ||
+  category === 'RentalShop' ||
+  category === 'RentalOffice';
+
+
+  const currentMinBudgetOptions = isRentalCategory(newEnquiry.category)
+  ? rentalMinBudgetOptions
+  : saleMinBudgetOptions;
+
+const currentMaxBudgetOptions = isRentalCategory(newEnquiry.category)
+  ? rentalMaxBudgetOptions
+  : saleMaxBudgetOptions;
+
+const filteredMaxOptions = currentMaxBudgetOptions.filter(
+  option =>
+    newEnquiry.minbudget == null || option.value > newEnquiry.minbudget
+);
 
   useEffect(() => {
     if (newEnquiry.state != '') {
@@ -785,31 +831,7 @@ height:250
                   value={newEnquiry?.contact}
                   onChangeText={text => handleEnquiryChange('contact', text)}
                 />
-                <Text style={{fontSize: 14,color:'gray'}}>Min-Budget</Text>
-                <TextInput
-                  style={[Sstyles.input, {color: 'black'}]}
-                  value={newEnquiry?.minbudget?.toString() || ''}
-                  keyboardType="numeric"
-                  onChangeText={text => {
-                    setNewEnquiry({
-                      ...newEnquiry,
-                      minbudget: text === '' ? null : Number(text),
-                    });
-                  }}
-                />
-
-                <Text style={{fontSize: 14,color:'gray'}}>Max-Budget</Text>
-                <TextInput
-                  style={[Sstyles.input, {color: 'black'}]}
-                  value={newEnquiry?.maxbudget?.toString() || ''}
-                  keyboardType="numeric"
-                  onChangeText={text => {
-                    setNewEnquiry({
-                      ...newEnquiry,
-                      maxbudget: text === '' ? null : Number(text),
-                    });
-                  }}
-                />
+             
 
                 <View style={{width: '100%', marginBottom: 16}}>
                   <Text
@@ -867,6 +889,72 @@ height:250
                     </Picker>
                   </View>
                 </View>
+                   
+                   <View style={{marginBottom: 20}}>
+  <Text style={{fontSize: 14, color: 'gray'}}>Min-Budget</Text>
+  <View style={{borderWidth: 1, borderColor: 'gray', borderRadius: 4}}>
+    <Picker
+      selectedValue={newEnquiry.minbudget}
+      onValueChange={(value) => {
+        setNewEnquiry({
+          ...newEnquiry,
+          minbudget: value,
+          maxbudget:
+            value != null &&
+            newEnquiry.maxbudget != null &&
+            newEnquiry.maxbudget <= value
+              ? null
+              : newEnquiry.maxbudget,
+        });
+      }}
+    >
+      <Picker.Item label="Select Min Budget..." value={null} />
+      {currentMinBudgetOptions.map(option => (
+        <Picker.Item
+          key={option.value}
+          label={option.label}
+          value={option.value}
+        />
+      ))}
+    </Picker>
+  </View>
+                      </View>
+
+
+                <View style={{marginBottom: 20}}>
+  <Text style={{fontSize: 14, color: 'gray'}}>Max-Budget</Text>
+  <View style={{borderWidth: 1, borderColor: 'gray', borderRadius: 4}}>
+    <Picker
+      enabled={filteredMaxOptions.length > 0}
+      selectedValue={newEnquiry.maxbudget}
+      onValueChange={(value) =>
+        setNewEnquiry({
+          ...newEnquiry,
+          maxbudget: value,
+        })
+      }
+    >
+      <Picker.Item
+        label={
+          filteredMaxOptions.length > 0
+            ? 'Select Max Budget...'
+            : 'No higher options available'
+        }
+        value={null}
+      />
+      {filteredMaxOptions.map(option => (
+        <Picker.Item
+          key={option.value}
+          label={option.label}
+          value={option.value}
+        />
+      ))}
+    </Picker>
+  </View>
+                    </View>
+
+
+
                 <View style={{width: '100%', marginBottom: 16}}>
                   <Text
                     style={{

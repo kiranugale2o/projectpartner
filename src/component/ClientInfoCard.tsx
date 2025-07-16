@@ -864,7 +864,56 @@ const propertyOptions = propertyList
   }));
 
 
-  
+  // For Sale
+const saleMinBudgetOptions = [
+  { label: '10 Lakh', value: 1000000 },
+  { label: '25 Lakh', value: 2500000 },
+  { label: '50 Lakh', value: 5000000 },
+  { label: '1 Crore', value: 10000000 },
+  { label: '2 Crore', value: 20000000 },
+  { label: '3 Crore', value: 30000000 },
+  { label: '4 Crore', value: 40000000 },
+  { label: '5 Crore', value: 50000000 },
+];
+
+const saleMaxBudgetOptions = [
+  ...saleMinBudgetOptions,
+  { label: '6 Crore', value: 60000000 },
+];
+
+// For Rental
+const rentalMinBudgetOptions = [
+  { label: '10 Thousand', value: 10000 },
+  { label: '25 Thousand', value: 25000 },
+  { label: '50 Thousand', value: 50000 },
+  { label: '75 Thousand', value: 75000 },
+  { label: '1 Lakh', value: 100000 },
+];
+
+const rentalMaxBudgetOptions = [
+  ...rentalMinBudgetOptions,
+  { label: '1.25 Lakh', value: 125000 },
+];
+
+const isRentalCategory = (category:any) =>
+  category === 'RentalFlat' ||
+  category === 'RentalShop' ||
+  category === 'RentalOffice';
+
+
+  const currentMinBudgetOptions = isRentalCategory(enquiryUpdateDetails.category)
+  ? rentalMinBudgetOptions
+  : saleMinBudgetOptions;
+
+const currentMaxBudgetOptions = isRentalCategory(enquiryUpdateDetails.category)
+  ? rentalMaxBudgetOptions
+  : saleMaxBudgetOptions;
+
+const filteredMaxOptions = currentMaxBudgetOptions.filter(
+  option =>
+    enquiryUpdateDetails.minbudget == null || option.value > enquiryUpdateDetails.minbudget
+);
+
 
   return (
      <>{

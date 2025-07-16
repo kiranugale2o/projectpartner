@@ -16,6 +16,7 @@ import {
 } from 'react-native';
 import { launchImageLibrary } from 'react-native-image-picker';
 import Svg, { Path } from 'react-native-svg';
+import Toast from 'react-native-toast-message';
 
 type PostProps = {
   postId: number;
@@ -84,6 +85,8 @@ const MyPost: React.FC<{ post: PostProps }> = ({ post }) => {
  const[visible,setVisible]=useState(false);
   const[deleteVisible,setDeleteVisible]=useState(false)
 
+
+  
 //   const handleImagePick  = () => {
 //       launchImageLibrary(
 //         {
@@ -113,9 +116,7 @@ const MyPost: React.FC<{ post: PostProps }> = ({ post }) => {
    };
   
  const updatePost = async () => {
-  Alert.alert(content,'pppppppp')
   const formData = new FormData();
- 
   formData.append('postContent', content);
   
  
@@ -123,7 +124,7 @@ const MyPost: React.FC<{ post: PostProps }> = ({ post }) => {
   formData.append('image', {
     uri: image.uri!,
     type: image.type!,
-    name: image.fileName!,
+    name: image.fileName ?? 'photo.jpg',
   });
 }
 
@@ -138,12 +139,27 @@ const MyPost: React.FC<{ post: PostProps }> = ({ post }) => {
     const data = await response.json();
 
     if (response.ok) {
+      setVisible(false);
+  
+      Toast.show({
+        type:'success',
+        text1:'Post updated successfully'
+      })
+      navigation.goBack()
       console.log('Post updated successfully:', data);
       // You can update state or navigate here
     } else {
+        Toast.show({
+        type:'error',
+        text1:'Failed to update post:'
+      })
       console.error('Failed to update post:', data);
     }
   } catch (error) {
+      Toast.show({
+        type:'error',
+        text1:'Failed to update post:'
+      })
     console.error('API error:', error);
   }
 };
@@ -284,16 +300,23 @@ const deletePost = async () => {
           <TextInput
             value={content}
             onChangeText={setContent}
+            placeholderTextColor={'black'}
             placeholder="Update your post..."
             style={styles.input}
             multiline
           />
 
-          {image ? (
-            <Image source={{ uri: image }} style={styles.imagePreview} />
-          ) : (
-            <Text style={styles.noImageText}>No image selected</Text>
-          )}
+     {image ? (
+  <Image
+    source={{
+      uri: typeof image === 'string' ?  `https://api.reparv.in${image}` : image.uri
+    }}
+    style={styles.imagePreview}
+  />
+) : (
+  <Text style={styles.noImageText}>No image selected</Text>
+)}
+
 
           <TouchableOpacity onPress={handleImagePick} style={styles.imageButton}>
             <Text style={styles.imageButtonText}>Change Image</Text>
@@ -387,6 +410,9 @@ const deletePost = async () => {
         </View>
       </View>
     </Modal>
+
+
+    <Toast/>
     
 
     </>
@@ -602,6 +628,7 @@ closePopupBtnText: {
     borderWidth: 1,
     borderRadius: 8,
     padding: 10,
+    color:'black',
     minHeight: 100,
     textAlignVertical: 'top',
     marginBottom: 12,

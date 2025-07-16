@@ -96,25 +96,8 @@ const [followers, setFollowers] = useState<any[]>([]);
       }
     };
   
-  console.log(users,'useeeeeee');
-  
-
-  // const fetchUsers = async () => {
-  //   try {
-  //     const response = await fetch('https://api.reparv.in/salesapp/user/'); // Update with your actual domain
-  //     const data = await response.json();
-  //     setUsers(data);
-  //     console.log(data,'dddddd');
-      
-  //   } catch (error) {
-  //     console.error('Failed to fetch users:', error);
-  //   } finally {
-  //     setLoading(false);
-  //   }
-  // };
-
-  //if (loading) return <ActivityIndicator size="large" color="#0000ff" />;
-
+ 
+ 
 
   const fetchUsers = async () => {
   try {
@@ -223,6 +206,13 @@ const auth=useContext(AuthContext)
 );
 
 
+useFocusEffect(
+  useCallback(() => {
+    fetchUserPosts();
+  }, [])
+);
+
+
 const sortPosts = (posts:any, currentUser:any, followedIds:any) => {
   return posts.sort((a:any, b:any) => {
     const score = (post:any) => {
@@ -298,7 +288,8 @@ const sortPosts = (posts:any, currentUser:any, followedIds:any) => {
       item =>
         item?.fullname?.toLowerCase().includes(lower) ||
         item?.city?.toLowerCase().includes(lower) ||
-        item?.role?.toLowerCase().includes(lower)
+        item?.role?.toLowerCase().includes(lower) 
+      
     );
   }
 
