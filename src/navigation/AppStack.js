@@ -1,39 +1,37 @@
-import { createNativeStackNavigator } from "@react-navigation/native-stack";
-import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 
-
-import Home from "../screen/Home/Home";
-import ClientInfoCard from "../component/ClientInfoCard";
-import AddClientScreen from "../screen/Home/AddClientScreen";
-import Booking from "../screen/Booking";
-import Community from "../screen/Community";
-import Profile from "../screen/Profile";
-import BookingFlats from "../screen/Booking/Flat";
-import UserProfile from "../screen/Community/Profile";
-import NewPost from "../screen/Community/NewPost";
-import Refer from "../screen/Profile/refer";
-import Tickets from "../screen/Profile/tickets";
-import TerritoryPartner from "../screen/Home/TerritoryPartner";
-import SelectTerritoryPartner from "../screen/Home/SelectPartner";
-import ConfirmMeetingCard from "../screen/Home/ConfirmMeetingCard";
-import SuccessScreen from "../screen/Home/SuccessScreen";
-import FlatInfo from "../screen/Booking/FlatInfo";
-import CalenderComponent from "../screen/Calender";
-import Svg, { Path } from "react-native-svg";
-import React, { useContext, useEffect, useState } from "react";
-import { Image, Keyboard, SafeAreaView, Text, View } from "react-native";
-import { NavigationContainer } from "@react-navigation/native";
-import { AuthContext } from "../context/AuthContext";
-import LinearGradient from "react-native-linear-gradient";
-import ProjectLocation from "../screen/Home/projectLocation";
-import EnquiryDetailScreen from "../screen/Home/EnauiryDetails";
-import PropertyDetails from "../screen/Home/propertyDetails";
-import { Printer } from "lucide-react-native";
-import ProfileUpdateSuccess from "../screen/Profile/ProfileUpdateSuccess";
-import KYC from "../screen/Profile/kyc";
-import PostDetailScreen from "../screen/Community/PostDetails";
-import FollowersScreen from "../screen/Community/FollowersScreen";
-import FollowingScreen from "../screen/Community/FollowingScreen";
+import Home from '../screen/Home/Home';
+import ClientInfoCard from '../component/ClientInfoCard';
+import Booking from '../screen/Booking';
+import Community from '../screen/Community';
+import Profile from '../screen/Profile';
+import BookingFlats from '../screen/Booking/Flat';
+import UserProfile from '../screen/Community/Profile';
+import NewPost from '../screen/Community/NewPost';
+import Refer from '../screen/Profile/refer';
+import Tickets from '../screen/Profile/tickets';
+import TerritoryPartner from '../screen/Home/TerritoryPartner';
+import SelectTerritoryPartner from '../screen/Home/SelectPartner';
+import ConfirmMeetingCard from '../screen/Home/ConfirmMeetingCard';
+import SuccessScreen from '../screen/Home/SuccessScreen';
+import FlatInfo from '../screen/Booking/FlatInfo';
+import CalenderComponent from '../screen/Calender';
+import Svg, { Path } from 'react-native-svg';
+import React, { useContext, useEffect, useState } from 'react';
+import { Image, Keyboard, SafeAreaView, Text, View } from 'react-native';
+import { NavigationContainer } from '@react-navigation/native';
+import { AuthContext } from '../context/AuthContext';
+import LinearGradient from 'react-native-linear-gradient';
+import ProjectLocation from '../screen/Home/projectLocation';
+import EnquiryDetailScreen from '../screen/Home/EnauiryDetails';
+import PropertyDetails from '../screen/Home/propertyDetails';
+import { Printer } from 'lucide-react-native';
+import ProfileUpdateSuccess from '../screen/Profile/ProfileUpdateSuccess';
+import KYC from '../screen/Profile/kyc';
+import PostDetailScreen from '../screen/Community/PostDetails';
+import FollowersScreen from '../screen/Community/FollowersScreen';
+import FollowingScreen from '../screen/Community/FollowingScreen';
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -43,17 +41,17 @@ function MyTabs() {
 
   useEffect(() => {
     const keyboardDidShowListener = Keyboard.addListener(
-      "keyboardDidShow",
+      'keyboardDidShow',
       () => {
         setKeyboardVisible(true); // Hide tab bar when keyboard is shown
-      }
+      },
     );
 
     const keyboardDidHideListener = Keyboard.addListener(
-      "keyboardDidHide",
+      'keyboardDidHide',
       () => {
         setKeyboardVisible(false); // Show tab bar when keyboard is hidden
-      }
+      },
     );
 
     // Cleanup listeners on component unmount
@@ -66,15 +64,15 @@ function MyTabs() {
   return (
     <Tab.Navigator
       screenOptions={{
-        tabBarActiveTintColor: "green", // active tab label color
+        tabBarActiveTintColor: 'green', // active tab label color
 
-        tabBarInactiveTintColor: "gray", // inactive tab label color
+        tabBarInactiveTintColor: 'gray', // inactive tab label color
         tabBarLabelStyle: {
           fontSize: 12,
-          fontWeight: "normal",
+          fontWeight: 'normal',
         },
         tabBarStyle: {
-          display: keyboardVisible ? "none" : "flex",
+          display: keyboardVisible ? 'none' : 'flex',
 
           height: 60, // <-- Increase tab bar height here
           paddingBottom: 5, // Optional: adjust padding
@@ -86,11 +84,11 @@ function MyTabs() {
         name="Dashboard"
         component={Home}
         options={{
-          headerTitle: "Dashboard",
+          headerTitle: 'Dashboard',
           headerShadowVisible: false,
 
           headerStyle: {
-            backgroundColor: "white",
+            backgroundColor: 'white',
           },
           tabBarIcon: ({ color, size }) => (
             <View>
@@ -109,11 +107,11 @@ function MyTabs() {
         name="Booking"
         component={Booking}
         options={{
-          headerTitle: "Booking",
+          headerTitle: 'Booking',
           headerShadowVisible: false,
 
           headerStyle: {
-            backgroundColor: "white",
+            backgroundColor: 'white',
           },
           tabBarIcon: ({ color, size }) => (
             <View>
@@ -131,11 +129,11 @@ function MyTabs() {
         name="Calender"
         component={CalenderComponent}
         options={{
-          headerTitle: "Calender",
+          headerTitle: 'Calender',
           headerShadowVisible: false,
 
           headerStyle: {
-            backgroundColor: "white",
+            backgroundColor: 'white',
           },
           tabBarIcon: ({ color, size }) => (
             <View>
@@ -147,11 +145,11 @@ function MyTabs() {
               </Svg>
             </View>
           ),
-          headerTitle: "Calender",
+          headerTitle: 'Calender',
           headerShadowVisible: false,
 
           headerStyle: {
-            backgroundColor: "white",
+            backgroundColor: 'white',
           },
         }}
       />
@@ -159,11 +157,11 @@ function MyTabs() {
         name="Community"
         component={Community}
         options={{
-          headerTitle: "Community",
+          headerTitle: 'Community',
           headerShadowVisible: false,
 
           headerStyle: {
-            backgroundColor: "white",
+            backgroundColor: 'white',
           },
           tabBarIcon: ({ color, size }) => (
             <Svg width="24" height="24" viewBox="0 0 24 24" fill="none">
@@ -181,14 +179,14 @@ function MyTabs() {
         component={Profile}
         options={{
           headerShown: true, // Show the header
-          headerTitle: "Profile", // Display a custom title in the header
+          headerTitle: 'Profile', // Display a custom title in the header
           headerStyle: {
-            backgroundColor: "transparent", // Remove the background color
+            backgroundColor: 'transparent', // Remove the background color
             shadowOpacity: 0, // Remove the shadow
             elevation: 0, // Remove the shadow for Android
           },
           headerTitleStyle: {
-            color: "black", // Adjust the title color if needed
+            color: 'black', // Adjust the title color if needed
             fontSize: 18, // Adjust font size if needed
           },
           tabBarIcon: ({ color, size }) => (
@@ -226,10 +224,10 @@ function AppStack() {
         name="FindTerritory"
         component={TerritoryPartner}
         options={{
-          headerTitle: "Schedule Meeting With Partner",
+          headerTitle: 'Schedule Meeting With Partner',
           headerTitleStyle: {
             fontSize: 18, // smaller font size
-            fontWeight: "500", // lighter font weight if needed
+            fontWeight: '500', // lighter font weight if needed
           },
         }}
       />
@@ -240,28 +238,24 @@ function AppStack() {
       <Stack.Screen
         name="SelectTerritoryPartner"
         component={SelectTerritoryPartner}
-        options={{ headerTitle: "Select Territory Partner" }}
+        options={{ headerTitle: 'Select Territory Partner' }}
       />
       <Stack.Screen
         name="ProjectLocation"
         component={ProjectLocation}
-        options={{ headerTitle: "Project Location" }}
+        options={{ headerTitle: 'Project Location' }}
       />
       <Stack.Screen
         name="ConfirmSchedule"
         component={ConfirmMeetingCard}
-        options={{ headerTitle: "Confirm Your Meeting" }}
+        options={{ headerTitle: 'Confirm Your Meeting' }}
       />
       <Stack.Screen
         name="SuccessScreen"
         component={SuccessScreen}
         options={{ headerShown: false }}
       />
-      <Stack.Screen
-        name="AddClient"
-        component={AddClientScreen}
-        options={{ headerTitle: "Add Client" }}
-      />
+
       <Stack.Screen
         name="Flat"
         component={BookingFlats}
@@ -275,7 +269,7 @@ function AppStack() {
       <Stack.Screen
         name="UserProfile"
         component={UserProfile}
-        options={{ headerTitle: "Profile" }}
+        options={{ headerTitle: 'Profile' }}
       />
       <Stack.Screen
         name="ProfileUpdateSuccess"
@@ -285,13 +279,13 @@ function AppStack() {
       <Stack.Screen
         name="NewPost"
         component={NewPost}
-        options={{ headerTitle: "New Post" }}
+        options={{ headerTitle: 'New Post' }}
       />
       <Stack.Screen
         name="Referral"
         component={Refer}
         options={{
-          headerTitle: "",
+          headerTitle: '',
           headerShadowVisible: false, // React Navigation v6+
           headerStyle: {
             elevation: 0, // Android: remove shadow
@@ -299,36 +293,46 @@ function AppStack() {
           },
           headerBackground: () => (
             <LinearGradient
-              colors={["#0BB501", "#076300"]}
+              colors={['#0BB501', '#076300']}
               start={{ x: 0.2, y: 0.1 }}
               end={{ x: 0.0, y: 0.4 }}
               style={{ flex: 1 }}
             />
           ),
-          headerTintColor: "white", // back arrow & title color
+          headerTintColor: 'white', // back arrow & title color
         }}
       />
-      <Stack.Screen name="PostDetailScreen" component={PostDetailScreen}  options={{ headerTitle: "Post Details" }} />
-<Stack.Screen name="FollowersScreen"
-
-component={FollowersScreen}  options={{
-          headerTitle: "Followers",
+      <Stack.Screen
+        name="PostDetailScreen"
+        component={PostDetailScreen}
+        options={{ headerTitle: 'Post Details' }}
+      />
+      <Stack.Screen
+        name="FollowersScreen"
+        component={FollowersScreen}
+        options={{
+          headerTitle: 'Followers',
           headerShadowVisible: false, // React Navigation v6+
-       } }/>
-<Stack.Screen name="FollowingScreen" component={FollowingScreen} options={{
-          headerTitle: "Followings",
+        }}
+      />
+      <Stack.Screen
+        name="FollowingScreen"
+        component={FollowingScreen}
+        options={{
+          headerTitle: 'Followings',
           headerShadowVisible: false, // React Navigation v6+
-       } } />
+        }}
+      />
 
       <Stack.Screen
         name="Tickets"
         component={Tickets}
-        options={{ headerTitle: "Tickets" }}
+        options={{ headerTitle: 'Tickets' }}
       />
-       <Stack.Screen
+      <Stack.Screen
         name="KYC"
         component={KYC}
-        options={{ headerTitle: "KYC Details" }}
+        options={{ headerTitle: 'KYC Details' }}
       />
     </Stack.Navigator>
   );

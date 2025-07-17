@@ -1,11 +1,11 @@
-import { createNativeStackNavigator } from "@react-navigation/native-stack";
-import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
-import SignIn from "../auth/signIn";
-import ForgotPassword from "../auth/ForgetPassword";
-import EmailVerification from "../auth/EmailVarification";
-import PasswordResetMessage from "../auth/PasswordResetMessage";
-import SetNewPassword from "../auth/SetPassword";
-import PasswordChangedSuccess from "../auth/PasswordChangedSuccess";
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import SignIn from '../auth/signIn';
+import ForgotPassword from '../auth/ForgetPassword';
+import EmailVerification from '../auth/EmailVarification';
+import PasswordResetMessage from '../auth/PasswordResetMessage';
+import SetNewPassword from '../auth/SetPassword';
+import PasswordChangedSuccess from '../auth/PasswordChangedSuccess';
 
 const Stack = createNativeStackNavigator();
 function AuthStack() {
@@ -16,43 +16,43 @@ function AuthStack() {
         name="Sign_In"
         component={SignIn}
         options={{
-          headerTitle: "",
+          headerTitle: '',
           headerShadowVisible: false,
           headerBackVisible: false,
           headerStyle: {
-            backgroundColor: "#E3FFDF",
+            backgroundColor: '#E3FFDF',
           },
         }}
       />
       <Stack.Screen
         name="ForgotPassword"
         component={ForgotPassword}
-        options={{ headerTitle: "" }}
+        options={{ headerTitle: '' }}
       />
       <Stack.Screen
         name="EmailVerification"
         component={EmailVerification}
-        options={{ headerTitle: "" }}
+        options={{ headerTitle: '' }}
       />
       <Stack.Screen
         name="PasswordResetMessage"
         component={PasswordResetMessage}
-        options={{ headerTitle: "" }}
+        options={{ headerTitle: '' }}
       />
       <Stack.Screen
         name="SetNewPassword"
         component={SetNewPassword}
-        options={{ headerTitle: "" }}
+        options={{ headerTitle: '' }}
       />
       <Stack.Screen
         name="PasswordChangedSuccess"
         component={PasswordChangedSuccess}
         options={{
-          headerTitle: "",
+          headerTitle: '',
           headerShadowVisible: false,
           headerBackVisible: false,
           headerStyle: {
-            backgroundColor: "white",
+            backgroundColor: 'white',
           },
         }}
       />

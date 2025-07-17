@@ -5,26 +5,32 @@ import {
   FlatList,
   ActivityIndicator,
   Image,
-  TouchableOpacity,
   StyleSheet,
 } from 'react-native';
 import { AuthContext } from '../../context/AuthContext';
 
-const FollowersScreen = () => {
-  const [followers, setFollowers] = useState([]);
-  const [loading, setLoading] = useState(true);
+type Follower = {
+  id: number;
+  fullname: string;
+  email: string;
+  userimage?: string;
+};
+
+const FollowersScreen: React.FC = () => {
+  const [followers, setFollowers] = useState<Follower[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
   const auth = useContext(AuthContext);
 
   useEffect(() => {
     const fetchFollowers = async () => {
       try {
+        if (!auth?.user?.id) return;
+
         const res = await fetch(
-          `https://api.reparv.in/territoryapp/user/add/${auth?.user?.id}/${'sales'}/followers`
+          `https://api.reparv.in/territoryapp/user/add/${auth.user.id}/sales/followers`,
         );
         const data = await res.json();
         setFollowers(data);
-        console.log(followers,'folooo');
-        
       } catch (e) {
         console.error('Failed to fetch followers', e);
       } finally {
@@ -33,41 +39,35 @@ const FollowersScreen = () => {
     };
 
     fetchFollowers();
-  }, []);
+  }, [auth?.user?.id]);
 
   if (loading) {
     return <ActivityIndicator style={{ marginTop: 30 }} />;
   }
 
   return (
-     <View style={{flex:1,backgroundColor:'white'}}>
-    <FlatList
-      data={followers}
-      keyExtractor={(item) => item.id.toString()}
-      contentContainerStyle={{ paddingVertical: 12 }}
-      renderItem={({ item }) => (
-        <View style={styles.followerItem}>
-          <Image
-            source={
-              item?.userimage
-                ? { uri: `https://api.reparv.in${item.userimage}` }
-                : require('../../../assets/community/user.png')
-            }
-            style={styles.avatar}
-          />
-          <View style={styles.userInfo}>
-            <Text style={styles.name}>{item.fullname}</Text>
-            <Text style={styles.email}>{item.email}</Text>
+    <View style={{ flex: 1, backgroundColor: 'white' }}>
+      <FlatList
+        data={followers}
+        keyExtractor={item => item.id.toString()}
+        contentContainerStyle={{ paddingVertical: 12 }}
+        renderItem={({ item }) => (
+          <View style={styles.followerItem}>
+            <Image
+              source={
+                item.userimage
+                  ? { uri: `https://api.reparv.in${item.userimage}` }
+                  : require('../../../assets/community/user.png')
+              }
+              style={styles.avatar}
+            />
+            <View style={styles.userInfo}>
+              <Text style={styles.name}>{item.fullname}</Text>
+              <Text style={styles.email}>{item.email}</Text>
+            </View>
           </View>
-
-          {/* Optional Follow Button 
-          <TouchableOpacity style={styles.followBtn}>
-            <Text style={styles.followText}>Follow</Text>
-          </TouchableOpacity> 
-          */}
-        </View>
-      )}
-    />
+        )}
+      />
     </View>
   );
 };
@@ -99,17 +99,6 @@ const styles = StyleSheet.create({
   email: {
     color: '#666',
     fontSize: 13,
-  },
-  followBtn: {
-    paddingHorizontal: 14,
-    paddingVertical: 6,
-    borderRadius: 6,
-    backgroundColor: '#007bff',
-  },
-  followText: {
-    color: '#fff',
-    fontWeight: '600',
-    fontSize: 14,
   },
 });
 

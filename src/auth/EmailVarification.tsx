@@ -1,4 +1,4 @@
-import React, {useRef, useState, useEffect} from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -7,13 +7,13 @@ import {
   Dimensions,
   TouchableOpacity,
 } from 'react-native';
-import {RootStackParamList} from '../types';
-import {NativeStackNavigationProp} from '@react-navigation/native-stack';
-import {useNavigation} from '@react-navigation/native';
+import { RootStackParamList } from '../types';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { useNavigation } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Toast from 'react-native-toast-message';
 
-const {width} = Dimensions.get('window');
+const { width } = Dimensions.get('window');
 
 const EmailVerification = () => {
   type NavigationProp = NativeStackNavigationProp<
@@ -67,7 +67,7 @@ const EmailVerification = () => {
   const verifyOtp = async () => {
     const storedHash = await AsyncStorage.getItem('otpHash');
     if (!storedHash) {
-      Toast.show({type: 'error', text1: 'Error', text2: 'No OTP hash found'});
+      Toast.show({ type: 'error', text1: 'Error', text2: 'No OTP hash found' });
       return;
     }
 
@@ -75,8 +75,8 @@ const EmailVerification = () => {
       'https://api.reparv.in/salesapp/client/verify-otp',
       {
         method: 'POST',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({email, otp: newOtp, hash: storedHash}),
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, otp: newOtp, hash: storedHash }),
       },
     );
 
@@ -104,7 +104,7 @@ const EmailVerification = () => {
         `https://api.reparv.in/salesapp/client/send-otp/${email}`,
         {
           method: 'GET',
-          headers: {'Content-Type': 'application/json'},
+          headers: { 'Content-Type': 'application/json' },
         },
       );
 
@@ -133,7 +133,8 @@ const EmailVerification = () => {
         flex: 1,
         backgroundColor: 'white',
         justifyContent: 'space-between',
-      }}>
+      }}
+    >
       <View style={styles.container}>
         <View style={styles.infoContainer}>
           <Text style={styles.checkEmail}>Check your email</Text>
@@ -147,7 +148,9 @@ const EmailVerification = () => {
           {[...Array(6)].map((_, index) => (
             <TextInput
               key={index}
-              ref={ref => (inputs.current[index] = ref)}
+              ref={(ref: TextInput | null) => {
+                inputs.current[index] = ref;
+              }}
               style={styles.codeBox}
               keyboardType="number-pad"
               maxLength={1}
@@ -159,7 +162,9 @@ const EmailVerification = () => {
         </View>
 
         <TouchableOpacity disabled={resendTimer > 0} onPress={handleResendOtp}>
-          <Text style={[styles.resendText, resendTimer > 0 && {color: '#aaa'}]}>
+          <Text
+            style={[styles.resendText, resendTimer > 0 && { color: '#aaa' }]}
+          >
             {resendTimer > 0
               ? `Resend available in ${Math.floor(resendTimer / 60)
                   .toString()

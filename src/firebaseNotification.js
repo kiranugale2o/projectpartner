@@ -1,6 +1,6 @@
 // firebaseNotification.js
-import messaging from "@react-native-firebase/messaging";
-import { Alert } from "react-native";
+import messaging from '@react-native-firebase/messaging';
+import { Alert } from 'react-native';
 
 export async function requestUserPermission() {
   const authStatus = await messaging().requestPermission();
@@ -10,7 +10,7 @@ export async function requestUserPermission() {
 
   if (enabled) {
     const fcmToken = await messaging().getToken();
-    console.log("FCM Token:", fcmToken);
+    console.log('FCM Token:', fcmToken);
     // Save token to your backend if needed
   }
 }

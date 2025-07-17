@@ -70,6 +70,8 @@ export interface Enquirer {
   message: string | null;
   updated_at: string;
   created_at: string;
+  category: string;
+  commissionAmount: number;
   frontView: string[];
   territoryName: string | null;
   territoryContact: string | null;
@@ -175,6 +177,64 @@ export interface EnquiryDetails {
   territoryFollowUp: string | null;
   territoryStatus: string | null;
 }
+//territory partner
+export type TerritoryPartnerType = {
+  id: number;
+  fullname: string;
+  username: string;
+  email: string;
+  contact: string;
+  password: string;
+  intrest: string | null;
+  experience: string | null;
+  address: string | null;
+  city: string;
+  state: string;
+  pincode: string | null;
+
+  adharno: string | null;
+  adharimage: string | null;
+
+  panno: string | null;
+  panimage: string | null;
+
+  rerano: string | null;
+  reraimage: string | null;
+
+  bankname: string | null;
+  accountnumber: string | null;
+  accountholdername: string | null;
+  ifsc: string | null;
+
+  agreement: 'Accept' | 'Reject' | null;
+  amount: string | number | null;
+
+  referral: string | null;
+  refrence: string | null;
+
+  role: string; // usually "Territory Partner"
+  loginstatus: 'Active' | 'Inactive';
+  paymentstatus: 'Pending' | 'Follow Up' | 'Done' | string;
+  status: 'Active' | 'Inactive';
+
+  userimage: string | null;
+  paymentid: string | null;
+
+  created_at: string; // ISO date string
+  updated_at: string; // ISO date string
+};
+
+export interface PostProps {
+  postId: number;
+  userId: number;
+  postContent: string;
+  image: string | null;
+  likes: number;
+  created_at: string;
+  fullname: string;
+  city: string | null;
+  userimage: string | null;
+}
 
 export type RootStackParamList = {
   Sign_In: undefined;
@@ -188,12 +248,12 @@ export type RootStackParamList = {
   FindTerritory: undefined;
   SelectTerritoryPartner: undefined;
   ProjectLocation: undefined;
-  ConfirmSchedule: {selectedIndex: number};
+  ConfirmSchedule: { selectedIndex: number };
   SuccessScreen: undefined;
   AddClient: undefined;
-  Flat: {flatType: string};
-  FlatInfo: {flat: Property};
-  UserProfile: {user: SalesPerson};
+  Flat: { flatType: string };
+  FlatInfo: { flat: Property };
+  UserProfile: { user: SalesPerson };
   ProfileUpdateSuccess: undefined;
   Community: undefined;
   NewPost: undefined;
@@ -205,10 +265,10 @@ export type RootStackParamList = {
     salespersonid: number | null;
     booktype: string;
   };
-  KYC:undefined,
-  EnquiryDetail: {enquiry: Enquirer};
-PostDetailScreen:undefined
-FollowersScreen:undefined;
-FollowingScreen:undefined
+  KYC: undefined;
+  EnquiryDetail: { enquiry: Enquirer };
+  PostDetailScreen: { post: PostProps };
+  FollowersScreen: undefined;
+  FollowingScreen: undefined;
   // add other screens here
 };

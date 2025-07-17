@@ -1,4 +1,5 @@
 import { useNavigation } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
 import { EllipsisVertical } from 'lucide-react-native';
@@ -13,6 +14,7 @@ import {
   Modal,
 } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
+import { RootStackParamList } from '../../types';
 
 type PostProps = {
   postId: number;
@@ -26,12 +28,14 @@ type PostProps = {
   userimage: string | null;
 };
 
-dayjs.extend(relativeTime);          // ⬅️  move extension outside component
+dayjs.extend(relativeTime); // ⬅️  move extension outside component
 
 const UserPostCard: React.FC<{ post: PostProps }> = ({ post }) => {
   const [liked, setLiked] = useState(false);
-  const navigation = useNavigation(); // 👈 For navigation
- const [opmodalVisible, setOpModalVisible] = useState(false);
+  const navigation =
+    useNavigation<NativeStackNavigationProp<RootStackParamList>>();
+
+  const [opmodalVisible, setOpModalVisible] = useState(false);
   const addLike = async () => {
     setLiked(!liked);
     fetch('https://api.reparv.in/salesapp/post/addlike', {
@@ -39,13 +43,13 @@ const UserPostCard: React.FC<{ post: PostProps }> = ({ post }) => {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ postId: post.postId }),
     })
-      .then((res) => res.json())
-      .then((data) => console.log(data.message))
-      .catch((err) => console.error('Like failed:', err));
+      .then(res => res.json())
+      .then(data => console.log(data.message))
+      .catch(err => console.error('Like failed:', err));
   };
 
   const handleImagePress = () => {
-    navigation.navigate('PostDetailScreen', { post }); // 
+    navigation.navigate('PostDetailScreen', { post }); //
   };
 
   return (
@@ -63,11 +67,11 @@ const UserPostCard: React.FC<{ post: PostProps }> = ({ post }) => {
           />
           <View>
             <Text style={styles.name}>{post.fullname}</Text>
-            <Text style={styles.timeAgo}>{dayjs(post.created_at).fromNow()}</Text>
+            <Text style={styles.timeAgo}>
+              {dayjs(post.created_at).fromNow()}
+            </Text>
           </View>
-         
         </View>
-     
       </View>
 
       {/* ── Clickable Image ───────────────── */}
@@ -110,10 +114,6 @@ const UserPostCard: React.FC<{ post: PostProps }> = ({ post }) => {
           {post.postContent}
         </Text>
       )}
-
-
-    
-      
     </View>
   );
 };
@@ -126,8 +126,8 @@ const styles = StyleSheet.create({
     width: '100%',
     backgroundColor: '#fff',
     marginBottom: 24,
-    borderTopWidth:0.3,
-    borderColor:'gray'
+    borderTopWidth: 0.3,
+    borderColor: 'gray',
   },
 
   /* header: avatar + name / time */
@@ -160,17 +160,17 @@ const styles = StyleSheet.create({
   },
 
   /* post image fills width, fixed aspect ratio like IG (1:1) */
-//   postImage: {
-//  //   width: '99%',
-//     aspectRatio: 1,     // square image feed
-//     backgroundColor: '#eee',
-//   },
+  //   postImage: {
+  //  //   width: '99%',
+  //     aspectRatio: 1,     // square image feed
+  //     backgroundColor: '#eee',
+  //   },
 
-postImage: {
-  width: '100%',
-  height: 250,
-  resizeMode: 'cover',
-},
+  postImage: {
+    width: '100%',
+    height: 250,
+    resizeMode: 'cover',
+  },
 
   /* footer row (icons then like count) */
   footer: {

@@ -1,4 +1,4 @@
-import {useState} from 'react';
+import { useState } from 'react';
 import {
   Text,
   TouchableOpacity,
@@ -6,11 +6,11 @@ import {
   StyleSheet,
   ScrollView,
 } from 'react-native';
-import {Calendar} from 'react-native-calendars';
-import Svg, {Path} from 'react-native-svg';
-import {RootStackParamList} from '../../types';
-import {NativeStackNavigationProp} from '@react-navigation/native-stack';
-import {useNavigation} from '@react-navigation/native';
+import { Calendar } from 'react-native-calendars';
+import Svg, { Path } from 'react-native-svg';
+import { RootStackParamList } from '../../types';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { useNavigation } from '@react-navigation/native';
 import MeetingCard from '../../component/MeetingCard';
 
 const timeSlots = [
@@ -35,31 +35,35 @@ const TerritoryPartner: React.FC = () => {
   >('SlotFirst');
   const [selectedSlot, setSelectedSlot] = useState('11:00 AM'); // default green selected
   console.log(selectedDate);
-  
+
   return (
     <View
       style={{
         width: '100%',
         flex: 1,
         backgroundColor: 'white',
-      }}>
+      }}
+    >
       <View style={styles.frame135}>
         {/* Select Slot First */}
         <TouchableOpacity
           style={styles.frame120}
-          onPress={() => setSelectedTab('SlotFirst')}>
+          onPress={() => setSelectedTab('SlotFirst')}
+        >
           <View
             style={[
               styles.iconCircle,
               selectedTab === 'SlotFirst' ? styles.activeBg : styles.inactiveBg,
-            ]}></View>
+            ]}
+          ></View>
           <Text
             style={[
               styles.tabText,
               selectedTab === 'SlotFirst'
                 ? styles.activeText
                 : styles.inactiveText,
-            ]}>
+            ]}
+          >
             Select Slot First
           </Text>
         </TouchableOpacity>
@@ -67,21 +71,24 @@ const TerritoryPartner: React.FC = () => {
         {/* Visit Scheduled */}
         <TouchableOpacity
           style={styles.frame134}
-          onPress={() => setSelectedTab('VisitScheduled')}>
+          onPress={() => setSelectedTab('VisitScheduled')}
+        >
           <View
             style={[
               styles.iconCircle,
               selectedTab === 'VisitScheduled'
                 ? styles.activeBg
                 : styles.inactiveBg,
-            ]}></View>
+            ]}
+          ></View>
           <Text
             style={[
               styles.tabText,
               selectedTab === 'VisitScheduled'
                 ? styles.activeText
                 : styles.inactiveText,
-            ]}>
+            ]}
+          >
             Visit Scheduled
           </Text>
         </TouchableOpacity>
@@ -145,13 +152,15 @@ const TerritoryPartner: React.FC = () => {
                         time.slot,
                         isSelected && time.selectedSlot,
                         isDisabled && time.disabledSlot,
-                      ]}>
+                      ]}
+                    >
                       <Text
                         style={[
                           time.slotText,
                           isSelected && time.selectedSlotText,
                           isDisabled && time.disabledSlotText,
-                        ]}>
+                        ]}
+                      >
                         {slot}
                       </Text>
                     </TouchableOpacity>
@@ -163,7 +172,8 @@ const TerritoryPartner: React.FC = () => {
                 style={styles.selectPartnerButton}
                 onPress={() => {
                   navigation.navigate('ProjectLocation');
-                }}>
+                }}
+              >
                 <Text style={styles.selectPartnerText}>Enter Location</Text>
               </TouchableOpacity>
             </>
@@ -177,13 +187,15 @@ const TerritoryPartner: React.FC = () => {
             style={{
               flex: 1,
               width: '100%',
-            }}>
+            }}
+          >
             <Text style={styles.statusText}>Visit Requests Status</Text>
             <ScrollView
               style={{
                 flex: 1,
                 top: 10,
-              }}>
+              }}
+            >
               <MeetingCard
                 status="Accepted"
                 timeAgo="2 hours ago"
@@ -355,7 +367,7 @@ const styles = StyleSheet.create({
     borderWidth: 0.5,
     borderRadius: 16,
     shadowColor: '#000',
-    shadowOffset: {width: 0, height: 4},
+    shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.1,
     shadowRadius: 2,
     elevation: 1,

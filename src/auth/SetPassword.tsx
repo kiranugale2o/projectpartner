@@ -1,5 +1,5 @@
-import {NativeStackNavigationProp} from '@react-navigation/native-stack';
-import React, {useState} from 'react';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import React, { useState } from 'react';
 import {
   View,
   Text,
@@ -9,20 +9,19 @@ import {
   Dimensions,
   Alert,
 } from 'react-native';
-import {RootStackParamList} from '../types';
-import {useNavigation} from '@react-navigation/native';
+import { RootStackParamList } from '../types';
+import { useNavigation } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import {Eye, EyeOff, Icon} from 'lucide-react-native';
+import { Eye, EyeOff } from 'lucide-react-native';
 import Toast from 'react-native-toast-message';
 
-import PasswordChangedSuccess from './PasswordChangedSuccess';
-//import {toastConfig} from '../utils';
-
-const {width} = Dimensions.get('window');
+const { width } = Dimensions.get('window');
 
 const SetNewPassword = () => {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [confirmshowPassword, setConfirmShowPassword] = useState(false);
 
   type NavigationProp = NativeStackNavigationProp<
     RootStackParamList,
@@ -31,13 +30,9 @@ const SetNewPassword = () => {
   const navigation = useNavigation<NavigationProp>();
 
   const handleConfirm = async () => {
-    // Handle validation and submit logic
-    console.log('Password:', password);
-    console.log('Confirm Password:', confirmPassword);
     if (password === confirmPassword) {
       await handleResetPassword();
     } else {
-      // Alert.alert('');
       Toast.show({
         type: 'info',
         text1: 'Mismatch',
@@ -61,7 +56,7 @@ const SetNewPassword = () => {
           headers: {
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify({email, newPassword: confirmPassword}),
+          body: JSON.stringify({ email, newPassword: confirmPassword }),
         },
       );
 
@@ -87,31 +82,22 @@ const SetNewPassword = () => {
     }
   };
 
-  const [showPassword, setShowPassword] = useState(false);
-  const [confirmshowPassword, setConfirmShowPassword] = useState(false);
-
   return (
     <View
       style={{
         flex: 1,
         backgroundColor: 'white',
         justifyContent: 'space-between',
-      }}>
+      }}
+    >
       <View style={styles.container}>
-        {/* Heading */}
         <Text style={styles.heading}>Set a new password</Text>
-
-        {/* Subtext */}
         <Text style={styles.subtext}>
           Create a new password. Ensure it differs from previous ones for
           security
         </Text>
 
-        {/* Password Label */}
         <Text style={styles.label}>Password</Text>
-
-        {/* Password Input */}
-
         <View style={styles.passwordWrapper}>
           <TextInput
             style={styles.input}
@@ -123,12 +109,8 @@ const SetNewPassword = () => {
           />
           <TouchableOpacity
             style={styles.iconWrapper}
-            onPress={() => setShowPassword(!showPassword)}>
-            {/* <Icon
-              name={showPassword ? 'eye-off' : 'eye'}
-              size={22}
-              color="rgba(0,0,0,0.5)"
-            /> */}
+            onPress={() => setShowPassword(!showPassword)}
+          >
             {showPassword ? (
               <Eye color={'gray'} size={15} />
             ) : (
@@ -136,11 +118,8 @@ const SetNewPassword = () => {
             )}
           </TouchableOpacity>
         </View>
-        {/* Confirm Password Label */}
-        <Text style={[styles.label, {marginTop: 20}]}>Confirm Password</Text>
 
-        {/* Confirm Password Input */}
-
+        <Text style={[styles.label, { marginTop: 20 }]}>Confirm Password</Text>
         <View style={styles.passwordWrapper}>
           <TextInput
             style={styles.input}
@@ -152,8 +131,9 @@ const SetNewPassword = () => {
           />
           <TouchableOpacity
             style={styles.iconWrapper}
-            onPress={() => setConfirmShowPassword(!confirmshowPassword)}>
-            {showPassword ? (
+            onPress={() => setConfirmShowPassword(!confirmshowPassword)}
+          >
+            {confirmshowPassword ? (
               <Eye color={'gray'} size={15} />
             ) : (
               <EyeOff color={'gray'} size={15} />
@@ -161,11 +141,11 @@ const SetNewPassword = () => {
           </TouchableOpacity>
         </View>
       </View>
-      {/* Submit Button */}
+
       <TouchableOpacity style={styles.button} onPress={handleConfirm}>
         <Text style={styles.buttonText}>Update Password</Text>
       </TouchableOpacity>
-      <Toast config={toastConfig} />
+      <Toast />
     </View>
   );
 };
@@ -212,13 +192,14 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontFamily: 'Inter',
     color: '#000',
+    alignSelf: 'center',
   },
   button: {
     backgroundColor: '#0BB501',
     height: 48,
     borderRadius: 6,
     width: '95%',
-    margin: 'auto',
+    alignSelf: 'center',
     marginBottom: 20,
     justifyContent: 'center',
     alignItems: 'center',
@@ -238,7 +219,6 @@ const styles = StyleSheet.create({
     paddingRight: 12,
     marginBottom: 16,
   },
-
   iconWrapper: {
     paddingHorizontal: 4,
   },

@@ -1,6 +1,6 @@
 // Success PopUp Component
-import {View, Text, StyleSheet, TouchableOpacity, Image} from 'react-native';
-import Svg, {Path} from 'react-native-svg';
+import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
+import Svg, { Path } from 'react-native-svg';
 
 const SuccessScreen: React.FC = () => {
   return (
@@ -36,15 +36,17 @@ const SuccessScreen: React.FC = () => {
           <View style={Sucessstyles.container2}>
             <Text style={Sucessstyles.text}>
               Date:
-              <Text style={[Sucessstyles.text, {color: 'black'}]}>
+              <Text style={[Sucessstyles.text, { color: 'black' }]}>
                 Friday, April 4, 2025
               </Text>{' '}
               {'\n'}
               Time:{' '}
-              <Text style={[Sucessstyles.text, {color: 'black'}]}>1:00 PM</Text>
+              <Text style={[Sucessstyles.text, { color: 'black' }]}>
+                1:00 PM
+              </Text>
               {'\n'}
               Location:
-              <Text style={[Sucessstyles.text, {color: 'black'}]}>
+              <Text style={[Sucessstyles.text, { color: 'black' }]}>
                 Project Name, Address
               </Text>
             </Text>

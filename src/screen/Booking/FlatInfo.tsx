@@ -1,5 +1,3 @@
-
-
 import {
   Image,
   ImageBackground,
@@ -8,22 +6,22 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import {RouteProp, useRoute} from '@react-navigation/native';
-import {RootStackParamList} from '../../types';
-import {useContext, useEffect} from 'react';
-import {AuthContext} from '../../context/AuthContext';
+import { RouteProp, useRoute } from '@react-navigation/native';
+import { RootStackParamList } from '../../types';
+import { useContext, useEffect } from 'react';
+import { AuthContext } from '../../context/AuthContext';
 
 type FlatInfoRouteProp = RouteProp<RootStackParamList, 'FlatInfo'>;
 
 const FlatInfo: React.FC = () => {
   const route = useRoute<FlatInfoRouteProp>();
-  const {flat} = route.params;
+  const { flat } = route.params;
   const auth = useContext(AuthContext);
   useEffect(() => {
     auth?.setFlatName(flat.property_name);
   }, []);
   return (
-    <View style={{flex: 1, width: '100%', backgroundColor: 'white'}}>
+    <View style={{ flex: 1, width: '100%', backgroundColor: 'white' }}>
       <Text style={styles.imageText}>Images</Text>
 
       <View
@@ -32,11 +30,12 @@ const FlatInfo: React.FC = () => {
           flexDirection: 'row',
           gap: 10,
           marginInline: 'auto',
-        }}>
+        }}
+      >
         {/* Image.. */}
 
         <Image
-          source={{uri: `https://api.reparv.in${flat.image}`}}
+          source={{ uri: `https://api.reparv.in${flat.image}` }}
           style={styles.image}
           resizeMode="cover"
         />
@@ -53,8 +52,8 @@ const FlatInfo: React.FC = () => {
           resizeMode="cover"
         />
       </View>
-      <View style={{flex: 2, width: '100%', top: 60}}>
-        <Text style={[styles.title, {marginInline: 5}]}>Location</Text>
+      <View style={{ flex: 2, width: '100%', top: 60 }}>
+        <Text style={[styles.title, { marginInline: 5 }]}>Location</Text>
 
         <View style={styles.Locationcontainer}>
           <Image

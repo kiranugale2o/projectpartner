@@ -1,17 +1,17 @@
-import {ActivityIndicator, ScrollView, Text, View} from 'react-native';
+import { ActivityIndicator, ScrollView, Text, View } from 'react-native';
 import PropertyCard from '../../component/PropertyCard';
-import {PropertyInfo, RootStackParamList} from '../../types';
-import {NativeStackNavigationProp} from '@react-navigation/native-stack';
-import {RouteProp, useNavigation, useRoute} from '@react-navigation/native';
-import {useContext, useEffect, useState} from 'react';
-import {AuthContext} from '../../context/AuthContext';
+import { PropertyInfo, RootStackParamList } from '../../types';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { RouteProp, useNavigation, useRoute } from '@react-navigation/native';
+import { useContext, useEffect, useState } from 'react';
+import { AuthContext } from '../../context/AuthContext';
 import Loader from '../../component/loader';
 
 type FlatRouteProp = RouteProp<RootStackParamList, 'Flat'>;
 
 const BookingFlats: React.FC = () => {
   const route = useRoute<FlatRouteProp>();
-  const {flatType} = route.params;
+  const { flatType } = route.params;
   console.log(flatType);
 
   const [flats, setFlats] = useState<any[]>([]);
@@ -57,8 +57,8 @@ const BookingFlats: React.FC = () => {
         flex: 1,
         flexDirection: 'column',
         backgroundColor: 'white',
-      
-      }}>
+      }}
+    >
       {/* Cards */}
       {/* .filter(property => property?.propertyCategory === 'Resale') */}
       <ScrollView>
@@ -75,7 +75,8 @@ const BookingFlats: React.FC = () => {
 
               marginTop: 'auto',
               justifyContent: 'center',
-            }}>
+            }}
+          >
             No Property Found !
           </Text>
         )}

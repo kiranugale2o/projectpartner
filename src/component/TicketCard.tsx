@@ -1,6 +1,6 @@
-import {Picker} from '@react-native-picker/picker';
-import {EllipsisVertical} from 'lucide-react-native';
-import React, {useState} from 'react';
+import { Picker } from '@react-native-picker/picker';
+import { EllipsisVertical } from 'lucide-react-native';
+import React, { useState } from 'react';
 import {
   View,
   Text,
@@ -9,7 +9,7 @@ import {
   Modal,
   Alert,
 } from 'react-native';
-import Svg, {Path} from 'react-native-svg';
+import Svg, { Path } from 'react-native-svg';
 import TicketDetailsModal from './Ticket/TicketDetailsModel';
 import TicketUpdateModel from './Ticket/TicketUpdateModel';
 import ConfirmDeleteModal from './Ticket/ConfirmDeleteModal';
@@ -28,15 +28,21 @@ type TicketCardProps = {
   adminid: number;
   departmentid: number;
   employeeid: number;
-  newTicket: {
-    adminid: string;
-    departmentid: string;
-    employeeid: string;
-    issue: string;
-    details: string;
-    adminData: string;
-  };
 };
+
+type TicketDetails = {
+  ticketNo: string;
+  adminName: string;
+  department: string;
+  employee: string;
+  issue: string;
+  description: string;
+  adminid: number;
+  departmentid: number;
+  employeeid: number;
+  ticketId: number;
+};
+
 const TicketCard: React.FC<TicketCardProps> = ({
   issue,
   status,
@@ -51,22 +57,14 @@ const TicketCard: React.FC<TicketCardProps> = ({
   adminid,
   departmentid,
   employeeid,
-  newTicket,
 }) => {
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedOption, setSelectedOption] = useState(null);
 
   const [TicketViewVisible, setTicketViewVisible] = useState(false);
-  const [selectedTicket, setSelectedTicket] = useState({
-    ticketNo: '',
-    department: '',
-    issue: '',
-    description: '',
-    adminid: '',
-    departmentid: '',
-    employeeid: '',
-    ticketId: '',
-  });
+  const [selectedTicket, setSelectedTicket] = useState<TicketDetails | null>(
+    null,
+  );
   const [updateView, setUpdateView] = useState(false);
   const options = ['View', 'Update', 'Delete'];
   const handleSelect = (option: any) => {
@@ -79,6 +77,10 @@ const TicketCard: React.FC<TicketCardProps> = ({
         employee,
         issue,
         description: ticketDes,
+        adminid,
+        departmentid,
+        employeeid,
+        ticketId,
       });
       setTicketViewVisible(true);
     }
@@ -143,7 +145,7 @@ const TicketCard: React.FC<TicketCardProps> = ({
   };
 
   return (
-    <View style={[styles.cardWrapper,  borderColorStyles[status] ]}>
+    <View style={[styles.cardWrapper, borderColorStyles[status]]}>
       {/* Top Row */}
       <View style={styles.topRow}>
         <View style={[styles.statusDot, dotColorStyles[status]]} />
@@ -159,18 +161,21 @@ const TicketCard: React.FC<TicketCardProps> = ({
         transparent
         visible={modalVisible}
         animationType="fade"
-        onRequestClose={() => setModalVisible(false)}>
+        onRequestClose={() => setModalVisible(false)}
+      >
         <TouchableOpacity
           style={styles.modalOverlay}
           activeOpacity={1}
-          onPressOut={() => setModalVisible(false)}>
+          onPressOut={() => setModalVisible(false)}
+        >
           <View style={styles.popupMenu}>
             <Text style={styles.popupTitle}>Action</Text>
             {options.map(option => (
               <TouchableOpacity
                 key={option}
                 style={styles.optionItem}
-                onPress={() => handleSelect(option)}>
+                onPress={() => handleSelect(option)}
+              >
                 <View style={styles.checkbox}>
                   {selectedOption === option && (
                     <View style={styles.checkedDot} />
@@ -220,50 +225,48 @@ const TicketCard: React.FC<TicketCardProps> = ({
 };
 
 const dotColorStyles = StyleSheet.create({
-  Open: {backgroundColor: 'green'},
-  Closed: {backgroundColor: '#FF4D4F'},
-   Resolved: { backgroundColor: '#0BB501' },
-  In_Progress: {backgroundColor: 'yellow'},
-  Pending:{backgroundColor:'red'}
+  Open: { backgroundColor: 'green' },
+  Closed: { backgroundColor: '#FF4D4F' },
+  Resolved: { backgroundColor: '#0BB501' },
+  In_Progress: { backgroundColor: 'yellow' },
+  Pending: { backgroundColor: 'red' },
 });
 
 const borderColorStyles = StyleSheet.create({
-  Open:        { borderLeftColor: 'green' },
-  Closed:      { borderLeftColor: '#FF4D4F' },
-  Resolved:    { borderLeftColor: '#0BB501' },
+  Open: { borderLeftColor: 'green' },
+  Closed: { borderLeftColor: '#FF4D4F' },
+  Resolved: { borderLeftColor: '#0BB501' },
   In_Progress: { borderLeftColor: 'yellow' },
-  Pending:     { borderLeftColor: 'red' },
+  Pending: { borderLeftColor: 'red' },
 });
 
-
 const statusTextColor = StyleSheet.create({
-  Open: {color: 'green'},
-  Resolved:   {color: '#0BB501'},
-  Closed: {color: '#FF4D4F'},
-  In_Progress: {color: 'yellow'},
-Pending: {color: 'red'},
+  Open: { color: 'green' },
+  Resolved: { color: '#0BB501' },
+  Closed: { color: '#FF4D4F' },
+  In_Progress: { color: 'yellow' },
+  Pending: { color: 'red' },
 });
 
 const styles = StyleSheet.create({
- cardWrapper: {
-  marginTop: 15,
-  marginHorizontal: 'auto',
-  width: '90%',
-  backgroundColor: '#FFFFFF',
+  cardWrapper: {
+    marginTop: 15,
+    marginHorizontal: 'auto',
+    width: '90%',
+    backgroundColor: '#FFFFFF',
 
-  borderWidth: 1,
-  borderColor: '#E7E7E7',
-  borderLeftWidth: 5,              // Emphasized left border
+    borderWidth: 1,
+    borderColor: '#E7E7E7',
+    borderLeftWidth: 5, // Emphasized left border
 
-  borderTopLeftRadius: 12,         // Rounded only left side
-  borderBottomLeftRadius: 12,
+    borderTopLeftRadius: 12, // Rounded only left side
+    borderBottomLeftRadius: 12,
 
-  borderTopRightRadius: 4,         // Optional: slightly round other corners
-  borderBottomRightRadius: 4,
+    borderTopRightRadius: 4, // Optional: slightly round other corners
+    borderBottomRightRadius: 4,
 
-  padding: 12,
-},
-
+    padding: 12,
+  },
 
   topRow: {
     flexDirection: 'row',
@@ -307,7 +310,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
     marginBottom: 10,
-    color:'black'
+    color: 'black',
   },
   picker: {
     height: 50,
@@ -317,7 +320,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     paddingVertical: 10,
-     color:'black'
+    color: 'black',
   },
   checkbox: {
     width: 18,
@@ -337,7 +340,7 @@ const styles = StyleSheet.create({
   },
   optionText: {
     fontSize: 14,
-     color:'black'
+    color: 'black',
   },
   issueTitle: {
     fontFamily: 'Montserrat',

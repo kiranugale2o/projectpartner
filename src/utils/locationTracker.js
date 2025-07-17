@@ -1,15 +1,15 @@
-import React, { useEffect, useState } from "react";
-import { View, Text, PermissionsAndroid, Platform, Button } from "react-native";
-import Geolocation from "react-native-geolocation-service";
+import React, { useEffect, useState } from 'react';
+import { View, Text, PermissionsAndroid, Platform, Button } from 'react-native';
+import Geolocation from 'react-native-geolocation-service';
 
 const LocationTracker = () => {
   const [location, setLocation] = useState(null);
 
   const requestLocationPermission = async () => {
     try {
-      if (Platform.OS === "android") {
+      if (Platform.OS === 'android') {
         const granted = await PermissionsAndroid.request(
-          PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION
+          PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
         );
         return granted === PermissionsAndroid.RESULTS.GRANTED;
       }
@@ -25,19 +25,19 @@ const LocationTracker = () => {
     if (!hasPermission) return;
 
     Geolocation.getCurrentPosition(
-      (position) => {
-        console.log("Current position:", position);
+      position => {
+        console.log('Current position:', position);
         setLocation(position);
       },
-      (error) => {
-        console.error("Location error:", error);
+      error => {
+        console.error('Location error:', error);
       },
       {
         enableHighAccuracy: true,
         timeout: 15000,
         maximumAge: 10000,
         forceRequestLocation: true,
-      }
+      },
     );
   };
 
@@ -47,7 +47,7 @@ const LocationTracker = () => {
       {location && (
         <Text>
           Latitude: {location.coords.latitude}
-          {"\n"}
+          {'\n'}
           Longitude: {location.coords.longitude}
         </Text>
       )}

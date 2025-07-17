@@ -90,7 +90,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     startDate: null,
     endDate: null,
   });
-  const[ticketNumber,setTicketNumber]=useState<number | null>(null);
+  const [ticketNumber, setTicketNumber] = useState<number | null>(null);
 
   const login = () => {
     setToken('');
@@ -157,7 +157,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         setPropertyinfoId,
         siteVisitModel,
         setSiteVisitModel,
-        setTicketNumber
+        setTicketNumber,
       }}
     >
       {children}

@@ -1,4 +1,4 @@
-import {useState} from 'react';
+import { useState } from 'react';
 import {
   ScrollView,
   StyleSheet,
@@ -7,9 +7,9 @@ import {
   Image,
   TouchableOpacity,
 } from 'react-native';
-import {RootStackParamList} from '../../types';
-import {NativeStackNavigationProp} from '@react-navigation/native-stack';
-import {useNavigation} from '@react-navigation/native';
+import { RootStackParamList } from '../../types';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { useNavigation } from '@react-navigation/native';
 
 const SelectTerritoryPartner: React.FC = () => {
   type NavigationProp = NativeStackNavigationProp<RootStackParamList, 'Home'>;
@@ -24,7 +24,8 @@ const SelectTerritoryPartner: React.FC = () => {
           width: '100%',
           flex: 1,
           backgroundColor: 'white',
-        }}>
+        }}
+      >
         <Text style={styles.partnerInfo}>
           Choose a Territory Partner available at this time
         </Text>
@@ -33,7 +34,8 @@ const SelectTerritoryPartner: React.FC = () => {
           style={{
             flex: 1,
             top: 40,
-          }}>
+          }}
+        >
           {/* Card */}
 
           {[1, 2, 3, 3, 3, 3, 3, 8, 7, 7, 7].map((partner, i) => {
@@ -50,7 +52,8 @@ const SelectTerritoryPartner: React.FC = () => {
                 style={[
                   styles.partnerCard,
                   isSelected && styles.selectedPartnerCard, // highlight if selected
-                ]}>
+                ]}
+              >
                 <View style={styles.partnerInfoWrapper}>
                   <View style={styles.avatarWrapper}>
                     <Image
@@ -78,8 +81,9 @@ const SelectTerritoryPartner: React.FC = () => {
           disabled={selectedPartner === null}
           style={[
             styles.selectPartnerButton,
-            selectedPartner === null && {backgroundColor: '#BDBDBD'}, // optional: grey out when disabled
-          ]}>
+            selectedPartner === null && { backgroundColor: '#BDBDBD' }, // optional: grey out when disabled
+          ]}
+        >
           <Text style={styles.selectPartnerText}>Confirm Schedule</Text>
         </TouchableOpacity>
       </View>
@@ -127,7 +131,7 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     overflow: 'hidden',
     shadowColor: 'rgba(20, 20, 43, 0.16)',
-    shadowOffset: {width: 0, height: 18},
+    shadowOffset: { width: 0, height: 18 },
     shadowOpacity: 1,
     shadowRadius: 54,
   },

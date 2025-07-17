@@ -1,4 +1,4 @@
-import React, {useContext, useState} from 'react';
+import React, { useContext, useState } from 'react';
 import {
   View,
   Text,
@@ -8,11 +8,11 @@ import {
   Modal,
   Dimensions,
 } from 'react-native';
-import {AuthContext} from '../context/AuthContext';
-import {payNow} from '../utils/razorpay';
+import { AuthContext } from '../context/AuthContext';
+import { payNow } from '../utils/razorpay';
 import SuccessModal from './PaymentModules/SuccessModel';
 import ConfirmBookingPopup from './ConfirmBookingPopup';
-import {X} from 'lucide-react-native';
+import { X } from 'lucide-react-native';
 
 const width = Dimensions.get('window').width;
 type Flat = {
@@ -81,11 +81,11 @@ const WingsFlatsList: React.FC<WingsFlatsListProps> = ({
   };
 
   // Group flats by wing
-  const groupedByWing: {[key: string]: Flat[]} = data.reduce((acc, item) => {
+  const groupedByWing: { [key: string]: Flat[] } = data.reduce((acc, item) => {
     if (!acc[item.wing]) acc[item.wing] = [];
     acc[item.wing].push(item);
     return acc;
-  }, {} as {[key: string]: Flat[]});
+  }, {} as { [key: string]: Flat[] });
 
   // Select only one flat
   const selectFlat = (id: number) => {
@@ -124,20 +124,24 @@ const WingsFlatsList: React.FC<WingsFlatsListProps> = ({
     <View
       style={{
         flex: 1,
-      }}>
+      }}
+    >
       <ScrollView
         style={styles.container}
         horizontal
         showsHorizontalScrollIndicator={false}
-        contentContainerStyle={styles.horizontalScroll}>
+        contentContainerStyle={styles.horizontalScroll}
+      >
         {wings.map(([wing, flats]) => {
-          const columns: Flat[][] = Array.from({length: NUM_COLUMNS}, () => []);
+          const columns: Flat[][] = Array.from(
+            { length: NUM_COLUMNS },
+            () => [],
+          );
           flats.forEach((flat, idx) => {
             columns[idx % NUM_COLUMNS].push(flat);
           });
 
           return (
-          
             <View key={wing} style={styles.wingSection}>
               <Text style={styles.wingTitle}>Wing {wing}</Text>
               <View style={styles.columnsContainer}>
@@ -167,7 +171,8 @@ const WingsFlatsList: React.FC<WingsFlatsListProps> = ({
                               styles.flatText,
                               isSelected && styles.selectedFlatText,
                               isDisabled && styles.disabledFlatText, // 🟡 Optional: grey out text
-                            ]}>
+                            ]}
+                          >
                             {flat.flatno}
                           </Text>
                         </TouchableOpacity>
@@ -184,8 +189,9 @@ const WingsFlatsList: React.FC<WingsFlatsListProps> = ({
         <View style={styles.modalOverlay}>
           <View style={WingDetailsStyle.card}>
             <TouchableOpacity
-              style={{alignSelf: 'flex-end'}}
-              onPress={() => setShowDrawer(false)}>
+              style={{ alignSelf: 'flex-end' }}
+              onPress={() => setShowDrawer(false)}
+            >
               <X size={20} />
             </TouchableOpacity>
             <View style={WingDetailsStyle.separator}></View>
@@ -200,7 +206,7 @@ const WingsFlatsList: React.FC<WingsFlatsListProps> = ({
 
             <View style={WingDetailsStyle.detailRow}>
               <Text style={WingDetailsStyle.label}>Total Value</Text>
-              <Text style={[WingDetailsStyle.value, {color: '#0068FF'}]}>
+              <Text style={[WingDetailsStyle.value, { color: '#0068FF' }]}>
                 ₹7,265,000
               </Text>
             </View>
@@ -210,7 +216,8 @@ const WingsFlatsList: React.FC<WingsFlatsListProps> = ({
                   setShowPopup(true);
                   setShowDrawer(false);
                 }}
-                style={WingDetailsStyle.button}>
+                style={WingDetailsStyle.button}
+              >
                 <Text style={WingDetailsStyle.buttonText}>Book</Text>
               </TouchableOpacity>
             </View>

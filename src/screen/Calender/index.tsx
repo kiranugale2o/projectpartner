@@ -1,10 +1,4 @@
-import React, {
-  useContext,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from 'react';
+import React, { useContext, useEffect, useMemo, useRef, useState } from 'react';
 import {
   View,
   Text,
@@ -21,21 +15,21 @@ import {
   BackHandler,
   Linking,
 } from 'react-native';
-import {Calendar} from 'react-native-calendars';
-import Svg, {Path} from 'react-native-svg';
+import { Calendar } from 'react-native-calendars';
+import Svg, { Path } from 'react-native-svg';
 import CustomPicker from '../../component/CustomPicker';
 import DateSelectPopup from '../../component/DateSelectedPopup';
-import {RootStackParamList} from '../../types';
-import {NativeStackNavigationProp} from '@react-navigation/native-stack';
-import {useNavigation} from '@react-navigation/native';
+import { RootStackParamList } from '../../types';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { useNavigation } from '@react-navigation/native';
 import PostNotification from '../../component/PostNotification';
-import {AuthContext} from '../../context/AuthContext';
-import {calanderOprtions, formatDateToShort} from '../../utils';
+import { AuthContext } from '../../context/AuthContext';
+import { calanderOprtions, formatDateToShort } from '../../utils';
 import CalanderCard from '../../component/CalanderCard';
 
 /* ----------------------------------------------------------------- */
 /* ----------  TYPES & CONSTANTS  ---------------------------------- */
-type NavigationProp = NativeStackNavigationProp<RootStackParamList, 'SignIn'>;
+type NavigationProp = NativeStackNavigationProp<RootStackParamList, 'Sign_In'>;
 
 export interface MeetingFollowUp {
   followupid: number;
@@ -58,7 +52,7 @@ const ScheduleData = {
 };
 
 const screenHeight = Dimensions.get('window').height;
-const {height} = Dimensions.get('window');
+const { height } = Dimensions.get('window');
 
 /* ----------------------------------------------------------------- */
 /* ----------  COMPONENT  ------------------------------------------ */
@@ -137,7 +131,7 @@ const CalenderComponent: React.FC = () => {
   /* ----------------------------------------------------------------- */
   /* ----------  CALENDAR MARKING  ----------------------------------- */
   const markedDates = useMemo(() => {
-    const marks: {[key: string]: any} = {};
+    const marks: { [key: string]: any } = {};
 
     meeting.forEach(item => {
       const date = item.visitdate?.slice(0, 10);
@@ -145,7 +139,7 @@ const CalenderComponent: React.FC = () => {
       const isPast = new Date(date) < new Date(todayStr);
       marks[date] = {
         ...(marks[date] || {}),
-        dots: [{key: 'visit', color: isPast ? 'red' : 'gold'}],
+        dots: [{ key: 'visit', color: isPast ? 'red' : 'gold' }],
       };
     });
 
@@ -183,7 +177,7 @@ const CalenderComponent: React.FC = () => {
   /* ----------------------------------------------------------------- */
   /* ----------  RENDER  --------------------------------------------- */
   return (
-    <View style={{flex: 1, backgroundColor: 'white'}}>
+    <View style={{ flex: 1, backgroundColor: 'white' }}>
       {/* ---------------- Calendar ---------------- */}
       <View style={styles.container}>
         <View style={styles.calendarWrapper}>
@@ -210,12 +204,13 @@ const CalenderComponent: React.FC = () => {
         </View>
 
         {/* -------- Upcoming Visits Heading -------- */}
-        <Text style={[styles.heading, {marginTop: 24}]}>Upcoming Visits</Text>
+        <Text style={[styles.heading, { marginTop: 24 }]}>Upcoming Visits</Text>
 
         {/* -------- Visit Cards / Fallback -------- */}
         <ScrollView
-          style={{marginTop: 12}}
-          contentContainerStyle={{paddingBottom: 40}}>
+          style={{ marginTop: 12 }}
+          contentContainerStyle={{ paddingBottom: 40 }}
+        >
           {updatedMeeting.length ? (
             updatedMeeting.map((d, i) => <CalanderCard key={i} d={d} />)
           ) : (

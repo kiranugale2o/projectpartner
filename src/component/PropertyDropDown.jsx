@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from 'react';
+import React, { useState, useEffect } from 'react';
 import DropDownPicker from 'react-native-dropdown-picker';
 
 const formatIndianAmount = amount => {
@@ -9,7 +9,7 @@ const formatIndianAmount = amount => {
   return num.toString();
 };
 
-const PropertyDropdown = ({propertyList, propertyId, setPropertyId}) => {
+const PropertyDropdown = ({ propertyList, propertyId, setPropertyId }) => {
   const [open, setOpen] = useState(false);
   const [items, setItems] = useState([]);
 

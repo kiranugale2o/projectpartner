@@ -1,7 +1,7 @@
-import {Picker} from '@react-native-picker/picker';
-import {X} from 'lucide-react-native';
-import React, {useEffect, useState} from 'react';
-import {Modal, View, Text, TouchableOpacity, TextInput} from 'react-native';
+import { Picker } from '@react-native-picker/picker';
+import { X } from 'lucide-react-native';
+import React, { useEffect, useState } from 'react';
+import { Modal, View, Text, TouchableOpacity, TextInput } from 'react-native';
 
 interface NewTicket {
   adminid: string;
@@ -124,14 +124,16 @@ const TicketDetailsModal: React.FC<TicketDetailsModalProps> = ({
       transparent
       visible={visible}
       animationType="slide"
-      onRequestClose={onClose}>
+      onRequestClose={onClose}
+    >
       <View
         style={{
           flex: 1,
           backgroundColor: 'rgba(0,0,0,0.4)',
           justifyContent: 'center',
           alignItems: 'center',
-        }}>
+        }}
+      >
         <View
           style={{
             backgroundColor: 'white',
@@ -139,27 +141,30 @@ const TicketDetailsModal: React.FC<TicketDetailsModalProps> = ({
             padding: 30,
             width: '95%',
             elevation: 5,
-          }}>
+          }}
+        >
           <View
             style={{
               flexDirection: 'row',
               justifyContent: 'space-between',
-            }}>
+            }}
+          >
             <Text
               style={{
                 fontSize: 18,
                 fontWeight: 'bold',
                 marginBottom: 16,
                 textAlign: 'center',
-              }}>
+              }}
+            >
               Ticket Details
             </Text>
             <TouchableOpacity onPress={onClose}>
               <X size={20} />
             </TouchableOpacity>
           </View>
-          <View style={{flexDirection: 'column', marginBottom: 10, gap: 5}}>
-            <Text style={{fontWeight: '600', width: 100, color: '#333'}}>
+          <View style={{ flexDirection: 'column', marginBottom: 10, gap: 5 }}>
+            <Text style={{ fontWeight: '600', width: 100, color: '#333' }}>
               Ticket No
             </Text>
             <View
@@ -170,21 +175,23 @@ const TicketDetailsModal: React.FC<TicketDetailsModalProps> = ({
                   // width: '30%',
                   padding: 15,
                 },
-              ]}>
+              ]}
+            >
               <Text
                 style={[
                   {
                     color: `#0BB501`,
                     width: '100%',
                   },
-                ]}>
+                ]}
+              >
                 {ticketData?.ticketNo}
               </Text>
             </View>
           </View>
 
-          <View style={{flexDirection: 'column', marginBottom: 10, gap: 5}}>
-            <Text style={{fontWeight: '600', width: 100, color: '#333'}}>
+          <View style={{ flexDirection: 'column', marginBottom: 10, gap: 5 }}>
+            <Text style={{ fontWeight: '600', width: 100, color: '#333' }}>
               Issue
             </Text>
             <View
@@ -195,22 +202,24 @@ const TicketDetailsModal: React.FC<TicketDetailsModalProps> = ({
                   // width: '30%',
                   padding: 15,
                 },
-              ]}>
+              ]}
+            >
               <Text
                 style={[
                   {
                     color: `#0BB501`,
                     width: '100%',
                   },
-                ]}>
+                ]}
+              >
                 {ticketData?.issue}
               </Text>
             </View>
           </View>
 
           {ticketData?.adminName !== null && (
-            <View style={{flexDirection: 'column', marginBottom: 10, gap: 5}}>
-              <Text style={{fontWeight: '600', width: 100, color: '#333'}}>
+            <View style={{ flexDirection: 'column', marginBottom: 10, gap: 5 }}>
+              <Text style={{ fontWeight: '600', width: 100, color: '#333' }}>
                 Admin
               </Text>
               <View
@@ -221,22 +230,24 @@ const TicketDetailsModal: React.FC<TicketDetailsModalProps> = ({
                     // width: '30%',
                     padding: 15,
                   },
-                ]}>
+                ]}
+              >
                 <Text
                   style={[
                     {
                       color: `#0BB501`,
                       width: '100%',
                     },
-                  ]}>
+                  ]}
+                >
                   {ticketData?.adminName}
                 </Text>
               </View>
             </View>
           )}
           {ticketData?.department !== null && (
-            <View style={{flexDirection: 'column', marginBottom: 10, gap: 5}}>
-              <Text style={{fontWeight: '600', width: 100, color: '#333'}}>
+            <View style={{ flexDirection: 'column', marginBottom: 10, gap: 5 }}>
+              <Text style={{ fontWeight: '600', width: 100, color: '#333' }}>
                 Department
               </Text>
               <View
@@ -247,23 +258,25 @@ const TicketDetailsModal: React.FC<TicketDetailsModalProps> = ({
                     // width: '30%',
                     padding: 15,
                   },
-                ]}>
+                ]}
+              >
                 <Text
                   style={[
                     {
                       color: `#0BB501`,
                       width: '100%',
                     },
-                  ]}>
+                  ]}
+                >
                   {ticketData?.department}
                 </Text>
               </View>
             </View>
           )}
 
-          {ticketData.employee !== null && (
-            <View style={{flexDirection: 'column', marginBottom: 10, gap: 5}}>
-              <Text style={{fontWeight: '600', width: 100, color: '#333'}}>
+          {ticketData?.employee !== null && (
+            <View style={{ flexDirection: 'column', marginBottom: 10, gap: 5 }}>
+              <Text style={{ fontWeight: '600', width: 100, color: '#333' }}>
                 Employee Name
               </Text>
               <View
@@ -274,22 +287,24 @@ const TicketDetailsModal: React.FC<TicketDetailsModalProps> = ({
                     // width: '30%',
                     padding: 15,
                   },
-                ]}>
+                ]}
+              >
                 <Text
                   style={[
                     {
                       color: `#0BB501`,
                       width: '100%',
                     },
-                  ]}>
+                  ]}
+                >
                   {ticketData?.employee}
                 </Text>
               </View>
             </View>
           )}
 
-          <View style={{flexDirection: 'column', marginBottom: 10, gap: 5}}>
-            <Text style={{fontWeight: '600', width: 200, color: '#333'}}>
+          <View style={{ flexDirection: 'column', marginBottom: 10, gap: 5 }}>
+            <Text style={{ fontWeight: '600', width: 200, color: '#333' }}>
               Ticket description
             </Text>
             <View
@@ -300,14 +315,16 @@ const TicketDetailsModal: React.FC<TicketDetailsModalProps> = ({
                   // width: '30%',
                   padding: 15,
                 },
-              ]}>
+              ]}
+            >
               <Text
                 style={[
                   {
                     color: `#0BB501`,
                     width: '100%',
                   },
-                ]}>
+                ]}
+              >
                 {ticketData?.description}
               </Text>
             </View>

@@ -5,21 +5,28 @@ import {
   FlatList,
   ActivityIndicator,
   Image,
-  TouchableOpacity,
   StyleSheet,
 } from 'react-native';
 import { AuthContext } from '../../context/AuthContext';
 
-const FollowingScreen = () => {
-  const [following, setFollowing] = useState([]);
-  const [loading, setLoading] = useState(true);
+type FollowingUser = {
+  id: number;
+  fullname: string;
+  userimage?: string;
+};
+
+const FollowingScreen: React.FC = () => {
+  const [following, setFollowing] = useState<FollowingUser[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
   const auth = useContext(AuthContext);
 
   useEffect(() => {
     const fetchFollowing = async () => {
       try {
+        if (!auth?.user?.id) return;
+
         const res = await fetch(
-          `https://api.reparv.in/territoryapp/user/add/${auth?.user?.id}/${'sales'}/following`
+          `https://api.reparv.in/territoryapp/user/add/${auth.user.id}/sales/following`,
         );
         const data = await res.json();
         setFollowing(data);
@@ -31,40 +38,35 @@ const FollowingScreen = () => {
     };
 
     fetchFollowing();
-  }, []);
+  }, [auth?.user?.id]);
 
   if (loading) {
     return <ActivityIndicator style={{ marginTop: 30 }} />;
   }
 
   return (
-    <View style={{flex:1,backgroundColor:'white'}}>
-    <FlatList
-      data={following}
-      keyExtractor={(item) => item.id.toString()}
-      renderItem={({ item }) => (
-        <View style={styles.card}>
-          <Image
-            source={
-              item?.userimage
-                ? { uri: `https://api.reparv.in${item.userimage}` }
-                : require('../../../assets/community/user.png')
-            }
-            style={styles.avatar}
-          />
-          <View style={{ flex: 1 }}>
-            <Text style={styles.name}>{item?.fullname || 'Unnamed User'}</Text>
-            {/* <Text style={styles.role}>{item.email || 'No email'}</Text> */}
+    <View style={{ flex: 1, backgroundColor: 'white' }}>
+      <FlatList
+        data={following}
+        keyExtractor={item => item.id.toString()}
+        contentContainerStyle={{ paddingVertical: 12 }}
+        renderItem={({ item }) => (
+          <View style={styles.card}>
+            <Image
+              source={
+                item.userimage
+                  ? { uri: `https://api.reparv.in${item.userimage}` }
+                  : require('../../../assets/community/user.png')
+              }
+              style={styles.avatar}
+            />
+            <View style={{ flex: 1 }}>
+              <Text style={styles.name}>{item.fullname || 'Unnamed User'}</Text>
+            </View>
           </View>
-
-          {/* <TouchableOpacity style={styles.followBtn}>
-            <Text style={styles.followText}>Following</Text>
-          </TouchableOpacity> */}
-        </View>
-      )}
-    
-    />
-      </View>
+        )}
+      />
+    </View>
   );
 };
 
@@ -82,24 +84,12 @@ const styles = StyleSheet.create({
     height: 48,
     borderRadius: 24,
     marginRight: 14,
+    backgroundColor: '#eee',
   },
   name: {
     fontSize: 16,
     fontWeight: '600',
-  },
-  role: {
-    fontSize: 13,
-    color: '#888',
-  },
-  followBtn: {
-    backgroundColor: '#f1f1f1',
-    paddingHorizontal: 14,
-    paddingVertical: 6,
-    borderRadius: 6,
-  },
-  followText: {
-    color: '#333',
-    fontWeight: '600',
+    color: '#111',
   },
 });
 
