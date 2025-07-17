@@ -27,6 +27,7 @@ import {all} from 'axios';
 import { AuthContext } from '../../context/AuthContext';
 import Loader from '../../component/loader';
 import MyPost from '../../component/community/MyPost';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 interface SalesPerson {
   id: number;
@@ -200,6 +201,8 @@ const auth=useContext(AuthContext)
       fetchFollowingPosts(); // Only posts from followed users
     }else{
       fetchUserPosts();
+      fetchFollowersAndFollowing()
+      getProfile()
     }
     fetchUsers();        // Common for both
   }, [selectedTab]) // dependency on tab change
@@ -274,6 +277,9 @@ const sortPosts = (posts:any, currentUser:any, followedIds:any) => {
   return [];
 }, [searchTerm, posts]);
 
+const [followersCount, setFollowersCount] = useState(0);
+const [followingCount, setFollowingCount] = useState(0);
+// userPosts already contains post list
 
 
 //user Filter 
@@ -296,7 +302,48 @@ const sortPosts = (posts:any, currentUser:any, followedIds:any) => {
   return [];
 }, [usersearchTerm, users]);
 
+const[userData,setData]=useState();
+const getProfile = async () => {
+    try {
+    //  const token = await AsyncStorage.getItem('salesPersonToken'); // Retrieve stored JWT
 
+      const response = await fetch('https://api.reparv.in/sales/profile/', {
+        method: 'GET',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${auth?.user?.id}`, // Attach token
+        },
+      });
+
+      const data = await response.json();
+      console.log('Update response:', data);
+      auth?.setImage(data?.userimage);
+      setData(data);
+      // navigation.navigate("")
+    } catch (error) {
+      console.error('Error updating user:', error);
+    }
+  };;
+
+  
+
+  const fetchFollowersAndFollowing = () => {
+    // const idToUse = getUserIdByRole(user);
+
+    fetch(`https://api.reparv.in/territoryapp/user/add/${auth?.user?.id}/${'sales'}/followers`)
+      .then(res => res.json())
+      .then(setFollowers);
+
+    fetch(`https://api.reparv.in/territoryapp/user/add/${auth?.user?.id}/${'sales'}/following`)
+      .then(res => res.json())
+      .then(setFollowing);
+  };
+//console.log(auth,'ddddseauthhhhhhhhhh');
+
+useEffect(()=>{
+  getProfile()
+},[])
   return (
     <View
       style={{
@@ -556,45 +603,92 @@ const sortPosts = (posts:any, currentUser:any, followedIds:any) => {
 ) : selectedTab === 'MyPost' ? (
  <View style={{ flex: 1, backgroundColor: 'white', width: '100%' }}>
       {/* Header */}
-      <View
-        style={{
-          height: Platform.OS === 'ios' ? 100 : 70,
-          paddingTop: Platform.OS === 'ios' ? 50 : 20,
-          flexDirection: 'row',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          paddingHorizontal: 16,
-          backgroundColor: '#fff',
-          borderBottomWidth: 0.3,
-          borderBottomColor: '#ccc',
-          shadowColor: '#000',
-          shadowOffset: { width: 0, height: 1 },
-          shadowOpacity: 0.05,
-          shadowRadius: 2,
-          elevation: 1,
-        }}
-      >
-        <TouchableOpacity onPress={() => navigation.goBack()} style={{ width: 32 }}>
-          {/* <Icon name="chevron-back" size={24} color="#000" /> */}
-        </TouchableOpacity>
+   
 
-        <Text
-          style={{
-            fontSize: 18,
-            fontWeight: '700',
-            color: '#000',
-            flex: 1,
-            textAlign: 'center',
-            marginLeft: -32,
-          }}
-        >
-          My Posts
-        </Text>
+       {/* Profile Section */}
+<View style={{ alignItems: 'center', paddingVertical: 20, backgroundColor: '#fff' }}>
+  <Image
+    source={
+      userData?.userimage ===null
+        ? require('../../../assets/community/user.png')
+        : { uri: `https://api.reparv.in${userData?.userimage}` }
+    }
+    style={{
+      width: 100,
+      height: 100,
+      borderRadius: 50,
+      borderWidth: 2,
+      borderColor: '#40f45eff',
+      marginBottom: 10,
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.1,
+      shadowRadius: 4,
+      elevation: 3,
+    }}
+  />
 
-        <TouchableOpacity onPress={() => {}} style={{ width: 32, alignItems: 'flex-end' }}>
-          {/* <Icon name="add-outline" size={24} color="#000" /> */}
-        </TouchableOpacity>
-      </View>
+  <Text style={{ fontSize: 18, fontWeight: '700', color: '#222' }}>{userData.fullname}</Text>
+</View>
+
+{/* Stats Section */}
+<View
+  style={{
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    paddingVertical: 16,
+    backgroundColor: '#fff',
+    marginHorizontal: 16,
+    marginTop: -10,
+    borderRadius: 12,
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+  }}
+>
+  {/* Posts */}
+  <TouchableOpacity style={{ alignItems: 'center' }}>
+    <Text style={{ fontWeight: '700', fontSize: 18 }}>{userPosts.length}</Text>
+    <Text style={{ fontSize: 13, color: '#888' }}>Posts</Text>
+  </TouchableOpacity>
+
+  <View style={{ width: 1, backgroundColor: '#eee', height: '100%' }} />
+
+  {/* Followers */}
+  <TouchableOpacity
+    onPress={() => navigation.navigate('FollowersScreen')}
+    style={{ alignItems: 'center' }}
+  >
+    <Text style={{ fontWeight: '700', fontSize: 18 }}>{followers.length}</Text>
+    <Text style={{ fontSize: 13, color: '#888' }}>Followers</Text>
+  </TouchableOpacity>
+
+  <View style={{ width: 1, backgroundColor: '#eee', height: '100%' }} />
+
+  {/* Following */}
+  <TouchableOpacity
+    onPress={() => navigation.navigate('FollowingScreen')}
+    style={{ alignItems: 'center' }}
+  >
+    <Text style={{ fontWeight: '700', fontSize: 18 }}>{following.length}</Text>
+    <Text style={{ fontSize: 13, color: '#888' }}>Following</Text>
+  </TouchableOpacity>
+</View>
+
+
+{/* Divider */}
+<View
+  style={{
+    height: 0.5,
+    backgroundColor: '#ccc',
+    marginTop: 12,
+    marginHorizontal: 16,
+    marginBottom: 8,
+  }}
+/>
+
 
       {/* Loader */}
       {loading && (

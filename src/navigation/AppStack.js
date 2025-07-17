@@ -32,6 +32,8 @@ import { Printer } from "lucide-react-native";
 import ProfileUpdateSuccess from "../screen/Profile/ProfileUpdateSuccess";
 import KYC from "../screen/Profile/kyc";
 import PostDetailScreen from "../screen/Community/PostDetails";
+import FollowersScreen from "../screen/Community/FollowersScreen";
+import FollowingScreen from "../screen/Community/FollowingScreen";
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -307,6 +309,16 @@ function AppStack() {
         }}
       />
       <Stack.Screen name="PostDetailScreen" component={PostDetailScreen}  options={{ headerTitle: "Post Details" }} />
+<Stack.Screen name="FollowersScreen"
+
+component={FollowersScreen}  options={{
+          headerTitle: "Followers",
+          headerShadowVisible: false, // React Navigation v6+
+       } }/>
+<Stack.Screen name="FollowingScreen" component={FollowingScreen} options={{
+          headerTitle: "Followings",
+          headerShadowVisible: false, // React Navigation v6+
+       } } />
 
       <Stack.Screen
         name="Tickets"

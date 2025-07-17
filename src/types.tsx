@@ -208,5 +208,7 @@ export type RootStackParamList = {
   KYC:undefined,
   EnquiryDetail: {enquiry: Enquirer};
 PostDetailScreen:undefined
+FollowersScreen:undefined;
+FollowingScreen:undefined
   // add other screens here
 };

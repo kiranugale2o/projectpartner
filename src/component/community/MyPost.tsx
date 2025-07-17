@@ -118,51 +118,51 @@ const MyPost: React.FC<{ post: PostProps }> = ({ post }) => {
  const updatePost = async () => {
   const formData = new FormData();
   formData.append('postContent', content);
-  
- 
-    if (image) {
-  formData.append('image', {
-    uri: image.uri!,
-    type: image.type!,
-    name: image.fileName ?? 'photo.jpg',
-  });
-}
 
+  // Only append if the image is actually a new file
+  if (image && typeof image === 'object' && image.uri) {
+    formData.append('image', {
+      uri: image.uri,
+      type: image.type,
+      name: image.fileName ?? 'photo.jpg',
+    });
+  }
 
   try {
-    const response = await fetch(`https://api.reparv.in/salesapp/post/updated/${post?.postId}`, {
-      method: 'PUT',
-    
-      body: formData,
-    });
+    const response = await fetch(
+      `https://api.reparv.in/salesapp/post/updated/${post?.postId}`,
+      {
+        method: 'PUT',
+        body: formData,
+      }
+    );
 
     const data = await response.json();
 
     if (response.ok) {
       setVisible(false);
-  
       Toast.show({
-        type:'success',
-        text1:'Post updated successfully'
-      })
-      navigation.goBack()
+        type: 'success',
+        text1: 'Post updated successfully',
+      });
+      navigation.goBack();
       console.log('Post updated successfully:', data);
-      // You can update state or navigate here
     } else {
-        Toast.show({
-        type:'error',
-        text1:'Failed to update post:'
-      })
+      Toast.show({
+        type: 'error',
+        text1: 'Failed to update post:',
+      });
       console.error('Failed to update post:', data);
     }
   } catch (error) {
-      Toast.show({
-        type:'error',
-        text1:'Failed to update post:'
-      })
+    Toast.show({
+      type: 'error',
+      text1: 'Failed to update post:',
+    });
     console.error('API error:', error);
   }
 };
+
 
 
 const deletePost = async () => {
