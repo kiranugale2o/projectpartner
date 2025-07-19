@@ -32,6 +32,7 @@ import KYC from '../screen/Profile/kyc';
 import PostDetailScreen from '../screen/Community/PostDetails';
 import FollowersScreen from '../screen/Community/FollowersScreen';
 import FollowingScreen from '../screen/Community/FollowingScreen';
+import EligibilityForm from '../screen/Booking/EligibilityForm';
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -209,6 +210,14 @@ function MyTabs() {
 
 // Stack Navigator Component
 function AppStack() {
+  function capitalizeWords(str) {
+    return str
+      .toLowerCase()
+      .split(' ')
+      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(' ');
+  }
+
   const auth = useContext(AuthContext);
   return (
     <Stack.Navigator initialRouteName="MainTabs">
@@ -231,10 +240,12 @@ function AppStack() {
           },
         }}
       />
-
       <Stack.Screen name="EnquiryDetail" component={EnquiryDetailScreen} />
-
-      <Stack.Screen name="PropertyDetails" component={PropertyDetails} />
+      <Stack.Screen
+        name="PropertyDetails"
+        component={PropertyDetails}
+        options={{ headerTitle: `${capitalizeWords(auth?.propertyName)}` }}
+      />
       <Stack.Screen
         name="SelectTerritoryPartner"
         component={SelectTerritoryPartner}
@@ -250,12 +261,17 @@ function AppStack() {
         component={ConfirmMeetingCard}
         options={{ headerTitle: 'Confirm Your Meeting' }}
       />
+
+      <Stack.Screen
+        name="EligibilityForm"
+        component={EligibilityForm}
+        options={{ headerTitle: 'Check EMI Eligibility' }}
+      />
       <Stack.Screen
         name="SuccessScreen"
         component={SuccessScreen}
         options={{ headerShown: false }}
       />
-
       <Stack.Screen
         name="Flat"
         component={BookingFlats}
@@ -275,7 +291,6 @@ function AppStack() {
         name="ProfileUpdateSuccess"
         component={ProfileUpdateSuccess}
       />
-
       <Stack.Screen
         name="NewPost"
         component={NewPost}
@@ -323,7 +338,6 @@ function AppStack() {
           headerShadowVisible: false, // React Navigation v6+
         }}
       />
-
       <Stack.Screen
         name="Tickets"
         component={Tickets}

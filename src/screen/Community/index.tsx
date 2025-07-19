@@ -34,6 +34,8 @@ import { AuthContext } from '../../context/AuthContext';
 import Loader from '../../component/loader';
 import MyPost from '../../component/community/MyPost';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { ArrowRightCircleIcon } from 'lucide-react-native';
+import { Modal } from 'react-native/types_generated/index';
 
 interface SalesPerson {
   id: number;
@@ -633,94 +635,41 @@ const Community: React.FC = () => {
         <View style={{ flex: 1, backgroundColor: 'white', width: '100%' }}>
           {/* Header */}
 
-          {/* Profile Section */}
-          <View
-            style={{
-              alignItems: 'center',
-              paddingVertical: 20,
-              backgroundColor: '#fff',
-            }}
-          >
-            <Image
-              source={
-                userData?.userimage === null
-                  ? require('../../../assets/community/user.png')
-                  : { uri: `https://api.reparv.in${userData?.userimage}` }
-              }
-              style={{
-                width: 100,
-                height: 100,
-                borderRadius: 50,
-                borderWidth: 2,
-                borderColor: '#40f45eff',
-                marginBottom: 10,
-                shadowColor: '#000',
-                shadowOffset: { width: 0, height: 2 },
-                shadowOpacity: 0.1,
-                shadowRadius: 4,
-                elevation: 3,
-              }}
-            />
+          <View>
+            {/* Profile */}
+            <View style={newstyles.profileHeader}>
+              <Image
+                source={
+                  userData?.userimage
+                    ? { uri: `https://api.reparv.in${userData?.userimage}` }
+                    : require('../../../assets/community/user.png')
+                }
+                style={newstyles.avatar}
+              />
+              <View style={newstyles.profileRight}>
+                <Text style={newstyles.name}>{userData?.fullname}</Text>
+                <View style={newstyles.statsRow}>
+                  <Stat label="Posts" value={userPosts?.length} />
 
-            <Text style={{ fontSize: 18, fontWeight: '700', color: '#222' }}>
-              {userData?.fullname}
-            </Text>
-          </View>
+                  <View
+                    style={{ marginRight: 30, flexDirection: 'row', gap: 10 }}
+                  >
+                    <TouchableOpacity
+                      onPress={() => navigation.navigate('FollowersScreen')}
+                      style={{ marginRight: 10 }}
+                    >
+                      <Stat label="Followers" value={followers?.length} />
+                    </TouchableOpacity>
 
-          {/* Stats Section */}
-          <View
-            style={{
-              flexDirection: 'row',
-              justifyContent: 'space-around',
-              paddingVertical: 16,
-              backgroundColor: '#fff',
-              marginHorizontal: 16,
-              marginTop: -10,
-              borderRadius: 12,
-              elevation: 2,
-              shadowColor: '#000',
-              shadowOffset: { width: 0, height: 2 },
-              shadowOpacity: 0.05,
-              shadowRadius: 4,
-            }}
-          >
-            {/* Posts */}
-            <TouchableOpacity style={{ alignItems: 'center' }}>
-              <Text style={{ fontWeight: '700', fontSize: 18 }}>
-                {userPosts.length}
-              </Text>
-              <Text style={{ fontSize: 13, color: '#888' }}>Posts</Text>
-            </TouchableOpacity>
-
-            <View
-              style={{ width: 1, backgroundColor: '#eee', height: '100%' }}
-            />
-
-            {/* Followers */}
-            <TouchableOpacity
-              onPress={() => navigation.navigate('FollowersScreen')}
-              style={{ alignItems: 'center' }}
-            >
-              <Text style={{ fontWeight: '700', fontSize: 18 }}>
-                {followers?.length}
-              </Text>
-              <Text style={{ fontSize: 13, color: '#888' }}>Followers</Text>
-            </TouchableOpacity>
-
-            <View
-              style={{ width: 1, backgroundColor: '#eee', height: '100%' }}
-            />
-
-            {/* Following */}
-            <TouchableOpacity
-              onPress={() => navigation.navigate('FollowingScreen')}
-              style={{ alignItems: 'center' }}
-            >
-              <Text style={{ fontWeight: '700', fontSize: 18 }}>
-                {following?.length}
-              </Text>
-              <Text style={{ fontSize: 13, color: '#888' }}>Following</Text>
-            </TouchableOpacity>
+                    <TouchableOpacity
+                      onPress={() => navigation.navigate('FollowingScreen')}
+                    >
+                      <Stat label="Following" value={following?.length} />
+                    </TouchableOpacity>
+                  </View>
+                </View>
+              </View>
+            </View>
           </View>
 
           {/* Divider */}
@@ -801,6 +750,20 @@ const Community: React.FC = () => {
   );
 };
 
+/* Components */
+const Stat = ({ label, value }: { label: string; value: number }) => (
+  <View style={newstyles.statBox}>
+    <Text style={newstyles.statValue}>{value}</Text>
+    <Text style={newstyles.statLabel}>{label}</Text>
+  </View>
+);
+
+const Info = ({ label, value }: { label: string; value: string }) => (
+  <View style={newstyles.infoPair}>
+    <Text style={newstyles.infoLabel}>{label}</Text>
+    <Text style={newstyles.infoValue}>{value}</Text>
+  </View>
+);
 const styles = StyleSheet.create({
   frame135: {
     width: '100%',
@@ -1028,6 +991,125 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: '#777',
     textAlign: 'right',
+  },
+  postThumb: {
+    width: THUMB_SIZE,
+    height: THUMB_SIZE,
+    margin: GRID_GAP,
+    backgroundColor: '#ddd',
+  },
+  postThumbWrapper: {
+    margin: GRID_GAP,
+    width: THUMB_SIZE,
+    height: THUMB_SIZE,
+  },
+
+  textOnlyThumb: {
+    backgroundColor: '#f0f0f0',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 6,
+  },
+
+  textOnlyContent: {
+    fontSize: 12,
+    color: '#333',
+    textAlign: 'center',
+  },
+
+  noPostBox: {
+    alignItems: 'center',
+    marginTop: 60,
+    gap: 12,
+  },
+  noPostText: { fontSize: 18, color: '#4b5563' },
+
+  modalContent: {
+    flex: 1,
+    backgroundColor: '#fff',
+    paddingTop: 50,
+  },
+  closeBtn: {
+    position: 'absolute',
+    top: 0,
+    right: 20,
+    zIndex: 10,
+    padding: 10,
+  },
+  closeText: {
+    color: '#007aff',
+    fontSize: 16,
+    fontWeight: '600',
+  },
+});
+
+const newstyles = StyleSheet.create({
+  page: { flex: 1, backgroundColor: '#fff' },
+
+  profileHeader: {
+    flexDirection: 'row',
+    paddingHorizontal: 16,
+    paddingVertical: 20,
+  },
+  avatar: {
+    width: 90,
+    height: 90,
+    borderRadius: 45,
+  },
+  profileRight: {
+    flex: 1,
+    marginLeft: 20,
+    justifyContent: 'center',
+  },
+  name: { fontSize: 20, fontWeight: '700', color: '#111' },
+  statValue: { fontSize: 16, fontWeight: '700', color: '#111' },
+  statLabel: { fontSize: 13, color: '#666' },
+
+  statsRow: {
+    flexDirection: 'row',
+    //  justifyContent: 'space-between',
+    marginTop: 12,
+  },
+  statBox: { justifyContent: 'space-evenly', flex: 1 },
+
+  infoRow: {
+    flexDirection: 'row',
+    //  justifyContent: 'space-around',
+    paddingVertical: 8,
+    borderTopWidth: 0.5,
+    borderBottomWidth: 0.5,
+    borderColor: '#e5e5e5',
+  },
+  infoPair: { alignItems: 'center' },
+  infoLabel: { fontSize: 13, fontWeight: '600', color: '#666' },
+  infoValue: { fontSize: 13, color: '#111' },
+
+  followBtn: {
+    marginTop: 12,
+    alignSelf: 'stretch',
+    backgroundColor: '#00C851',
+    paddingVertical: 6,
+    borderRadius: 6,
+  },
+  followText: {
+    textAlign: 'center',
+    color: '#fff',
+    fontWeight: '600',
+    fontSize: 14,
+  },
+  followBtnOutline: {
+    backgroundColor: '#fff',
+    borderWidth: 1,
+    borderColor: '#dbdbdb',
+  },
+  followTextOutline: {
+    color: '#111',
+  },
+
+  grid: {
+    paddingTop: GRID_GAP,
+    paddingHorizontal: GRID_GAP,
+    paddingBottom: 80,
   },
   postThumb: {
     width: THUMB_SIZE,

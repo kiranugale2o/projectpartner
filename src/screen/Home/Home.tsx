@@ -56,6 +56,16 @@ interface CityOptions {
   stateId: string;
 }
 
+interface DashboardStats {
+  totalDealAmount: number;
+  totalCustomer: number;
+  totalDealInSquareFeet: number;
+  selfEarning: number;
+  totalEnquiry: number;
+  totalProperty: number;
+  totalTicket: number;
+}
+
 const Home: React.FC = () => {
   type NavigationProp = NativeStackNavigationProp<
     RootStackParamList,
@@ -166,7 +176,15 @@ const Home: React.FC = () => {
   }, []);
 
   const [overviewData, setOverviewData] = useState([]);
-  const [overviewCountData, setOverviewCountData] = useState({});
+  const [overviewCountData, setOverviewCountData] = useState<DashboardStats>({
+    totalDealAmount: 0,
+    totalCustomer: 0,
+    totalDealInSquareFeet: 0,
+    selfEarning: 0,
+    totalEnquiry: 0,
+    totalProperty: 0,
+    totalTicket: 0,
+  });
   const [newEnquiry, setNewEnquiry] = useState<NewEnquiry>({
     customer: '',
     contact: '',

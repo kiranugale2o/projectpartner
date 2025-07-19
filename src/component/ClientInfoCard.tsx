@@ -220,8 +220,6 @@ const ClientInfoCard: React.FC<Props> = ({ enquiry }) => {
           //visibilityTime: 5000,
         });
         setTokenModel(false);
-
-        console.log('Status updated successfully:', data);
       } else {
         console.error('Failed to update status:', data);
       }
@@ -386,7 +384,6 @@ const ClientInfoCard: React.FC<Props> = ({ enquiry }) => {
       const data = await response.json();
 
       if (!response.ok) {
-        console.log('Error:', data.message);
         Alert.alert('Errog', data.message);
       } else {
         await changeStatus(enquiry?.enquirersid, 'Token');
@@ -600,33 +597,6 @@ const ClientInfoCard: React.FC<Props> = ({ enquiry }) => {
         });
       }
 
-      // Clear form only after successful fetch
-      // setEnquiryUpdateDetails({
-      //   enquirersid: '',
-      //   propertyid: '',
-      //   salespersonid: '',
-      //   territorypartnerid: '',
-      //   source: '',
-      //   customer: '',
-      //   contact: '',
-      //   location: '',
-      //   city: '',
-      //   minbudget: null,
-      //   maxbudget: null,
-      //   category: '',
-      //   status: '',
-      //   assign: '',
-      //   message: '',
-      //   visitdate: '',
-      //   territorystatus: '',
-      //   state: '',
-      //   updated_at: '',
-      //   created_at: '',
-      //   territoryName: '',
-      //   territoryContact: '',
-      //   territoryFollowUp: '',
-      //   territoryStatus: '',
-      // });
       setEnquiryUpdateDetails({
         customer: '',
         contact: '',
@@ -659,7 +629,7 @@ const ClientInfoCard: React.FC<Props> = ({ enquiry }) => {
       );
       if (!response.ok) throw new Error('Failed to fetch City.');
       const data = await response.json();
-      console.log(data);
+
       fetchTerritoryPartner(data.city);
     } catch (err) {
       console.error('Error fetching :', err);
@@ -823,7 +793,7 @@ const ClientInfoCard: React.FC<Props> = ({ enquiry }) => {
         },
       );
       const data = await response.json();
-      console.log(response);
+
       if (response.ok) {
         setTerritoryModel(false);
         viewEnquiry(enquiry?.enquirersid, '');
@@ -1073,7 +1043,7 @@ const ClientInfoCard: React.FC<Props> = ({ enquiry }) => {
                   <TouchableOpacity onPress={() => setModalVisible(false)}>
                     <Text style={styles.cancel}>X</Text>
                   </TouchableOpacity>
-                  <View style={styles.modalContainer}>
+                  <View style={styles.smodalContainer}>
                     <FlatList
                       data={optionsl}
                       keyExtractor={item => item.value}
@@ -1376,6 +1346,7 @@ const ClientInfoCard: React.FC<Props> = ({ enquiry }) => {
                       borderRadius: 10,
                       padding: 12,
                       marginBottom: 20,
+                      color: 'black',
                     }}
                   />
                   <Text
@@ -1397,6 +1368,7 @@ const ClientInfoCard: React.FC<Props> = ({ enquiry }) => {
                       borderRadius: 10,
                       padding: 12,
                       marginBottom: 12,
+                      color: 'black',
                     }}
                   />
 
@@ -2479,7 +2451,7 @@ const ClientInfoCard: React.FC<Props> = ({ enquiry }) => {
                       justifyContent: 'space-between',
                     }}
                   >
-                    <Text style={Sstyles.title}>
+                    <Text style={[Sstyles.title, { color: 'black' }]}>
                       Update Property to Enquiry
                     </Text>
                     <X
@@ -2575,6 +2547,7 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: 'bold',
     marginBottom: 10,
+    color: 'black',
   },
 
   leftContainer: {
@@ -2647,7 +2620,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0,0,0,0.4)',
     justifyContent: 'flex-end',
   },
-  modalContainer: {
+  smodalContainer: {
     flexDirection: 'row',
     backgroundColor: 'white',
     padding: 20,
@@ -2766,6 +2739,7 @@ const Sstyles = StyleSheet.create({
     fontSize: 18,
     fontWeight: 'bold',
     marginBottom: 10,
+    color: 'black',
   },
 
   modal: {

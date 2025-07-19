@@ -2,7 +2,7 @@ import { useNavigation } from '@react-navigation/native';
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
 import { EllipsisVertical } from 'lucide-react-native';
-import React, { useState } from 'react';
+import React, { useContext, useState } from 'react';
 import {
   View,
   Text,
@@ -19,6 +19,7 @@ import Svg, { Path } from 'react-native-svg';
 import Toast from 'react-native-toast-message';
 import { RootStackParamList } from '../../types';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { AuthContext } from '../../context/AuthContext';
 
 type PostProps = {
   postId: number;
@@ -177,7 +178,7 @@ const MyPost: React.FC<{ post: PostProps }> = ({ post }) => {
 
       if (response.ok) {
         Alert.alert('Success', 'Post deleted successfully');
-        // Optional: Refresh post list or update UI
+        // Optional: Refresh post list or update
         navigation.goBack();
       } else {
         Alert.alert('Error', data.message || 'Failed to delete post');
@@ -187,6 +188,7 @@ const MyPost: React.FC<{ post: PostProps }> = ({ post }) => {
       Alert.alert('Error', 'Something went wrong while deleting the post.');
     }
   };
+  const auth = useContext(AuthContext);
 
   return (
     <>
@@ -197,7 +199,7 @@ const MyPost: React.FC<{ post: PostProps }> = ({ post }) => {
             <ImageBackground
               source={
                 post.userimage
-                  ? { uri: `https://api.reparv.in${post.userimage}` }
+                  ? { uri: `https://api.reparv.in${post?.userimage}` }
                   : require('../../../assets/community/user.png')
               }
               style={styles.avatar}

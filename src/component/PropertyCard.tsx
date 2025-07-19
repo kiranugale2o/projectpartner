@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import {
   View,
   Text,
@@ -13,6 +13,7 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useNavigation } from '@react-navigation/native';
 import { PropertyInfo, RootStackParamList } from '../types';
 import { CheckCheck } from 'lucide-react-native';
+import { AuthContext } from '../context/AuthContext';
 
 interface Property {
   propertyid: number;
@@ -119,11 +120,12 @@ const PropertyCard: React.FC<Props> = ({ pdata }) => {
 
   const showApprovedBy = pdata?.propertyCategory !== 'FarmLand';
   const showRERA = ['NewFlat', 'NewPlot'].includes(pdata?.propertyCategory);
-
+  const auth = useContext(AuthContext);
   return (
     <Pressable
       style={styles.card}
       onPress={() => {
+        auth?.setPropertyName(pdata?.propertyName);
         navigation.navigate('PropertyDetails', {
           propertyid: pdata.propertyid,
           enquirersid: null,
@@ -134,8 +136,8 @@ const PropertyCard: React.FC<Props> = ({ pdata }) => {
     >
       <ImageBackground
         source={
-          getFrontImageUrl(pdata.frontView)
-            ? { uri: getFrontImageUrl(pdata.frontView)! }
+          getFrontImageUrl(pdata?.frontView)
+            ? { uri: getFrontImageUrl(pdata?.frontView)! }
             : require('../../assets/home/notfound.png')
         }
         style={styles.image}

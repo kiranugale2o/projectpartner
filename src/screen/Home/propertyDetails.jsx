@@ -14,10 +14,17 @@ import {
 } from 'react-native';
 import Svg, { Defs, LinearGradient, Path, Rect, Stop } from 'react-native-svg';
 import PropertyOverviewCard from '../../component/PropertyOverviewCard';
-import { RouteProp, useRoute } from '@react-navigation/native';
+import { RouteProp, useNavigation, useRoute } from '@react-navigation/native';
 import { PropertyInfo, RootStackParamList } from '../../types';
 import { FormatPrice } from '../../utils';
-import { CheckCheck, MapPin, Star, X, XCircle } from 'lucide-react-native';
+import {
+  CheckCheck,
+  MapPin,
+  Navigation,
+  Star,
+  X,
+  XCircle,
+} from 'lucide-react-native';
 import Wings from '../../component/Wings';
 import SuccessModal from '../../component/PaymentModules/SuccessModel';
 import ConfirmBookingPopup from '../../component/ConfirmBookingPopup';
@@ -43,27 +50,30 @@ const icons = {
   security: require('../../../assets/icons/security.png'),
 };
 
-type PropertyDetailsRouteProp = RouteProp<
-  RootStackParamList,
-  'PropertyDetails'
->;
+// type PropertyDetailsRouteProp = RouteProp<
+//   RootStackParamList,
+//   'PropertyDetails'
+// >;
 
-const PropertyDetails: React.FC = () => {
-  const route = useRoute<PropertyDetailsRouteProp>();
+// const PropertyDetails: React.FC = () => {
+//   const route = useRoute<PropertyDetailsRouteProp>();
+const PropertyDetails = () => {
+  const route = useRoute();
+  const { propertyid, enquirersid, salespersonid, booktype } = route.params;
+
+  const navigation = useNavigation();
   const [showDrawer, setshowDrawer] = useState(false);
-  const { propertyid } = route.params;
-  const { enquirersid } = route.params;
-  const { salespersonid } = route.params;
-  const { booktype } = route.params;
+
   const [showPopup, setShowPopup] = useState(false);
   const auth = useContext(AuthContext);
   const [showSiteVisitPopup, setShowSiteVisitPopup] = useState(false);
 
   const [modalVisible, setModalVisible] = useState(false);
-  const [selectedImageUri, setSelectedImageUri] = useState<string | null>(null);
+  const [selectedImageUri, setSelectedImageUri] = useState(null);
   const [showBenifits, setShowBenifits] = useState(false);
-  const [propertyData, setPropertyData] = useState<PropertyInfo>();
+  const [propertyData, setPropertyData] = useState(null);
   const [loading, setLoading] = useState(true);
+
   useEffect(() => {
     const fetchPropertyData = async () => {
       try {
@@ -83,14 +93,15 @@ const PropertyDetails: React.FC = () => {
     fetchPropertyData();
   }, [propertyid]);
 
-  const scrollRef = useRef<ScrollView>(null);
+  const scrollRef = useRef(null);
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [selectedTab, setSelectedTab] = useState<'Features' | 'Benefits'>(
-    'Features',
-  );
-  const scrollTo = (index: number) => {
-    scrollRef.current?.scrollTo({ x: index * width, animated: true });
-    setCurrentIndex(index);
+  const [selectedTab, setSelectedTab] = useState('Features');
+
+  const scrollTo = index => {
+    if (scrollRef.current) {
+      scrollRef.current.scrollTo({ x: index * width, animated: true });
+      setCurrentIndex(index);
+    }
   };
 
   const handleNext = () => {
@@ -105,33 +116,47 @@ const PropertyDetails: React.FC = () => {
     }
   };
 
+  // Safely parse JSON or return null
+  const safeParse = str => {
+    try {
+      const arr = JSON.parse(str);
+      return Array.isArray(arr) ? arr[0] : null;
+    } catch {
+      return null;
+    }
+  };
+
   const images = [
-    propertyData?.frontView ? JSON.parse(propertyData.frontView)[0] : null,
-    propertyData?.sideView ? JSON.parse(propertyData.sideView)[0] : null,
-    propertyData?.hallView ? JSON.parse(propertyData.hallView)[0] : null,
-    propertyData?.kitchenView ? JSON.parse(propertyData.kitchenView)[0] : null,
-    propertyData?.bedroomView ? JSON.parse(propertyData.bedroomView)[0] : null,
-    propertyData?.nearestLandmark
-      ? JSON.parse(propertyData.nearestLandmark)[0]
-      : null,
-    propertyData?.developedAmenities
-      ? JSON.parse(propertyData.developedAmenities)[0]
-      : null,
+    safeParse(propertyData?.frontView),
+    safeParse(propertyData?.sideView),
+    safeParse(propertyData?.hallView),
+    safeParse(propertyData?.kitchenView),
+    safeParse(propertyData?.bedroomView),
+    safeParse(propertyData?.nearestLandmark),
+    safeParse(propertyData?.developedAmenities),
   ];
 
+  const icons = {
+    location: require('../../../assets/icons/location.png'),
+    area: require('../../../assets/icons/area.png'),
+    garage: require('../../../assets/icons/home.png'),
+    balcony: require('../../../assets/icons/balcony.png'),
+    built: require('../../../assets/icons/built.png'),
+    furniture: require('../../../assets/icons/furniture.png'),
+    amenities: require('../../../assets/icons/gym.png'),
+    construction: require('../../../assets/icons/construction.png'),
+    elevator: require('../../../assets/icons/elevator.png'),
+    cctv: require('../../../assets/icons/cctv.png'),
+    security: require('../../../assets/icons/security.png'),
+  };
+
   const primaryItems = [
-    {
-      icon: icons.location,
-      text: propertyData?.locationFeature,
-    },
+    { icon: icons.location, text: propertyData?.locationFeature },
     { icon: icons.area, text: propertyData?.sizeAreaFeature },
     { icon: icons.garage, text: propertyData?.parkingFeature },
     { icon: icons.balcony, text: propertyData?.terraceFeature },
     { icon: icons.built, text: propertyData?.ageOfPropertyFeature },
-    {
-      icon: icons.furniture,
-      text: propertyData?.furnishingFeature,
-    },
+    { icon: icons.furniture, text: propertyData?.furnishingFeature },
   ];
 
   const secondaryItems = [
@@ -174,7 +199,7 @@ const PropertyDetails: React.FC = () => {
   ];
   const [showSuccess, setShowSuccess] = useState(false);
 
-  const parse = (val: any) => {
+  const parse = val => {
     const num = Number(val);
     return isNaN(num) ? 0 : num;
   };
@@ -306,9 +331,22 @@ const PropertyDetails: React.FC = () => {
             { key: 'developedAmenities', label: 'Amenities' },
           ].map(({ key, label }) => {
             const value = propertyData?.[key];
-            if (!value) return null;
 
-            const imageUri = `https://api.reparv.in${JSON.parse(value)[0]}`;
+            // Skip if value is missing or empty string
+            if (!value || value === '') return null;
+
+            let parsed = [];
+            try {
+              parsed = JSON.parse(value);
+            } catch {
+              return null; // Skip invalid JSON
+            }
+
+            // Skip if array is empty or first value is falsy
+            if (!parsed || parsed.length === 0 || !parsed[0]) return null;
+
+            const imageUri = `https://api.reparv.in${parsed[0]}`;
+
             return (
               <TouchableOpacity
                 key={key}
@@ -649,7 +687,12 @@ const PropertyDetails: React.FC = () => {
                 </Text>
               </View>
               <View style={{ alignItems: 'flex-end', marginTop: 10 }}>
-                <View style={styles.emibox}>
+                <TouchableOpacity
+                  onPress={() => {
+                    navigation.navigate('EligibilityForm');
+                  }}
+                  style={styles.emibox}
+                >
                   <Text style={styles.label}>Check eligibility</Text>
                   <Svg
                     style={{ marginTop: 6 }}
@@ -665,7 +708,7 @@ const PropertyDetails: React.FC = () => {
                     <Path d="M18 8L22 12L18 16" />
                     <Path d="M2 12H22" />
                   </Svg>
-                </View>
+                </TouchableOpacity>
               </View>
             </View>
 
@@ -1149,16 +1192,14 @@ const PropertyDetails: React.FC = () => {
   );
 };
 
-const ItemRow = ({ label, value }: { label: string; value: string }) => (
+const ItemRow = ({ label, value }) => (
   <View style={dstyles.row}>
     <Text style={dstyles.label}>{label}</Text>
     <Text style={dstyles.value}>{value}</Text>
   </View>
 );
 
-const InfoText = ({ text }: { text: string }) => (
-  <Text style={styles.infoText}>{text}</Text>
-);
+const InfoText = ({ text }) => <Text style={styles.infoText}>{text}</Text>;
 
 const dstyles = StyleSheet.create({
   drawer: {
@@ -1562,13 +1603,97 @@ const styles = StyleSheet.create({
 
 export default PropertyDetails;
 
-const PriceBenModal = ({
-  visible,
-  onClose,
-}: {
-  visible: boolean;
-  onClose: () => void;
-}) => {
+// const PriceBenModal = ({
+//   visible,
+//   onClose,
+// }: {
+//   visible: boolean,
+//   onClose: () => void,
+// }) => {
+//   const benefits = [
+//     {
+//       title: 'Trusted Investment Guidance',
+//       description:
+//         'We prioritize your needs and budget to help you invest wisely—no hidden agendas, just honest support.',
+//     },
+//     {
+//       title: 'Expert Partner Network',
+//       description:
+//         'Our trained Sales, Territory, Onboarding, and Project Partners offer personalized service, ensuring a smooth buying experience.',
+//     },
+//     {
+//       title: 'End-to-End Assistance',
+//       description:
+//         'From property visits to home loans and registration, we handle it all—so you can relax and focus on your dream home.',
+//     },
+//     {
+//       title: 'Verified Properties Only',
+//       description:
+//         'Every listing on Reparv is thoroughly verified for legal clarity, RERA compliance, and construction quality.',
+//     },
+//     {
+//       title: 'Transparent Process',
+//       description:
+//         'No confusing jargon or last-minute surprises—we keep you informed at every step with clear documentation.',
+//     },
+//   ];
+
+//   return (
+//     <Modal visible={visible} transparent animationType="slide">
+//       <View style={priceBen.overlay}>
+//         <View style={priceBen.modal}>
+//           <View style={priceBen.header}>
+//             <View style={priceBen.titleRow}>
+//               {/* <Icon name="verified" size={24} color="#0BB501" /> */}
+//               <Svg width="25" height="25" viewBox="0 0 25 25" fill="none">
+//                 <Path
+//                   d="M9.10195 23L7.20195 19.8L3.60195 19L3.95195 15.3L1.50195 12.5L3.95195 9.7L3.60195 6L7.20195 5.2L9.10195 2L12.502 3.45L15.902 2L17.802 5.2L21.402 6L21.052 9.7L23.502 12.5L21.052 15.3L21.402 19L17.802 19.8L15.902 23L12.502 21.55L9.10195 23ZM11.452 16.05L17.102 10.4L15.702 8.95L11.452 13.2L9.30195 11.1L7.90195 12.5L11.452 16.05Z"
+//                   fill="url(#paint0_linear_1558_2024)"
+//                 />
+//                 <Defs>
+//                   <LinearGradient
+//                     id="paint0_linear_1558_2024"
+//                     x1="23.502"
+//                     y1="12.5"
+//                     x2="1.50195"
+//                     y2="12.5"
+//                     gradientUnits="userSpaceOnUse"
+//                   >
+//                     <Stop stop-color="#FFFFFF" />
+//                     <Stop offset="1" stop-color="#0BB501" />
+//                   </LinearGradient>
+//                 </Defs>
+//               </Svg>
+
+//               <Text style={priceBen.title}>Why buy from REPARV?</Text>
+//             </View>
+//             <TouchableOpacity onPress={onClose}>
+//               <XCircle />
+//             </TouchableOpacity>
+//           </View>
+
+//           {benefits.map((item, index) => (
+//             <View style={priceBen.benefitRow} key={index}>
+//               <Svg width="17" height="17" viewBox="0 0 17 17" fill="none">
+//                 <Path
+//                   d="M4.38398 14.5007L5.46732 9.81732L1.83398 6.66732L6.63398 6.25065L8.50065 1.83398L10.3673 6.25065L15.1673 6.66732L11.534 9.81732L12.6173 14.5007L8.50065 12.0173L4.38398 14.5007Z"
+//                   fill="#EFBF35"
+//                 />
+//               </Svg>
+
+//               <View style={priceBen.benefitTextContainer}>
+//                 <Text style={priceBen.benefitTitle}>{item.title}</Text>
+//                 <Text style={priceBen.benefitDesc}>{item.description}</Text>
+//               </View>
+//             </View>
+//           ))}
+//         </View>
+//       </View>
+//     </Modal>
+//   );
+// };
+
+const PriceBenModal = ({ visible, onClose }) => {
   const benefits = [
     {
       title: 'Trusted Investment Guidance',
@@ -1603,27 +1728,25 @@ const PriceBenModal = ({
         <View style={priceBen.modal}>
           <View style={priceBen.header}>
             <View style={priceBen.titleRow}>
-              {/* <Icon name="verified" size={24} color="#0BB501" /> */}
               <Svg width="25" height="25" viewBox="0 0 25 25" fill="none">
                 <Path
                   d="M9.10195 23L7.20195 19.8L3.60195 19L3.95195 15.3L1.50195 12.5L3.95195 9.7L3.60195 6L7.20195 5.2L9.10195 2L12.502 3.45L15.902 2L17.802 5.2L21.402 6L21.052 9.7L23.502 12.5L21.052 15.3L21.402 19L17.802 19.8L15.902 23L12.502 21.55L9.10195 23ZM11.452 16.05L17.102 10.4L15.702 8.95L11.452 13.2L9.30195 11.1L7.90195 12.5L11.452 16.05Z"
-                  fill="url(#paint0_linear_1558_2024)"
+                  fill="url(#grad1)"
                 />
                 <Defs>
                   <LinearGradient
-                    id="paint0_linear_1558_2024"
+                    id="grad1"
                     x1="23.502"
                     y1="12.5"
                     x2="1.50195"
                     y2="12.5"
                     gradientUnits="userSpaceOnUse"
                   >
-                    <Stop stop-color="#FFFFFF" />
-                    <Stop offset="1" stop-color="#0BB501" />
+                    <Stop stopColor="#FFFFFF" />
+                    <Stop offset="1" stopColor="#0BB501" />
                   </LinearGradient>
                 </Defs>
               </Svg>
-
               <Text style={priceBen.title}>Why buy from REPARV?</Text>
             </View>
             <TouchableOpacity onPress={onClose}>
@@ -1639,7 +1762,6 @@ const PriceBenModal = ({
                   fill="#EFBF35"
                 />
               </Svg>
-
               <View style={priceBen.benefitTextContainer}>
                 <Text style={priceBen.benefitTitle}>{item.title}</Text>
                 <Text style={priceBen.benefitDesc}>{item.description}</Text>
@@ -1651,7 +1773,6 @@ const PriceBenModal = ({
     </Modal>
   );
 };
-
 const priceBen = StyleSheet.create({
   overlay: {
     flex: 1,

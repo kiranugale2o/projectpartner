@@ -58,7 +58,7 @@ interface Props {
   sid: number;
 }
 
-const Wings: React.FC<Props> = ({ pdata, eid, sid }) => {
+const Wings: React.FC<Props> = ({ pdata, eid: any, sid }) => {
   const [selectedRoom, setSelectedRoom] = useState<{
     wing: string;
     room: string;
@@ -189,7 +189,6 @@ const Wings: React.FC<Props> = ({ pdata, eid, sid }) => {
         );
         if (!res.ok) throw new Error('Network response was not ok');
         const data = await res.json();
-        console.log(data);
 
         setProperty(data);
       } catch (error) {

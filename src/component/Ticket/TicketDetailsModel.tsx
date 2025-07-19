@@ -73,7 +73,6 @@ const TicketDetailsModal: React.FC<TicketDetailsModalProps> = ({
   useEffect(() => {
     if (newTicket.departmentid) {
       fetchEmployeeData(newTicket.departmentid);
-      console.log(newTicket.departmentid);
     }
   }, [newTicket.departmentid]);
 
@@ -155,6 +154,7 @@ const TicketDetailsModal: React.FC<TicketDetailsModalProps> = ({
                 fontWeight: 'bold',
                 marginBottom: 16,
                 textAlign: 'center',
+                color: 'black',
               }}
             >
               Ticket Details

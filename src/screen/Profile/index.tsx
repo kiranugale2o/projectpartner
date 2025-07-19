@@ -46,21 +46,25 @@ const Profile: React.FC = () => {
   const [profileImage, setProfileImage] = useState<Asset | null>(null);
 
   const pickImage = () => {
-    launchImageLibrary(
-      {
-        mediaType: 'photo',
-      },
-      response => {
-        if (response.assets && response.assets.length > 0) {
-          const asset = response.assets[0];
-          setProfileImage(asset);
-          handleUpdate();
-        }
-      },
-    );
+    launchImageLibrary({ mediaType: 'photo' }, response => {
+      if (response.didCancel) {
+        console.log('User cancelled image picker');
+        return;
+      }
+      if (response.errorCode) {
+        console.error('ImagePicker Error:', response.errorMessage);
+        Alert.alert('Error', 'Failed to pick image');
+        return;
+      }
+      if (response.assets && response.assets.length > 0) {
+        const asset = response.assets[0];
+        setProfileImage(asset);
+        handleUpdate(asset);
+      }
+    });
   };
 
-  const handleUpdate = async () => {
+  const handleUpdate = async (datas: any) => {
     try {
       const token = await AsyncStorage.getItem('salesPersonToken');
 
@@ -71,11 +75,11 @@ const Profile: React.FC = () => {
       formData.append('email', editedEmail);
 
       // Assuming you have the image info from an image picker, e.g. react-native-image-picker or expo-image-picker
-      if (profileImage) {
+      if (datas) {
         formData.append('image', {
-          uri: profileImage.uri!,
-          type: profileImage.type!,
-          name: profileImage.fileName!,
+          uri: datas.uri!,
+          type: datas.type!,
+          name: datas.fileName!,
         });
       }
 

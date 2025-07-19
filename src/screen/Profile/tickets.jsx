@@ -38,47 +38,21 @@ const issue = {
   issueMessage: '',
 };
 
-export interface Ticket {
-  ticketid: number;
-  ticketadder: string;
-  adminid: string;
-  departmentid: string;
-  employeeid: string;
-  ticketno: string;
-  issue: string;
-  details: string;
-  response: string | null;
-  status: 'Open' | 'Closed' | 'In_Progress';
-  updated_at: string; // e.g., '06 May 2025 | 08:48 AM'
-  created_at: string;
-  admin_name: string | null;
-  department: string | null;
-  employee_name: string | null;
-  uid: string | null;
-}
-interface NewTicket {
-  adminid: string;
-  departmentid: string;
-  employeeid: string;
-  issue: string;
-  details: string;
-}
-
-const Tickets: React.FC = () => {
+const Tickets = () => {
   const [visible, setVisible] = useState(false);
-  const [tickets, setTickets] = useState<Ticket[]>([]);
+  const [tickets, setTickets] = useState([]); // Removed Ticket[] type
   const [drawerHeight] = useState(new Animated.Value(height)); // Starting from bottom
-  const [selectedValue, setSelectedValue] = useState<string>('');
-  const [ticketDes, setTicketDis] = useState<string>('');
-  const [sucessShow, setSuccessShow] = useState<boolean>(false);
-  const [mainScreen, setMain] = useState<boolean>(true);
-  const [buttonShow, setButtonShow] = useState<boolean>(false);
-  const [issueData, setIssueData] = useState<typeof issue>(issue);
+  const [selectedValue, setSelectedValue] = useState('');
+  const [ticketDes, setTicketDis] = useState('');
+  const [sucessShow, setSuccessShow] = useState(false);
+  const [mainScreen, setMain] = useState(true);
+  const [buttonShow, setButtonShow] = useState(false);
+  const [issueData, setIssueData] = useState(issue); // Assuming 'issue' is already defined
   const [isFocused, setIsFocused] = useState(false);
   const [adminData, setAdminData] = useState([]);
   const [departmentData, setDepartmentData] = useState([]);
   const [employeeData, setEmployeeData] = useState([]);
-  const [newTicket, setNewTicketData] = useState<NewTicket>({
+  const [newTicket, setNewTicketData] = useState({
     adminid: '',
     departmentid: '',
     employeeid: '',
@@ -118,7 +92,7 @@ const Tickets: React.FC = () => {
     });
   };
 
-  const handleChange = (name: string, value: string) => {
+  const handleChange = (name, value) => {
     setIssueData({ ...issueData, [name]: value });
     if (issueData.issueType !== '' && issueData?.issueMessage !== '') {
       setButtonShow(true);
@@ -202,7 +176,7 @@ const Tickets: React.FC = () => {
   };
 
   //Fetch department data
-  const fetchEmployeeData = async (id: any) => {
+  const fetchEmployeeData = async id => {
     try {
       const response = await fetch(
         'https://api.reparv.in/sales/tickets/employees/' + id,
@@ -460,8 +434,8 @@ const Tickets: React.FC = () => {
                     {adminData?.map((admin, index) => (
                       <Picker.Item
                         key={index}
-                        label={admin.name}
-                        value={admin.id}
+                        label={admin?.name}
+                        value={admin?.id}
                       />
                     ))}
                   </Picker>

@@ -1,5 +1,4 @@
 import React, { useContext, useEffect, useState } from 'react';
-
 import {
   Image,
   View,
@@ -13,18 +12,13 @@ import {
   TextInput,
   ScrollView,
 } from 'react-native';
-
 import { Picker } from '@react-native-picker/picker';
 import Svg, { Path } from 'react-native-svg';
 import CheckBox from '@react-native-community/checkbox';
-import { RootStackParamList } from '../types';
-import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useNavigation } from '@react-navigation/native';
-
 import { launchImageLibrary } from 'react-native-image-picker';
 import { Loader, X } from 'lucide-react-native';
 import Toast from 'react-native-toast-message';
-import { vi } from 'date-fns/locale';
 import { AuthContext } from '../context/AuthContext';
 import { formatIndianAmount } from '../utils';
 
@@ -38,47 +32,28 @@ const optionsL = [
   { label: 'Cancelled', value: 'cancelled', color: '#EF4444', select: false },
 ];
 
-interface BookingData {
-  bookingid: number;
-  enquirersid: number;
-  amount: number;
-  status: string;
-  propertyid: number | null;
-  customer: string;
-  contact: string;
-  salespersonid: number;
-  fullname: string;
-  propertyName: string | null;
-  dealamount: number | string;
-  tokenamount: number | string;
-}
-
-interface BookingClientInfoCardProps {
-  data: BookingData;
-}
-
-const BookingClientInfoCard: React.FC<BookingClientInfoCardProps> = ({
-  data,
-}) => {
-  type NavigationProp = NativeStackNavigationProp<
-    RootStackParamList,
-    'Sign_In'
-  >;
-
-  const navigation = useNavigation<NavigationProp>();
+const BookingClientInfoCard = ({ data }) => {
+  const navigation = useNavigation();
 
   const [customer, setCustomer] = useState(null);
   const [paymentList, setPaymentList] = useState([]);
   const [showCustomer, setShowCustomer] = useState(false);
-
   const [selectedValue, setSelectedValue] = useState(data.status);
   const [modalVisible, setModalVisible] = useState(false);
   const [opmodalVisible, setOpModalVisible] = useState(false);
-  const [imageUri, setImageUri] = useState<any>();
+  const [imageUri, setImageUri] = useState(null);
+  const [paymentPopup, setPaymentPopUp] = useState(false);
+  const [paymentAmount, setPaymentAmount] = useState('');
+  const [paymentType, setPaymentType] = useState('');
+  const [image, setImage] = useState(null);
+  const [customerPayments, setCustomerPayments] = useState([]);
+  const [submitDisabled, setSubmitDisabled] = useState(false);
+  const [previewImage, setPreviewImage] = useState(null);
+  const [imageShow, setimageShow] = useState(false);
+
   const selected =
     !optionsL.find(opt => opt.value === selectedValue)?.select ||
     !optionsR.find(opt => opt.value === selectedValue)?.select;
-  console.log(selected);
 
   const selectColor =
     optionsL.find(opt => opt.value === selectedValue)?.color ||
@@ -91,9 +66,8 @@ const BookingClientInfoCard: React.FC<BookingClientInfoCardProps> = ({
   const selectedColor =
     optionsL.find(opt => opt.value === selectedValue)?.color ||
     optionsR.find(opt => opt.value === selectedValue)?.color;
-  const handleSelect = (value: string) => {
-    // setSelectedValue(value);
-    // setModalVisible(false);
+
+  const handleSelect = value => {
     if (value === 'View') {
       setOpModalVisible(false);
       setModalVisible(true);
@@ -116,51 +90,31 @@ const BookingClientInfoCard: React.FC<BookingClientInfoCardProps> = ({
     { label: 'View', value: 'View', color: 'black', select: true },
   ];
 
-  const STATUS_PALETTE: Record<string, { bg: string; fg: string }> = {
-    Token: { bg: '#E6F7FF', fg: '#1890FF' }, // Blue
-    'Visit Scheduled': { bg: '#FFFBE6', fg: '#FAAD14' }, // Yellow
-    Visited: { bg: '#F6FFED', fg: '#52C41A' }, // Green
-    Cancelled: { bg: '#FFF1F0', fg: '#FF4D4F' }, // Red
-    'Follow up': { bg: '#F9F0FF', fg: '#722ED1' }, // Purple
+  const STATUS_PALETTE = {
+    Token: { bg: '#E6F7FF', fg: '#1890FF' },
+    'Visit Scheduled': { bg: '#FFFBE6', fg: '#FAAD14' },
+    Visited: { bg: '#F6FFED', fg: '#52C41A' },
+    Cancelled: { bg: '#FFF1F0', fg: '#FF4D4F' },
+    'Follow up': { bg: '#F9F0FF', fg: '#722ED1' },
   };
+
   const { bg: pillBg, fg: pillFg } = STATUS_PALETTE[data?.status] || {
     bg: '#F0F0F0',
     fg: '#333',
   };
-  interface CustomerPayment {
-    customerPaymentId: number;
-    enquirerId: number;
-    paymentAmount: number;
-    paymentType: 'cash' | 'cheque' | 'upi' | string; // add more types if needed
-    paymentImage?: string; // optional in case some records have no image
-    created_at: string;
-    updated_at: string;
-  }
-  //image getting
-  const pickImage = () => {
-    launchImageLibrary(
-      {
-        mediaType: 'photo',
-      },
-      response => {
-        if (response.assets && response.assets.length > 0) {
-          const asset = response.assets[0];
-          setImageUri(asset);
-        }
-      },
-    );
-  };
-  const [paymentPopup, setPaymentPopUp] = useState(false);
-  const [paymentAmount, setPaymentAmount] = useState('');
-  const [paymentType, setPaymentType] = useState('');
-  const [image, setImage] = useState(null);
-  const [customerPayments, setCustomerPayments] = useState<CustomerPayment[]>(
-    [],
-  );
 
-  const [submitDisabled, setSubmitDisabled] = useState(false);
+  const auth = useContext(AuthContext);
+
+  const pickImage = () => {
+    launchImageLibrary({ mediaType: 'photo' }, response => {
+      if (response.assets && response.assets.length > 0) {
+        const asset = response.assets[0];
+        setImageUri(asset);
+      }
+    });
+  };
+
   const getCustomer = async () => {
-    console.log(data);
     try {
       fetch(
         `https://api.reparv.in/sales/customers/payment/get/${data.enquirerid}`,
@@ -174,7 +128,6 @@ const BookingClientInfoCard: React.FC<BookingClientInfoCardProps> = ({
       ).then(res =>
         res.json().then(res => {
           setCustomerPayments(res);
-          console.log(res, 'dd');
         }),
       );
     } catch (error) {
@@ -182,26 +135,20 @@ const BookingClientInfoCard: React.FC<BookingClientInfoCardProps> = ({
     }
   };
 
-  const calculateBalance = (payments: any, customer: any) => {
-    const totalPaid = payments.reduce(
-      (sum: any, p: any) => sum + p?.paymentAmount,
-      0,
-    );
+  const calculateBalance = (payments, customer) => {
+    const totalPaid = payments.reduce((sum, p) => sum + p?.paymentAmount, 0);
     const balance = customer?.dealamount - totalPaid;
     console.log(`Remaining balance: ₹${balance}`);
   };
 
-  const auth = useContext(AuthContext);
-
   useEffect(() => {
     getCustomer();
-    const interval = setInterval(getCustomer, 3000); //tch every 30s
-    return () => clearInterval(interval); // cleanup on unmount
+    const interval = setInterval(getCustomer, 3000);
+    return () => clearInterval(interval);
   }, []);
-  //fetchCustomerPayments();
 
   const addCustomerPayment = async () => {
-    if (submitDisabled) return; // Prevent double click
+    if (submitDisabled) return;
     setSubmitDisabled(true);
 
     const formData = new FormData();
@@ -251,20 +198,14 @@ const BookingClientInfoCard: React.FC<BookingClientInfoCardProps> = ({
       });
     } finally {
       setOpModalVisible(false);
-      setSubmitDisabled(false); // Re-enable the button after completion
+      setSubmitDisabled(false);
     }
   };
 
-  const [previewImage, setPreviewImage] = useState<string | null>(null);
-  const [imageShow, setimageShow] = useState(false);
-  const parseAmount = (val: number | string | undefined | null): number =>
-    isNaN(Number(val)) ? 0 : parseFloat(val as string);
+  const parseAmount = val => (isNaN(Number(val)) ? 0 : parseFloat(val));
   const totalPaidAmount =
     parseAmount(data?.tokenamount) +
-    customerPayments.reduce(
-      (sum: any, p) => sum + parseAmount(p?.paymentAmount),
-      0,
-    );
+    customerPayments.reduce((sum, p) => sum + parseAmount(p?.paymentAmount), 0);
 
   return (
     <>
@@ -701,7 +642,7 @@ const BookingClientInfoCard: React.FC<BookingClientInfoCardProps> = ({
 
           <View style={styles.modalContent}>
             <Image
-              source={{ uri: previewImage! }}
+              source={{ uri: previewImage }}
               style={styles.fullImage}
               resizeMode="contain"
             />

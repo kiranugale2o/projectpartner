@@ -231,7 +231,12 @@ const TicketUpdateModel: React.FC<TicketUpdateProp> = ({
             style={{ flexDirection: 'row', justifyContent: 'space-between' }}
           >
             <Text
-              style={{ fontSize: 18, fontWeight: 'bold', marginBottom: 16 }}
+              style={{
+                fontSize: 18,
+                fontWeight: 'bold',
+                marginBottom: 16,
+                color: 'black',
+              }}
             >
               Ticket Details
             </Text>
@@ -317,7 +322,7 @@ const TicketUpdateModel: React.FC<TicketUpdateProp> = ({
           >
             <Picker
               selectedValue={newTicket.departmentid}
-              enabled={newTicket.adminid !== ''}
+              enabled={newTicket.adminid == ''}
               onValueChange={itemValue =>
                 setNewTicketData({ ...newTicket, departmentid: itemValue })
               }

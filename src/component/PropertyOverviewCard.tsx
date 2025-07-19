@@ -17,12 +17,12 @@ import {
   Grid2x2,
 } from 'lucide-react-native';
 
-const PropertyOverview = (propertyInfo: any) => {
+const PropertyOverview = ({ propertyInfo }: { propertyInfo: any }) => {
   const overviewData = [
     {
       icon: Building,
       label: 'Property Type',
-      value: propertyInfo?.propertyType,
+      value: propertyInfo?.propertyType ?? '',
     },
     { icon: Calendar, label: 'Built Year', value: propertyInfo?.builtYear },
     { icon: Grid3x3, label: 'Built-Up Area', value: propertyInfo?.builtUpArea },
@@ -107,7 +107,7 @@ const PropertyOverview = (propertyInfo: any) => {
             <View style={{ flex: 1 }}>
               <Text style={{ fontSize: 12, color: '#00000066' }}>{label}</Text>
               <Text style={{ fontSize: 14, color: '#000', fontWeight: '400' }}>
-                {value || '—'}
+                {value === null || value === '' ? '_' : value}
               </Text>
             </View>
           </View>

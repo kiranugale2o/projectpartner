@@ -69,7 +69,6 @@ const NewPost: React.FC = () => {
   };
 
   const auth = useContext(AuthContext);
-  console.log(auth);
 
   const handlePost = () => {
     const formData = new FormData();

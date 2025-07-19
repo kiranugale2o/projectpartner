@@ -48,6 +48,7 @@ interface AuthContextType {
   siteVisitModel: boolean;
   dateRange: DateRangeType;
   ticketNumber: number | null;
+  propertyName: string | null;
 
   setUser: (user: UserType | null) => void;
   setToken: (token: string | null) => void;
@@ -62,6 +63,7 @@ interface AuthContextType {
   setSiteVisitModel: (value: boolean) => void;
   setDateRange: (range: DateRangeType) => void;
   setTicketNumber: (value: number | null) => void;
+  setPropertyName: (propertyName: string | null) => void;
 }
 
 // ────────────────────────────────────────────────
@@ -84,6 +86,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   const [token, setToken] = useState<string | null>(null);
   const [user, setUser] = useState<UserType | null>(null);
   const [flatName, setFlatName] = useState<string | null>(null);
+  const [propertyName, setPropertyName] = useState<string | null>('');
   const [image, setImage] = useState<string | null>(null);
   const [propertyinfoId, setPropertyinfoId] = useState<number | null>(null);
   const [dateRange, setDateRange] = useState<DateRangeType>({
@@ -148,6 +151,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         login,
         logout,
         dateRange,
+        propertyName,
         setDateRange,
         isPaymentSuccess,
         setIsPaymentSuccess,
@@ -158,6 +162,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         siteVisitModel,
         setSiteVisitModel,
         setTicketNumber,
+        setPropertyName,
       }}
     >
       {children}
