@@ -79,6 +79,7 @@ const Home: React.FC = () => {
   const [modalVisible, setModalVisible] = useState(false);
   const [cities, setCities] = useState<CityOptions[]>([]);
   const [states, setStates] = useState<StateOption[]>([]);
+  const [contactError, setContactError] = useState('');
 
   // Calculate the Inquiry Section height dynamically based on scroll position
   const inquiryHeight = scrollY.interpolate({
@@ -227,6 +228,11 @@ const Home: React.FC = () => {
     }));
   };
 
+  const isValidMobileNumber = (number: string) => {
+    const mobileRegex = /^[6-9]\d{9}$/; // for Indian 10-digit numbers
+    return mobileRegex.test(number);
+  };
+
   // **Fetch States from API**
   const fetchStates = async () => {
     try {
@@ -266,10 +272,22 @@ const Home: React.FC = () => {
       console.error('Error fetching :', err);
     }
   };
-
+  const isFormValid =
+    newEnquiry?.customer.trim() !== '' &&
+    isValidMobileNumber(newEnquiry?.contact) &&
+    newEnquiry?.category !== '' &&
+    newEnquiry?.minbudget !== null &&
+    newEnquiry?.maxbudget !== null &&
+    newEnquiry?.state !== '' &&
+    newEnquiry?.city !== '' &&
+    newEnquiry?.location.trim() !== '' &&
+    newEnquiry?.message.trim() !== '';
   const addEnquiry = async () => {
-    console.log(newEnquiry);
-
+    setNewEnquiry({
+      ...newEnquiry,
+      salesPersonName: auth?.user?.name ?? '',
+      salesPersonContact: auth?.user?.contact ?? '',
+    });
     try {
       const response = await fetch(
         `https://api.reparv.in/sales/enquiry/add/enquiry`,
@@ -307,6 +325,7 @@ const Home: React.FC = () => {
         salesPersonContact: '',
       });
     } catch (err) {
+      Alert.alert('Error saving enquiry', err);
       console.error('Error saving enquiry:', err);
     }
   };
@@ -876,14 +895,30 @@ const Home: React.FC = () => {
                   placeholderTextColor={'gray'}
                   onChangeText={text => handleEnquiryChange('customer', text)}
                 />
+
                 <Text style={{ fontSize: 14, color: 'gray' }}>
                   Contact Number
                 </Text>
                 <TextInput
                   style={[Sstyles.input, { color: 'black' }]}
                   value={newEnquiry?.contact}
-                  onChangeText={text => handleEnquiryChange('contact', text)}
+                  keyboardType="numeric"
+                  maxLength={10}
+                  placeholderTextColor={'gray'}
+                  onChangeText={text => {
+                    handleEnquiryChange('contact', text);
+                    if (!isValidMobileNumber(text)) {
+                      setContactError('Enter a valid 10-digit mobile number');
+                    } else {
+                      setContactError('');
+                    }
+                  }}
                 />
+                {contactError ? (
+                  <Text style={{ fontSize: 12, color: 'red' }}>
+                    {contactError}
+                  </Text>
+                ) : null}
 
                 <View style={{ width: '100%', marginBottom: 16 }}>
                   <Text
@@ -895,11 +930,10 @@ const Home: React.FC = () => {
                   >
                     Property Category
                   </Text>
-
                   <View
                     style={{
                       marginTop: 10,
-                      borderWidth: 1,
+                      borderWidth: 0.5,
                       borderColor: '#00000033',
                       borderRadius: 4,
                       backgroundColor: '#fff',
@@ -951,12 +985,13 @@ const Home: React.FC = () => {
                   </Text>
                   <View
                     style={{
-                      borderWidth: 1,
-                      borderColor: 'gray',
+                      borderWidth: 0.5,
+                      borderColor: '#00000033',
                       borderRadius: 4,
                     }}
                   >
                     <Picker
+                      style={{ color: 'black' }}
                       selectedValue={newEnquiry.minbudget}
                       onValueChange={value => {
                         setNewEnquiry({
@@ -989,12 +1024,13 @@ const Home: React.FC = () => {
                   </Text>
                   <View
                     style={{
-                      borderWidth: 1,
-                      borderColor: 'gray',
+                      borderWidth: 0.5,
+                      borderColor: '#00000033',
                       borderRadius: 4,
                     }}
                   >
                     <Picker
+                      style={{ color: 'black' }}
                       enabled={filteredMaxOptions.length > 0}
                       selectedValue={newEnquiry.maxbudget}
                       onValueChange={value =>
@@ -1033,7 +1069,6 @@ const Home: React.FC = () => {
                   >
                     Select State
                   </Text>
-
                   <View
                     style={{
                       marginTop: 10,
@@ -1067,17 +1102,13 @@ const Home: React.FC = () => {
                     </Picker>
                   </View>
                 </View>
+
                 <View style={{ width: '100%', marginBottom: 16 }}>
                   <Text
-                    style={{
-                      fontSize: 14,
-                      fontWeight: '500',
-                      color: 'gray',
-                    }}
+                    style={{ fontSize: 14, fontWeight: '500', color: 'gray' }}
                   >
                     Select City
                   </Text>
-
                   <View
                     style={{
                       marginTop: 10,
@@ -1111,6 +1142,7 @@ const Home: React.FC = () => {
                     </Picker>
                   </View>
                 </View>
+
                 <Text style={{ fontSize: 14, color: 'gray' }}>Location</Text>
                 <TextInput
                   style={[Sstyles.input, { color: 'black' }]}
@@ -1120,6 +1152,7 @@ const Home: React.FC = () => {
                     handleEnquiryChange('location', text);
                   }}
                 />
+
                 <Text style={{ fontSize: 14, color: 'gray' }}>Message</Text>
                 <TextInput
                   style={[Sstyles.input, { color: 'black' }]}
@@ -1129,19 +1162,22 @@ const Home: React.FC = () => {
                     handleEnquiryChange('message', text);
                   }}
                 />
-                {newEnquiry?.category !== '' ||
-                  newEnquiry?.city !== '' ||
-                  newEnquiry?.contact !== '' ||
-                  newEnquiry?.customer !== '' ||
-                  newEnquiry?.location !== '' ||
-                  newEnquiry?.maxbudget !== null ||
-                  newEnquiry?.minbudget !== null ||
-                  newEnquiry?.message !== '' ||
-                  newEnquiry?.state !== '' || (
-                    <Text style={{ fontSize: 14, color: 'red' }}>
-                      All Values Are Required*
-                    </Text>
-                  )}
+
+                {/* Optional All fields required message */}
+                {(newEnquiry?.category === '' ||
+                  newEnquiry?.city === '' ||
+                  newEnquiry?.contact === '' ||
+                  newEnquiry?.customer === '' ||
+                  newEnquiry?.location === '' ||
+                  newEnquiry?.maxbudget === null ||
+                  newEnquiry?.minbudget === null ||
+                  newEnquiry?.message === '' ||
+                  newEnquiry?.state === '') && (
+                  <Text style={{ fontSize: 14, color: 'red' }}>
+                    All Values Are Required*
+                  </Text>
+                )}
+
                 <View style={Sstyles.buttonContainer}>
                   <TouchableOpacity
                     style={Sstyles.cancel}
@@ -1164,7 +1200,34 @@ const Home: React.FC = () => {
                   >
                     <Text style={Sstyles.buttonText}>Cancel</Text>
                   </TouchableOpacity>
-                  <TouchableOpacity style={Sstyles.save} onPress={addEnquiry}>
+
+                  {/* <TouchableOpacity
+                    style={Sstyles.save}
+                    onPress={() => {
+                      if (!isValidMobileNumber(newEnquiry.contact)) {
+                        setContactError(
+                          'Please enter a valid 10-digit mobile number',
+                        );
+                        return;
+                      }
+                      addEnquiry();
+                    }}
+                  >
+                    <Text style={Sstyles.buttonText}>Save</Text>
+                  </TouchableOpacity> */}
+                  <TouchableOpacity
+                    style={[Sstyles.save, { opacity: isFormValid ? 1 : 0.5 }]}
+                    disabled={!isFormValid}
+                    onPress={() => {
+                      if (!isValidMobileNumber(newEnquiry.contact)) {
+                        setContactError(
+                          'Please enter a valid 10-digit mobile number',
+                        );
+                        return;
+                      }
+                      addEnquiry();
+                    }}
+                  >
                     <Text style={Sstyles.buttonText}>Save</Text>
                   </TouchableOpacity>
                 </View>
