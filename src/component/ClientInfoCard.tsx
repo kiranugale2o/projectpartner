@@ -553,6 +553,18 @@ const ClientInfoCard: React.FC<Props> = ({ enquiry }) => {
     }
   };
 
+  const isValidContact = (contact: any) => /^\d{10}$/.test(contact);
+  const isUpdateFormValid = () => {
+    const details = enquiryUpdateDetails;
+    return (
+      details.customer?.trim().length > 0 &&
+      isValidContact(details.contact) &&
+      details.category?.trim() &&
+      details.state?.trim() &&
+      details.city?.trim()
+    );
+  };
+
   //update enquiry
   const updateEnquiry = async () => {
     if (
@@ -1691,7 +1703,7 @@ const ClientInfoCard: React.FC<Props> = ({ enquiry }) => {
                                 height="16"
                                 viewBox="0 0 24 24"
                                 fill="none"
-                                stroke="#1E88E5"
+                                stroke="green"
                                 strokeWidth="2"
                                 strokeLinecap="round"
                                 strokeLinejoin="round"
@@ -1998,16 +2010,23 @@ const ClientInfoCard: React.FC<Props> = ({ enquiry }) => {
                         Full Name
                       </Text>
                       <TextInput
-                        style={[Sstyles.input, { color: 'black' }]}
+                        style={Sstyles.input}
                         value={enquiryUpdateDetails.customer}
-                        placeholderTextColor={'gray'}
                         onChangeText={text => {
+                          const noNumbers = text.replace(/[0-9]/g, '');
                           setEnquiryUpdateDetails({
                             ...enquiryUpdateDetails,
-                            customer: text,
+                            customer: noNumbers,
                           });
                         }}
+                        placeholder="Customer Name"
                       />
+                      {enquiryUpdateDetails.customer?.trim() === '' && (
+                        <Text style={{ color: 'red', fontSize: 12 }}>
+                          Valid name is required
+                        </Text>
+                      )}
+
                       <Text style={{ fontSize: 14, color: 'black' }}>
                         Contact Number
                       </Text>
@@ -2263,8 +2282,16 @@ const ClientInfoCard: React.FC<Props> = ({ enquiry }) => {
                           <Text style={Sstyles.buttonText}>Cancel</Text>
                         </TouchableOpacity>
                         <TouchableOpacity
-                          style={Sstyles.save}
+                          style={[
+                            Sstyles.save,
+                            {
+                              backgroundColor: isUpdateFormValid()
+                                ? 'green'
+                                : '#ccc',
+                            },
+                          ]}
                           onPress={updateEnquiry}
+                          disabled={!isUpdateFormValid()}
                         >
                           <Text style={Sstyles.buttonText}>Save</Text>
                         </TouchableOpacity>

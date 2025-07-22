@@ -386,7 +386,7 @@ const BookingClientInfoCard = ({ data }) => {
             </View>
 
             <View style={{ marginBottom: 12 }}>
-              <Text style={{ fontSize: 12, marginBottom: 6 }}>
+              <Text style={{ fontSize: 12, marginBottom: 6, color: 'black' }}>
                 Payment Type
               </Text>
               <View
@@ -403,6 +403,7 @@ const BookingClientInfoCard = ({ data }) => {
                     setPaymentType(itemValue)
                   }
                   style={{
+                    color: 'black',
                     height: 50,
                     paddingHorizontal: 12,
                   }}
@@ -418,12 +419,14 @@ const BookingClientInfoCard = ({ data }) => {
             <Text
               style={{
                 fontSize: 12,
+                color: 'black',
               }}
             >
               Payment Amount
             </Text>
             <TextInput
               placeholder="Enter Payment Amount"
+              placeholderTextColor={'black'}
               value={paymentAmount}
               onChangeText={text => {
                 const numericText = text.replace(/[^0-9]/g, '');
@@ -436,6 +439,7 @@ const BookingClientInfoCard = ({ data }) => {
                 borderRadius: 10,
                 padding: 12,
                 marginBottom: 12,
+                color: 'black',
               }}
             />
 

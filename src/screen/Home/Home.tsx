@@ -16,7 +16,7 @@ import {
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 // import {NativeStackNavigationProp} from '@react-navigation/native-stack';
-import { Enquirer, RootStackParamList } from '../../types';
+import { Enquirer, RootStackParamList, SalesPerson } from '../../types';
 import ClientInfoCard from '../../component/ClientInfoCard';
 import Svg, { Path } from 'react-native-svg';
 import { formatIndianAmount, optionsL, optionsR } from '../../utils';
@@ -27,7 +27,18 @@ import { AuthContext } from '../../context/AuthContext';
 import Toast from 'react-native-toast-message';
 import Loader from '../../component/loader';
 import { Picker } from '@react-native-picker/picker';
-import { FilterIcon, ListFilterIcon, SearchIcon, X } from 'lucide-react-native';
+import {
+  FilterIcon,
+  IndianRupee,
+  ListFilterIcon,
+  MessageSquare,
+  Ruler,
+  SearchIcon,
+  ThumbsUp,
+  Ticket,
+  Wallet,
+  X,
+} from 'lucide-react-native';
 import EnquiryCustomeDatePicker from '../../component/EnquiryCustomeDatePicker';
 //import {FlatList, GestureHandlerRootView} from 'react-native-gesture-handler';
 import { parse, isWithinInterval, isValid } from 'date-fns';
@@ -170,7 +181,7 @@ const Home: React.FC = () => {
   }, []);
   useEffect(() => {
     fetchCountData();
-
+    getProfile();
     fetchEnquiries(); // initial fetch
     const interval = setInterval(fetchEnquiries, 5000); // fetch every 30s
     return () => clearInterval(interval); // cleanup on unmount
@@ -228,6 +239,11 @@ const Home: React.FC = () => {
     }));
   };
 
+  const [nameError, setNameError] = useState('');
+  const [locationError, setLocationError] = useState('');
+  const [messageError, setMessageError] = useState('');
+
+  const isValidName = (name: string) => /^[A-Za-z ]+$/.test(name.trim());
   const isValidMobileNumber = (number: string) => {
     const mobileRegex = /^[6-9]\d{9}$/; // for Indian 10-digit numbers
     return mobileRegex.test(number);
@@ -273,7 +289,7 @@ const Home: React.FC = () => {
     }
   };
   const isFormValid =
-    newEnquiry?.customer.trim() !== '' &&
+    isValidName(newEnquiry?.customer) &&
     isValidMobileNumber(newEnquiry?.contact) &&
     newEnquiry?.category !== '' &&
     newEnquiry?.minbudget !== null &&
@@ -329,7 +345,30 @@ const Home: React.FC = () => {
       console.error('Error saving enquiry:', err);
     }
   };
+  const [data, setData] = useState<SalesPerson | null>(null);
 
+  const getProfile = async () => {
+    try {
+      const token = await AsyncStorage.getItem('salesPersonToken'); // Retrieve stored JWT
+
+      const response = await fetch('https://api.reparv.in/sales/profile/', {
+        method: 'GET',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`, // Attach token
+        },
+      });
+
+      const data = await response.json();
+      console.log('Update response:', data);
+      auth?.setImage(data?.userimage);
+      setData(data);
+      // navigation.navigate("")
+    } catch (error) {
+      console.error('Error updating user:', error);
+    }
+  };
   // For Sale
   const saleMinBudgetOptions = [
     { label: '10 Lakh', value: 1000000 },
@@ -474,172 +513,134 @@ const Home: React.FC = () => {
       {/* Main ScrollView for the entire screen */}
 
       {/* Cards Section */}
+      {/* Cards Section */}
       <Animated.View
         style={{
-          marginTop: 10,
-          display: `${showCards ? 'flex' : 'none'}`,
+          //marginTop: 10,
+          display: showCards ? 'flex' : 'none',
         }}
       >
         <View
           style={{
-            width: '100%',
-            height: 150,
+            width: '85%',
+            backgroundColor: '#fff',
+            borderRadius: 12,
+            padding: 6,
+            margin: 'auto',
             shadowColor: '#000',
-            shadowOffset: { width: 0, height: 8 },
-            shadowOpacity: 0.3,
-            shadowRadius: 6,
-            elevation: 1, // Android shadow
-            backgroundColor: 'white', // Needed to see shadow
-            borderRadius: 8, // Optional: soft corners
-            // marginVertical: 10, // spacing around
+            shadowOffset: { width: 0, height: 2 },
+            shadowOpacity: 0.1,
+            shadowRadius: 4,
+            elevation: 3,
           }}
         >
           <ScrollView
             style={{
               width: '100%',
-              height: 250,
+              // height: 250,
             }}
           >
-            <View
-              style={{
-                width: '110%',
-                margin: 'auto',
-              }}
-            >
+            <View style={{ width: '100%', gap: 0 }}>
               <View style={styles.box1}>
-                <LinearGradient
-                  colors={['#0BB501', '#076300']}
-                  start={{ x: 1, y: 0 }}
-                  end={{ x: 0.5, y: 0.5 }}
-                  style={styles.card}
-                >
+                {/* Card 1 */}
+                <View style={styles.card}>
                   <View style={styles.content}>
-                    <Text style={styles.label}>Total Deal Amount</Text>
+                    <View>
+                      <Text style={styles.label}>Total Deal Amount</Text>
+                      <Text style={styles.percent}>(100%)</Text>
+                    </View>
                     <View style={styles.iconWrapper}>
-                      <Image
-                        source={require('../../../assets/icons/rs.png')}
-                        style={styles.vectorInner}
-                      />
+                      <IndianRupee size={24} color="#17af1cff" />
                     </View>
                   </View>
                   <Text style={styles.amount}>
                     ₹{formatIndianAmount(overviewCountData?.totalDealAmount)}
                   </Text>
-                </LinearGradient>
-                {/* Card 1: No. of Deal Done */}
-                <LinearGradient
-                  colors={['#0BB501', '#076300']}
-                  start={{ x: 1, y: 0 }}
-                  end={{ x: 0.5, y: 0.5 }}
-                  style={styles.card}
-                >
+                </View>
+
+                {/* Card 2 */}
+                <View style={styles.card}>
                   <View style={styles.content}>
-                    <Text style={styles.label}>No. of Deal Done</Text>
+                    <View>
+                      <Text style={styles.label}>No. of Deal Done</Text>
+                      <Text style={styles.percent}>(100%)</Text>
+                    </View>
                     <View style={styles.iconWrapper}>
-                      <Image
-                        source={require('../../../assets/icons/like.png')}
-                        style={styles.vectorInner}
-                      />
+                      <ThumbsUp size={24} color="#17af1cff" />
                     </View>
                   </View>
                   <Text style={styles.amount}>0</Text>
-                </LinearGradient>
+                </View>
               </View>
-              <View style={styles.box2}>
-                {/* Card 2: Self Earning */}
-                <LinearGradient
-                  colors={['#0BB501', '#076300']}
-                  start={{ x: 1, y: 0 }}
-                  end={{ x: 0.5, y: 0.5 }}
-                  style={styles.card}
-                >
+
+              <View style={styles.box1}>
+                {/* Card 3 */}
+                <View style={styles.card}>
                   <View style={styles.content}>
-                    <View style={{ flexDirection: 'column' }}>
+                    <View>
                       <Text style={styles.label}>Self Earning</Text>
-                      <Text style={[styles.label]}>Amount</Text>
+                      <Text style={styles.label}>Amount</Text>
                     </View>
                     <View style={styles.iconWrapper}>
-                      <Image
-                        source={require('../../../assets/icons/pr.png')}
-                        style={styles.vectorInner}
-                      />
+                      <Wallet size={24} color="#17af1cff" />
                     </View>
                   </View>
                   <Text style={styles.amount}>
                     ₹{formatIndianAmount(overviewCountData?.selfEarning)}
                   </Text>
-                </LinearGradient>
+                </View>
 
-                {/* Card 3: Deal in Sq. Ft. */}
-                <LinearGradient
-                  colors={['#0BB501', '#076300']}
-                  start={{ x: 1, y: 0 }}
-                  end={{ x: 0.5, y: 0.5 }}
-                  style={styles.card}
-                >
+                {/* Card 4 */}
+                <View style={styles.card}>
                   <View style={styles.content}>
                     <Text style={styles.label}>Deal in Sq. Ft.</Text>
                     <View style={styles.iconWrapper}>
-                      <Image
-                        source={require('../../../assets/icons/map.png')}
-                        style={styles.vectorInner}
-                      />
+                      <Ruler size={24} color="#17af1cff" />
                     </View>
                   </View>
                   <Text style={styles.amount}>
                     {overviewCountData?.totalDealInSquareFeet} Sq. Ft.
                   </Text>
-                </LinearGradient>
+                </View>
               </View>
-            </View>
-            <View
-              style={{
-                width: '110%',
-                margin: 'auto',
-                marginInline: 40,
-              }}
-            >
-              <View style={styles.box2}>
-                <LinearGradient
-                  colors={['#0BB501', '#076300']}
-                  start={{ x: 1, y: 0 }}
-                  end={{ x: 0.5, y: 0.5 }}
-                  style={styles.card}
-                >
+
+              <View style={styles.box1}>
+                {/* Card 5 */}
+                <View style={styles.card}>
                   <View style={styles.content}>
                     <Text style={styles.label}>No of Enquiry</Text>
+                    <View style={styles.iconWrapper}>
+                      <MessageSquare size={24} color="#17af1cff" />
+                    </View>
                   </View>
                   <Text style={styles.amount}>{enquiries.length}</Text>
-                </LinearGradient>
+                </View>
+
+                {/* Card 6 */}
                 <TouchableOpacity
                   onPress={() => {
                     navigation.navigate('Tickets');
                   }}
+                  style={styles.card}
                 >
-                  <LinearGradient
-                    colors={['#0BB501', '#076300']}
-                    start={{ x: 1, y: 0 }}
-                    end={{ x: 0.5, y: 0.5 }}
-                    style={styles.card}
-                  >
+                  <View>
                     <View style={styles.content}>
-                      <View style={{ flexDirection: 'column' }}>
-                        <Text style={styles.label}>Total Tickets</Text>
+                      <Text style={styles.label}>Total Tickets</Text>
+                      <View style={styles.iconWrapper}>
+                        <Ticket size={24} color="#17af1cff" />
                       </View>
                     </View>
                     <Text style={styles.amount}>
                       {overviewCountData.totalTicket}
                     </Text>
-                  </LinearGradient>
+                  </View>
                 </TouchableOpacity>
-              </View>
-              <View style={[styles.box2, { margin: 0 }]}>
-                {/* Card 2: Self Earning */}
               </View>
             </View>
           </ScrollView>
         </View>
       </Animated.View>
+
       {/* Cards List */}
 
       <View
@@ -774,7 +775,7 @@ const Home: React.FC = () => {
         {enquiries?.length !== 0 ? (
           <View
             style={{
-              padding: 20,
+              padding: 0,
               height: 200,
             }}
           ></View>
@@ -891,10 +892,25 @@ const Home: React.FC = () => {
                 <Text style={{ fontSize: 14, color: 'gray' }}>Full Name</Text>
                 <TextInput
                   style={[Sstyles.input, { color: 'black' }]}
-                  value={newEnquiry?.customer}
+                  placeholder="Enter full name"
                   placeholderTextColor={'gray'}
-                  onChangeText={text => handleEnquiryChange('customer', text)}
+                  value={newEnquiry?.customer}
+                  onChangeText={text => {
+                    handleEnquiryChange('customer', text);
+                    if (!isValidName(text)) {
+                      setNameError(
+                        'Name should only contain letters and spaces',
+                      );
+                    } else {
+                      setNameError('');
+                    }
+                  }}
                 />
+                {nameError ? (
+                  <Text style={{ fontSize: 12, color: 'red' }}>
+                    {nameError}
+                  </Text>
+                ) : null}
 
                 <Text style={{ fontSize: 14, color: 'gray' }}>
                   Contact Number
@@ -904,6 +920,7 @@ const Home: React.FC = () => {
                   value={newEnquiry?.contact}
                   keyboardType="numeric"
                   maxLength={10}
+                  placeholder="Enter 10-digit mobile number"
                   placeholderTextColor={'gray'}
                   onChangeText={text => {
                     handleEnquiryChange('contact', text);
@@ -1146,22 +1163,43 @@ const Home: React.FC = () => {
                 <Text style={{ fontSize: 14, color: 'gray' }}>Location</Text>
                 <TextInput
                   style={[Sstyles.input, { color: 'black' }]}
-                  value={newEnquiry?.location}
+                  placeholder="Enter location"
                   placeholderTextColor={'gray'}
+                  value={newEnquiry?.location}
                   onChangeText={text => {
                     handleEnquiryChange('location', text);
+                    if (!text.trim()) {
+                      setLocationError('Location cannot be empty');
+                    } else {
+                      setLocationError('');
+                    }
                   }}
                 />
-
+                {locationError ? (
+                  <Text style={{ fontSize: 12, color: 'red' }}>
+                    {locationError}
+                  </Text>
+                ) : null}
                 <Text style={{ fontSize: 14, color: 'gray' }}>Message</Text>
                 <TextInput
                   style={[Sstyles.input, { color: 'black' }]}
-                  value={newEnquiry?.message}
+                  placeholder="Enter your message"
                   placeholderTextColor={'gray'}
+                  value={newEnquiry?.message}
                   onChangeText={text => {
                     handleEnquiryChange('message', text);
+                    if (!text.trim()) {
+                      setMessageError('Message cannot be empty');
+                    } else {
+                      setMessageError('');
+                    }
                   }}
                 />
+                {messageError ? (
+                  <Text style={{ fontSize: 12, color: 'red' }}>
+                    {messageError}
+                  </Text>
+                ) : null}
 
                 {/* Optional All fields required message */}
                 {(newEnquiry?.category === '' ||
@@ -1201,30 +1239,11 @@ const Home: React.FC = () => {
                     <Text style={Sstyles.buttonText}>Cancel</Text>
                   </TouchableOpacity>
 
-                  {/* <TouchableOpacity
-                    style={Sstyles.save}
-                    onPress={() => {
-                      if (!isValidMobileNumber(newEnquiry.contact)) {
-                        setContactError(
-                          'Please enter a valid 10-digit mobile number',
-                        );
-                        return;
-                      }
-                      addEnquiry();
-                    }}
-                  >
-                    <Text style={Sstyles.buttonText}>Save</Text>
-                  </TouchableOpacity> */}
                   <TouchableOpacity
                     style={[Sstyles.save, { opacity: isFormValid ? 1 : 0.5 }]}
                     disabled={!isFormValid}
                     onPress={() => {
-                      if (!isValidMobileNumber(newEnquiry.contact)) {
-                        setContactError(
-                          'Please enter a valid 10-digit mobile number',
-                        );
-                        return;
-                      }
+                      if (!isFormValid) return;
                       addEnquiry();
                     }}
                   >
@@ -1246,84 +1265,54 @@ const styles = StyleSheet.create({
     width: '100%',
     flexDirection: 'column',
     backgroundColor: 'white',
-    gap: 5,
-  },
-  box1: {
-    width: '90%',
-    marginInline: 'auto',
-    flexDirection: 'row',
+    margin: 'auto',
     justifyContent: 'center',
-    alignItems: 'center',
-    gap: 10,
-  },
-
-  box2: {
-    width: '90%',
-    marginTop: 20,
-    marginInline: 'auto',
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-    gap: 10,
+    // gap: 5,
   },
   card: {
-    width: 171,
-    height: 90,
-    padding: 16,
-    gap: 8,
-    flexDirection: 'column',
-    alignItems: 'flex-start',
-    borderRadius: 16,
-    backgroundColor: '#076300',
-    // gradient workaround using overlay if needed
+    width: '50%',
+    backgroundColor: '#90ee90',
+    borderRadius: 8,
+    padding: 7,
+    marginVertical: 5,
   },
-
   content: {
-    width: 139,
-    height: 24,
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    flexWrap: 'wrap',
-    borderRadius: 8,
-  },
-  label: {
-    width: 106,
-    height: 15,
-    fontSize: 12,
-    fontWeight: '500',
-    lineHeight: 15,
-    color: '#fff',
+    color: 'green',
   },
   iconWrapper: {
-    width: 24,
-    height: 24,
-
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    position: 'relative',
-    backgroundColor: 'green',
-    borderRadius: 80,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 10 },
-    shadowOpacity: 0.1,
-    padding: 10,
-    shadowRadius: 15,
-    elevation: 10, // For Android
+    padding: 2,
+    borderRadius: 6,
   },
-  vectorInner: {
-    width: 14,
-    height: 14,
+  label: {
+    fontSize: 12,
+    color: '#333',
   },
   amount: {
-    fontSize: 20,
-    fontWeight: '600',
-    color: '#fff',
-    lineHeight: 24,
+    fontSize: 16,
+    fontWeight: 'bold',
+    marginTop: 4,
+    color: 'green',
   },
-
+  percent: {
+    fontSize: 10,
+    color: '#888',
+  },
+  box1: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    // justifyContent: 'space-between',
+    gap: 5,
+    // marginTop: 2,
+  },
+  box2: {
+    justifyContent: 'center',
+    flexDirection: 'row',
+    gap: 5,
+    // marginTop: 2,
+  },
   text: {
     marginTop: 10,
     marginLeft: 10,
@@ -1348,9 +1337,9 @@ const styles = StyleSheet.create({
       width: 0,
       height: -2,
     },
-    shadowOpacity: 0.08,
+    shadowOpacity: 0.18,
     shadowRadius: 4,
-    elevation: 4, // Android shadow
+    elevation: 2, // Android shadow
     zIndex: 1,
     padding: 5,
   },

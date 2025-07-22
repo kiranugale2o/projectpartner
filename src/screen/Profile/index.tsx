@@ -41,7 +41,15 @@ const Profile: React.FC = () => {
   const [userName, setuserName] = useState(auth?.user?.username || '');
   const [editedEmail, setEditedEmail] = useState(auth?.user?.email || '');
   const [editedMobile, setEditedMobile] = useState(auth?.user?.contact || '');
+  const [nameError, setNameError] = useState('');
+  const [locationError, setLocationError] = useState('');
+  const [messageError, setMessageError] = useState('');
 
+  const isValidName = (name: string) => /^[A-Za-z ]+$/.test(name.trim());
+  const isValidMobileNumber = (number: string) => {
+    const mobileRegex = /^[6-9]\d{9}$/; // for Indian 10-digit numbers
+    return mobileRegex.test(number);
+  };
   const circleSize = 107;
   const [profileImage, setProfileImage] = useState<Asset | null>(null);
 

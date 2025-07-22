@@ -447,8 +447,8 @@ const styles = StyleSheet.create({
   cardContainer: {
     width: '100%',
     backgroundColor: '#fff',
-    marginBottom: 24,
-    borderTopWidth: 0.3,
+    // marginBottom: 24,
+    // borderTopWidth: 0.3,
     borderColor: 'gray',
   },
 
