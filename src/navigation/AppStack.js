@@ -66,6 +66,7 @@ function MyTabs() {
       const data = await response.json();
       console.log('Update response:', data);
       auth?.setImage(data.userimage);
+      auth?.setUserName(data?.fullname);
       setData(data);
       // navigation.navigate("")
     } catch (error) {

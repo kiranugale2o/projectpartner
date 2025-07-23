@@ -49,10 +49,12 @@ interface AuthContextType {
   dateRange: DateRangeType;
   ticketNumber: number | null;
   propertyName: string | null;
+  userName: string | null;
 
   setUser: (user: UserType | null) => void;
   setToken: (token: string | null) => void;
   setFlatName: (flatName: string | null) => void;
+  setUserName: (flatName: string | null) => void;
   setIsLoggedIn: (value: boolean) => void;
   setLoading: (value: boolean) => void;
   setIsPaymentSuccess: (value: boolean) => void;
@@ -85,6 +87,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   const [siteVisitModel, setSiteVisitModel] = useState(false);
   const [token, setToken] = useState<string | null>(null);
   const [user, setUser] = useState<UserType | null>(null);
+  const [userName, setUserName] = useState<string | null>(null);
   const [flatName, setFlatName] = useState<string | null>(null);
   const [propertyName, setPropertyName] = useState<string | null>('');
   const [image, setImage] = useState<string | null>(null);
@@ -144,6 +147,8 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         flatName,
         setFlatName,
         user,
+        userName,
+        setUserName,
         ticketNumber,
         setUser,
         setToken,
