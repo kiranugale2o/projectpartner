@@ -65,13 +65,14 @@ function MyTabs() {
 
       const data = await response.json();
       console.log('Update response:', data);
-      auth?.setImage(data?.userimage);
+      auth?.setImage(data.userimage);
       setData(data);
       // navigation.navigate("")
     } catch (error) {
       console.error('Error updating user:', error);
     }
   };
+
   useEffect(() => {
     getProfile();
     const keyboardDidShowListener = Keyboard.addListener(
@@ -131,14 +132,20 @@ function MyTabs() {
             <View style={{ marginRight: 15 }}>
               <Image
                 source={
-                  data?.userimage || auth?.user?.userimage
-                    ? { uri: `https://api.reparv.in${data?.userimage}` }
-                    : require('../../assets/community/user.png') // fallback icon
+                  auth?.image
+                    ? { uri: `https://api.reparv.in${auth?.image}` }
+                    : require('../../assets/community/user.png')
                 }
-                style={{ width: 38, height: 38, borderRadius: 16 }}
+                style={{
+                  width: 38,
+                  height: 38,
+                  borderRadius: 19, // for perfect circle
+                  overflow: 'hidden',
+                }}
               />
             </View>
           ),
+
           tabBarIcon: ({ color, size }) => (
             <View>
               <Svg width="24" height="24" viewBox="0 0 24 24" fill="none">

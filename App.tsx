@@ -1,6 +1,6 @@
-import React, {useContext, useEffect, useState} from 'react';
-import {Image, Keyboard, SafeAreaView, Text, View} from 'react-native';
-import {NavigationContainer} from '@react-navigation/native';
+import React, { useContext, useEffect, useState } from 'react';
+import { Image, Keyboard, SafeAreaView, Text, View } from 'react-native';
+import { NavigationContainer } from '@react-navigation/native';
 
 import SignIn from './src/auth/signIn';
 import ForgotPassword from './src/auth/ForgetPassword';
@@ -9,7 +9,7 @@ import PasswordResetMessage from './src/auth/PasswordResetMessage';
 import SetNewPassword from './src/auth/SetPassword';
 import PasswordChangedSuccess from './src/auth/PasswordChangedSuccess';
 import AuthStack from './src/navigation/AuthStack';
-import {AuthContext, AuthProvider} from './src/context/AuthContext';
+import { AuthContext, AuthProvider } from './src/context/AuthContext';
 import AppStack from './src/navigation/AppStack';
 import Loader from './src/component/loader';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -17,7 +17,6 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 // import {requestUserPermission} from './src/firebaseNotification';
 
 // import BellIcon from './src/component/Bellicon'; // unused in this code
-
 
 // App Entry Point
 export default function App() {
@@ -45,5 +44,5 @@ function MainApp() {
   ) : (
     <AppStack />
   );
- // return <AppStack />;
+  // return <AppStack />;
 }

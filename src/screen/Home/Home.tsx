@@ -1,4 +1,10 @@
-import React, { useContext, useEffect, useMemo, useState } from 'react';
+import React, {
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from 'react';
 import {
   Alert,
   Animated,
@@ -107,17 +113,16 @@ const Home: React.FC = () => {
 
   const [isAtTop, setIsAtTop] = useState(true);
 
-  // Handle Scroll
-  const handleCardScroll = (event: any) => {
+  const handleCardScroll = useCallback((event: any) => {
     const offsetY = event.nativeEvent.contentOffset.y;
-    if (offsetY === 0) {
+    if (offsetY <= 5) {
       setShowCards(true);
-      setIsAtTop(true); // We're at the top
+      setIsAtTop(true);
     } else {
       setShowCards(false);
-      setIsAtTop(false); // We're not at the top
+      setIsAtTop(false);
     }
-  };
+  }, []);
 
   const selected =
     !optionsL.find(opt => opt.value === selectedValue)?.select ||
@@ -550,7 +555,7 @@ const Home: React.FC = () => {
                       <Text style={styles.percent}>(100%)</Text>
                     </View>
                     <View style={styles.iconWrapper}>
-                      <IndianRupee size={24} color="#17af1cff" />
+                      <IndianRupee size={24} color="white" />
                     </View>
                   </View>
                   <Text style={styles.amount}>
@@ -566,7 +571,7 @@ const Home: React.FC = () => {
                       <Text style={styles.percent}>(100%)</Text>
                     </View>
                     <View style={styles.iconWrapper}>
-                      <ThumbsUp size={24} color="#17af1cff" />
+                      <ThumbsUp size={24} color="white" />
                     </View>
                   </View>
                   <Text style={styles.amount}>0</Text>
@@ -582,7 +587,7 @@ const Home: React.FC = () => {
                       <Text style={styles.label}>Amount</Text>
                     </View>
                     <View style={styles.iconWrapper}>
-                      <Wallet size={24} color="#17af1cff" />
+                      <Wallet size={24} color="white" />
                     </View>
                   </View>
                   <Text style={styles.amount}>
@@ -595,7 +600,7 @@ const Home: React.FC = () => {
                   <View style={styles.content}>
                     <Text style={styles.label}>Deal in Sq. Ft.</Text>
                     <View style={styles.iconWrapper}>
-                      <Ruler size={24} color="#17af1cff" />
+                      <Ruler size={24} color="white" />
                     </View>
                   </View>
                   <Text style={styles.amount}>
@@ -610,7 +615,7 @@ const Home: React.FC = () => {
                   <View style={styles.content}>
                     <Text style={styles.label}>No of Enquiry</Text>
                     <View style={styles.iconWrapper}>
-                      <MessageSquare size={24} color="#17af1cff" />
+                      <MessageSquare size={24} color="white" />
                     </View>
                   </View>
                   <Text style={styles.amount}>{enquiries.length}</Text>
@@ -627,7 +632,7 @@ const Home: React.FC = () => {
                     <View style={styles.content}>
                       <Text style={styles.label}>Total Tickets</Text>
                       <View style={styles.iconWrapper}>
-                        <Ticket size={24} color="#17af1cff" />
+                        <Ticket size={24} color="white" />
                       </View>
                     </View>
                     <Text style={styles.amount}>
@@ -738,18 +743,18 @@ const Home: React.FC = () => {
           </View>
         </Animated.View>
       </View>
-      <ScrollView
+      <Animated.ScrollView
         contentContainerStyle={{ flexGrow: 1 }}
         scrollEventThrottle={16} // Make scroll events smoother
-        onScroll={handleCardScroll} // Regular onScroll handler
+        onScroll={Animated.event(
+          [{ nativeEvent: { contentOffset: { y: scrollY } } }],
+          {
+            useNativeDriver: false,
+            listener: handleCardScroll,
+          },
+        )}
       >
         <View style={{ flexDirection: 'column' }}>
-          {/* <ScrollView>
-            {enquiries &&
-              enquiries.map(d => (
-                <ClientInfoCard key={d.enquirersid} enquiry={d} />
-              ))}
-          </ScrollView> */}
           {enquiries !== null ? (
             <>
               {filteredData.map(d => (
@@ -757,7 +762,7 @@ const Home: React.FC = () => {
               ))}
             </>
           ) : null}
-          {filteredData.length <= 0 && (
+          {filteredData.length === 0 && (
             <Text
               style={{
                 fontSize: 13,
@@ -772,15 +777,21 @@ const Home: React.FC = () => {
             </Text>
           )}
         </View>
-        {enquiries?.length !== 0 ? (
+        {enquiries?.length === 1 ? (
           <View
             style={{
-              padding: 0,
-              height: 200,
+              padding: 10,
+              height: 100,
             }}
           ></View>
         ) : null}
-      </ScrollView>
+        <View
+          style={{
+            padding: 10,
+            height: 300,
+          }}
+        ></View>
+      </Animated.ScrollView>
 
       {/* <GestureHandlerRootView> */}
       <Modal transparent visible={modalVisible} animationType="slide">
@@ -1271,7 +1282,7 @@ const styles = StyleSheet.create({
   },
   card: {
     width: '50%',
-    backgroundColor: '#90ee90',
+    backgroundColor: '#0BB501',
     borderRadius: 8,
     padding: 7,
     marginVertical: 5,
@@ -1280,7 +1291,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    color: 'green',
+    color: 'white',
   },
   iconWrapper: {
     padding: 2,
@@ -1288,17 +1299,17 @@ const styles = StyleSheet.create({
   },
   label: {
     fontSize: 12,
-    color: '#333',
+    color: 'white',
   },
   amount: {
     fontSize: 16,
     fontWeight: 'bold',
     marginTop: 4,
-    color: 'green',
+    color: 'white',
   },
   percent: {
     fontSize: 10,
-    color: '#888',
+    color: 'white',
   },
   box1: {
     flexDirection: 'row',

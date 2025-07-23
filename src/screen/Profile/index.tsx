@@ -124,6 +124,7 @@ const Profile: React.FC = () => {
 
       const data = await response.json();
       console.log('Update response:', data);
+
       auth?.setImage(data?.userimage);
       setData(data);
       // navigation.navigate("")
