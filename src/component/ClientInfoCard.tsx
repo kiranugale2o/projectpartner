@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import {
   Image,
   View,
@@ -33,6 +33,7 @@ import { EllipsisVertical, X } from 'lucide-react-native';
 import EnquiryRemarkList, { getStatusStyle } from './EnquiryRemarkList';
 import ModalSelector from 'react-native-modal-selector';
 import dayjs from 'dayjs';
+import { AuthContext } from '../context/AuthContext';
 
 //Interfaces
 interface Props {
@@ -119,6 +120,30 @@ const ClientInfoCard: React.FC<Props> = ({ enquiry }) => {
   const [statusModel, setStatusModel] = useState(false);
   const [territoryModel, setTerritoryModel] = useState(false);
   const [enquiryVisible, setShowEnquiry] = useState(false);
+
+ const allTimeSlots = [
+  "8 - 9AM",
+  "9 - 10AM",
+  "10 - 11AM",
+  "11 - 12PM",
+  "12 - 1PM",
+  "1 - 2PM",
+  "2 - 3PM",
+  "3 - 4PM",
+  "4 - 5PM",
+  "5 - 6AM",
+];
+
+const [bookedSlots, setBookedSlots] = useState<string[]>([]);
+const [selectedSlot, setSelectedSlot] = useState<string | null>(null);
+
+
+
+
+  // const [timeSlots, setTimeSlots] = useState<string[]>([]);
+   const [enquiries, setEnquiries] = useState<Enquirer[]>([]);
+  
+    const [loading, setLoading] = useState(true);
   const [territoryPartnerList, setTerritoryPartnerList] = useState<
     TerritoryPartnerType[]
   >([]);
@@ -137,7 +162,6 @@ const ClientInfoCard: React.FC<Props> = ({ enquiry }) => {
     territorypartnercontact: '',
     territorypartnerdate: '',
   });
-
   const [enquiryUpdateDetails, setEnquiryUpdateDetails] = useState({
     customer: '',
     contact: '',
@@ -152,7 +176,6 @@ const ClientInfoCard: React.FC<Props> = ({ enquiry }) => {
 
   const optionsr = [
     { label: 'Property', value: 'Property', color: 'black', select: false },
-
     {
       label: 'Territory Partner',
       value: 'TerritoryPartner',
@@ -285,23 +308,70 @@ const ClientInfoCard: React.FC<Props> = ({ enquiry }) => {
     }
   };
 
-  //date handle
-  const handleOk = (date: any) => {
-    setSelectedDate(date);
-    setShowPicker(false);
-    handleChange(
-      'edate',
-      formatDate({ day: date.day, month: date.month, year: date.year }),
-    );
-    setTerritoryPartnerToAssign({
-      ...territoryPartnerToAssign,
-      territorypartnerdate: formatDate({
-        day: date.day,
-        month: date.month,
-        year: date.year,
-      }),
-    });
+const convertDateFormat = (input: string): string => {
+  const months: { [key: string]: number } = {
+    Jan: 1, Feb: 2, Mar: 3, Apr: 4, May: 5, Jun: 6,
+    Jul: 7, Aug: 8, Sep: 9, Oct: 10, Nov: 11, Dec: 12,
   };
+
+  const [dayStr, monthStr, yearStr] = input.split("-");
+  const day = parseInt(dayStr); // removes leading zero if any
+  const month = months[monthStr];
+
+  return `${day}-${0+month}-${yearStr}`;
+};
+
+
+ const updateBookedSlots = (partnerId: number, date: any) => {
+  if (!partnerId || !date) return;
+
+
+  // ✅ Convert to "dd-MM-yyyy" with leading zeros
+  const formattedSelectedDate = `${String(date.day).padStart(2, '0')}-${String(date.month).padStart(2, '0')}-${date.year}`;
+  const newDate=convertDateFormat(formattedSelectedDate);
+console.log(partnerId,'pid',newDate,'idd');
+  const taken = enquiries
+    .filter((e: any) => {
+      return (
+        e.territorypartnerid === partnerId &&
+        e.visitdate === newDate
+      );
+    })
+    .map((e: any) => e.territorytimeslot)
+    .filter(Boolean) as string[];
+
+  setBookedSlots(taken);
+  console.log("Taken slots for", newDate, taken);
+};
+
+
+const handleTerritoryPartnerChange = (partnerId: number) => {
+  setTerritoryPartnerToAssign({
+    ...territoryPartnerToAssign,
+    territorypartnerid: partnerId,
+  });
+
+  updateBookedSlots(partnerId, selectedDate); // ✅ filter by selected date
+  setSelectedSlot(null);
+};
+
+const handleOk = (date: any) => {
+  setSelectedDate(date);
+  setShowPicker(false);
+
+  const formattedSelectedDate = `${String(date.day).padStart(2, '0')}-${String(date.month).padStart(2, '0')}-${date.year}`;
+  const newDate=convertDateFormat(formattedSelectedDate);
+
+  setTerritoryPartnerToAssign({
+    ...territoryPartnerToAssign,
+    territorypartnerdate: newDate,
+  });
+
+  updateBookedSlots(territoryPartnerToAssign?.territorypartnerid, date);
+  setSelectedSlot(null);
+
+  handleChange("edate", newDate);
+};
 
   //visit schedule update functions
   const handleSave = () => {
@@ -791,40 +861,88 @@ const ClientInfoCard: React.FC<Props> = ({ enquiry }) => {
   };
 
   //Assign territory partner
-  const assignTerritoryPartner = async () => {
-    try {
-      const response = await fetch(
-        `https://api.reparv.in/sales/enquirers/assign/to/partner/${enquiry.enquirersid}`,
-        {
-          method: 'POST',
-          credentials: 'include',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(territoryPartnerToAssign),
+ const assignTerritoryPartner = async () => {
+  try {
+    // Merge slot into the payload
+    const payload = {
+      ...territoryPartnerToAssign,
+     territorytimeslot: selectedSlot, 
+    };
+    
+console.log(payload,'pppp');
+
+    const response = await fetch(
+      `https://api.reparv.in/salesapp/enquiry/assign/to/partner/${enquiry.enquirersid}`,
+      {
+        method: 'POST',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
         },
-      );
-      const data = await response.json();
-
-      if (response.ok) {
-        setTerritoryModel(false);
-        viewEnquiry(enquiry?.enquirersid, '');
-        Toast.show({
-          type: 'success',
-          text1: 'Success',
-          text2: `${data.message}`,
-        });
-      } else {
-        Toast.show({
-          type: 'error',
-
-          text1: `${data.message}`,
-        });
+        body: JSON.stringify(payload),
       }
+    );
+
+    const data = await response.json();
+
+    if (response.ok) {
+      setTerritoryModel(false);
+      viewEnquiry(enquiry?.enquirersid, '');
+      Toast.show({
+        type: 'success',
+        text1: 'Success',
+        text2: `${data.message}`,
+      });
+    } else {
+      Toast.show({
+        type: 'error',
+        text1: `${data.message}`,
+      });
+    }
+  } catch (error) {
+    console.error('Error assigning territory partner:', error);
+  }
+};
+
+const auth=useContext(AuthContext);
+ const fetchEnquiries = async (id:any) => {
+    try {
+      const token = auth?.user?.id; // make sure you stored it at login
+
+      const response = await fetch(`https://api.reparv.in/salesapp/enquiry/getAll/${id}`, {
+        method: 'GET',
+        credentials: 'include',
+        headers: {
+         // Authorization: `Bearer ${auth?.user?.id}`, // token required for req.user.id to work
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.error('Fetch error:', errorData);
+        return;
+      }
+
+      const data = await response.json();
+      setEnquiries(data);
+      console.log(data,'ddddddddd');
+      
     } catch (error) {
-      console.error('Error deleting :', error);
+      console.error('API call failed:', error);
+    } finally {
+      setLoading(false);
     }
   };
+
+  useEffect(()=>{
+    fetchEnquiries(territoryPartnerToAssign?.territorypartnerid)
+   // handleTerritoryPartnerChange(Number(enquiry?.territorypartnerid))
+  },[territoryPartnerToAssign,selectedDate])
+
+
+
+
 
   const [propertyId, setPropertyId] = useState('');
   //update property Of Enquiry
@@ -1803,7 +1921,7 @@ const ClientInfoCard: React.FC<Props> = ({ enquiry }) => {
                               borderRadius: 16,
                             }}
                           >
-                            {enquiryDetails.visitdate}
+                            {enquiryDetails.visitdate}{'   ||   '}{enquiryDetails?.territorytimeslot}
                           </Text>
                         </View>
                       )}
@@ -2349,121 +2467,104 @@ const ClientInfoCard: React.FC<Props> = ({ enquiry }) => {
               </TouchableOpacity>
             </Modal>
             {/* Territory partner selector*/}
-            <Modal transparent visible={territoryModel} animationType="slide">
-              <View style={Sstyles.overlay}>
-                <View style={Sstyles.modal}>
-                  <View
-                    style={{
-                      flexDirection: 'row',
-                      justifyContent: 'space-between',
-                    }}
-                  >
-                    <Text style={Sstyles.title}>
-                      Assign Enquiry to Territory Partner
-                    </Text>
-                    <X
-                      size={30}
-                      color={'gray'}
-                      onPress={() => {
-                        setTerritoryModel(false);
-                      }}
-                    />
-                  </View>
+      <Modal transparent visible={territoryModel} animationType="slide">
+  <View style={Sstyles.overlay}>
+    <View style={Sstyles.tmodal}>
+      {/* Header */}
+      <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+        <Text style={Sstyles.title}>Assign Enquiry to Territory Partner.</Text>
+        <X size={30} color={'gray'} onPress={() => setTerritoryModel(false)} />
+      </View>
 
-                  <View style={{ width: '100%' }}>
-                    <Text
-                      style={{
-                        fontSize: 14,
-                        color: '#00000066',
-                        fontWeight: '500',
-                        marginBottom: 8,
-                      }}
-                    >
-                      Territory Partner
-                    </Text>
+      {/* Territory Partner Picker */}
+      <Text style={Sstyles.label}>Territory Partner</Text>
+      <View style={Sstyles.pickerContainer}>
+      <Picker
+      style={{color:'black'}}
+  selectedValue={territoryPartnerToAssign.territorypartnerid ?? ""}
+  onValueChange={(itemValue) => handleTerritoryPartnerChange(Number(itemValue))}
+>
+  <Picker.Item label="Select Territory Partner" value="" />
+  {territoryPartnerList
+    .filter(tp => tp.status === "Active")
+    .map(tp => (
+      <Picker.Item
+        key={tp.id}
+        label={`${tp.fullname} | ${tp.contact}`}
+        value={tp.id}
+      />
+    ))}
+</Picker>
+      </View>
 
-                    <View
-                      style={{
-                        borderWidth: 1,
-                        borderColor: '#00000033',
-                        borderRadius: 4,
-                        backgroundColor: 'white',
-                      }}
-                    >
-                      <Picker
-                        selectedValue={
-                          territoryPartnerToAssign.territorypartnerid
-                        }
-                        onValueChange={itemValue =>
-                          setTerritoryPartnerToAssign({
-                            ...territoryPartnerToAssign,
-                            territorypartnerid: itemValue,
-                          })
-                        }
-                        style={{ color: 'black' }}
-                      >
-                        <Picker.Item
-                          label="Select Territory Partner"
-                          value=""
-                        />
-                        {territoryPartnerList
-                          .filter(tp => tp?.status === 'Active')
-                          .map((tp, index) => (
-                            <Picker.Item
-                              key={index}
-                              label={`${tp?.fullname} | ${tp?.contact}`}
-                              value={tp.id}
-                            />
-                          ))}
-                      </Picker>
-                    </View>
-                  </View>
-                  <Text
-                    style={{
-                      fontSize: 14,
-                      color: '#00000066',
-                      fontWeight: '500',
-                      marginBottom: 8,
-                    }}
-                  >
-                    Select Date
-                  </Text>
-                  <TouchableOpacity
-                    onPress={() => setShowPicker(true)}
-                    style={Sstyles.input}
-                  >
-                    <Text>
-                      {!selectedDate ? (
-                        <Text style={{ color: 'black' }}>Date</Text>
-                      ) : (
-                        <Text style={{ color: 'black' }}>
-                          {`${selectedDate?.day}-${selectedDate?.month}-${selectedDate?.year}`}
-                        </Text>
-                      )}
-                    </Text>
-                  </TouchableOpacity>
+      {/* Date Selection */}
+      <Text style={Sstyles.label}>Select Date</Text>
+      <TouchableOpacity onPress={() => setShowPicker(true)} style={Sstyles.input}>
+        <Text style={{ color: 'black' }}>
+          {!selectedDate
+            ? 'Date'
+            : `${selectedDate?.day}-${selectedDate?.month}-${selectedDate?.year}`}
+        </Text>
+      </TouchableOpacity>
 
-                  {showPicker && (
-                    <DateSelectPopup
-                      visible={showPicker}
-                      onCancel={() => setShowPicker(false)}
-                      onOk={handleOk}
-                    />
-                  )}
+      {showPicker && (
+        <DateSelectPopup
+          visible={showPicker}
+          onCancel={() => setShowPicker(false)}
+          onOk={handleOk}
+        />
+      )}
 
-                  <TouchableOpacity
-                    style={[Sstyles.save, { width: '50%', margin: 'auto' }]}
-                    onPress={assignTerritoryPartner}
-                  >
-                    <Text
-                      style={[Sstyles.buttonText, { marginInline: 'auto' }]}
-                    >
-                      Save
-                    </Text>
-                  </TouchableOpacity>
-                </View>
-              </View>
-            </Modal>
+      {/* Time Slot Selection */}
+     <Text style={[Sstyles.label, { marginTop: 10 }]}>Select Time Slot</Text>
+<ScrollView contentContainerStyle={Sstyles.slotContainer}>
+  {allTimeSlots.map(slot => {
+    const isDisabled = bookedSlots.includes(slot);
+    const isSelected = selectedSlot === slot;
+
+    return (
+      <TouchableOpacity
+        key={slot}
+        disabled={isDisabled}
+        onPress={() => !isDisabled && setSelectedSlot(slot)}
+        style={[
+          Sstyles.slot,
+          isSelected && Sstyles.slotSelected,
+          isDisabled && { backgroundColor: "#ccc" },
+        ]}
+      >
+        <Text
+          style={{
+            color: isDisabled
+              ? "#888"
+              : isSelected
+              ? "#fff"
+              : "#000",
+            fontWeight: "500",
+          }}
+        >
+          {slot}
+        </Text>
+      </TouchableOpacity>
+    );
+  })}
+</ScrollView>
+
+      {/* Save Button */}
+      <TouchableOpacity
+        style={[
+          Sstyles.tsave,
+          { opacity: selectedSlot ? 1 : 0.5 },
+        ]}
+        disabled={!selectedSlot}
+        onPress={assignTerritoryPartner}
+      >
+        <Text style={Sstyles.tbuttonText}>Save</Text>
+      </TouchableOpacity>
+    </View>
+  </View>
+</Modal>
+
             {/* Property Select Model */}
             <Modal
               transparent
@@ -2753,8 +2854,9 @@ const styles = StyleSheet.create({
 const Sstyles = StyleSheet.create({
   overlay: {
     flex: 1,
-    backgroundColor: '#00000080',
     justifyContent: 'center',
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    padding: 20,
   },
   modalContainer: {
     flex: 1,
@@ -2762,21 +2864,24 @@ const Sstyles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: 'rgba(0,0,0,0.5)',
   },
-  title: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    marginBottom: 10,
-    color: 'black',
-  },
-
-  modal: {
+   modal: {
     backgroundColor: 'white',
     borderRadius: 12,
     padding: 20,
     gap: 16,
   },
 
-  input: {
+  title: {
+    fontSize: 16, // updated from 18 to match new style
+    fontWeight: 'bold',
+    color: 'black',
+  },
+  tmodal: {
+    backgroundColor: 'white',
+    borderRadius: 8, // updated from 12
+    padding: 16,     // updated from 20
+  },
+   input: {
     borderWidth: 1,
     borderColor: '#ccc',
     padding: 10,
@@ -2804,5 +2909,57 @@ const Sstyles = StyleSheet.create({
     color: 'white',
     margin: 'auto',
   },
+ 
+ 
+  
+  tsave: {
+    backgroundColor: '#0BB501', // updated color
+    padding: 12,                // updated padding
+    borderRadius: 6,            // updated radius
+    marginTop: 16,
+    alignItems: 'center',
+  },
+  tbuttonText: {
+    color: 'white',
+    fontWeight: 'bold', // updated
+  },
+
+  // Newly Added
+  label: {
+    fontSize: 14,
+    color: '#00000066',
+    fontWeight: '500',
+    marginTop: 12,
+    marginBottom: 4,
+  },
+  pickerContainer: {
+    borderWidth: 1,
+    borderColor: '#00000033',
+    borderRadius: 4,
+    backgroundColor: 'white',
+  },
+ slotContainer: {
+  flexDirection: 'row',
+  flexWrap: 'wrap',
+  justifyContent: 'space-between',
+},
+
+slot: {
+  width: '32%', // ✅ ensures 3 per row (with some margin)
+  borderWidth: 1,
+  borderColor: '#00000033',
+  borderRadius: 6,
+  paddingVertical: 10,
+  alignItems: 'center',
+  marginBottom: 8,
+  backgroundColor: '#f5f5f5',
+},
+
+  slotSelected: {
+    backgroundColor: '#0BB501',
+    borderColor: '#0BB501',
+  },
 });
+
+
 export default ClientInfoCard;
