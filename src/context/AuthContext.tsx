@@ -98,10 +98,14 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   });
   const [ticketNumber, setTicketNumber] = useState<number | null>(null);
 
-  const login = () => {
-    setToken('');
-    setIsLoggedIn(true);
-  };
+ const login = async (token: string, user: UserType) => {
+  await AsyncStorage.setItem('salesPersonToken', token);
+  await AsyncStorage.setItem('salesPersonInfo', JSON.stringify(user));
+  setToken(token);
+  setUser(user);
+  setIsLoggedIn(true);
+};
+
 
   const logout = () => {
     AsyncStorage.removeItem('salesPersonToken');

@@ -219,7 +219,7 @@ const Home: React.FC = () => {
   const fetchCountData = async () => {
     try {
       const response = await fetch(
-        `https://api.reparv.in/territory-partner/dashboard/count`,
+        `https://api.reparv.in/sales/dashboard/count`,
         {
           method: 'GET',
           credentials: 'include',
@@ -346,7 +346,7 @@ const Home: React.FC = () => {
         salesPersonContact: '',
       });
     } catch (err) {
-      Alert.alert('Error saving enquiry', err);
+      Alert.alert('Error saving enquiry'+'-'+err);
       console.error('Error saving enquiry:', err);
     }
   };
@@ -574,7 +574,7 @@ const Home: React.FC = () => {
                       <ThumbsUp size={24} color="white" />
                     </View>
                   </View>
-                  <Text style={styles.amount}>0</Text>
+                  <Text style={styles.amount}>{overviewCountData?.totalCustomer}</Text>
                 </View>
               </View>
 

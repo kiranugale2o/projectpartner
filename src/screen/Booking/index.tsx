@@ -135,7 +135,7 @@ const Booking: React.FC = () => {
   const fetchMeetings = async () => {
     try {
       const response = await fetch(
-        'https://api.reparv.in/sales/calender/meetings',
+        'https://api.reparv.in/sales/customers/',
         {
           method: 'GET',
           headers: {
@@ -154,7 +154,7 @@ const Booking: React.FC = () => {
         return;
       }
 
-      console.log('Fetched meetings:', data);
+    console.log('Fetched meetings:', data);
       setMeetings(data);
       setUpdatedMeetings(data);
     } catch (error) {

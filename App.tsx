@@ -89,66 +89,43 @@ export default function App() {
 // }
 
 function MainApp() {
-  type NavigationProp = NativeStackNavigationProp<
-    RootStackParamList,
-    'Sign_In'
-  >;
   const auth = useContext(AuthContext);
-  const navigation = useNavigation<NavigationProp>();
-
   const [userData, setUserData] = useState<any>(null);
   const [isFetching, setIsFetching] = useState(true);
 
-  const showDetails = async () => {
-    try {
-      setIsFetching(true);
-      const res = await fetch(
-        `https://api.reparv.in/admin/salespersons/get/${auth?.user?.id}`,
-        {
-          method: 'GET',
-          credentials: 'include',
-          headers: { 'Content-Type': 'application/json' },
-        },
-      );
-      if (!res.ok) throw new Error('Failed to fetch details');
-      const data = await res.json();
-      setUserData(data);
-    } catch (e) {
-      console.log(e);
-    } finally {
-      setIsFetching(false);
-    }
-  };
-
-  console.log('userData:', userData);
-  console.log('adharno:', userData?.adharno);
-  console.log(
-    'Is empty or missing?',
-    !userData?.adharno || userData.adharno.trim() === '',
-  );
-
   useEffect(() => {
-    if (auth?.user?.id) {
-      showDetails();
-    }
-  }, [auth?.user?.id]);
+    const fetchUser = async () => {
+      if (auth?.user?.id && auth.token) {
+        try {
+          const res = await fetch(
+            `https://api.reparv.in/admin/salespersons/get/${auth.user.id}`,
+            {
+              method: 'GET',
+              headers: { 'Content-Type': 'application/json' },
+            },
+          );
+          const data = await res.json();
+          setUserData(data);
+        } catch (err) {
+          console.log('Error fetching user details:', err);
+        } finally {
+          setIsFetching(false);
+        }
+      } else {
+        setIsFetching(false);
+      }
+    };
 
-  if (!auth || auth.isLoding || isFetching) {
-    return <Loader />;
-  }
+    fetchUser();
+  }, [auth?.user?.id, auth?.token]);
 
-  if (auth.token === null) {
-    return <AuthStack />;
-  }
+  if (auth?.isLoding || isFetching) return <Loader />;
+  if (!auth?.token || !auth?.user) return <AuthStack />;
+  if (!userData) return <Loader />;
 
-  // ✅ Render nothing until userData is available
-  if (!userData) {
-    return <Loader />;
-  }
-
-  // ✅ Check KYC based on adharno
   const isKYCIncomplete =
     !userData.adharno || userData.adharno.trim().length === 0;
 
   return <AppStack initialRouteName={isKYCIncomplete ? 'KYC' : 'MainTabs'} />;
 }
+

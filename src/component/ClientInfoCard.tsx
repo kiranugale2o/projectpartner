@@ -869,8 +869,6 @@ const handleOk = (date: any) => {
      territorytimeslot: selectedSlot, 
     };
     
-console.log(payload,'pppp');
-
     const response = await fetch(
       `https://api.reparv.in/salesapp/enquiry/assign/to/partner/${enquiry.enquirersid}`,
       {

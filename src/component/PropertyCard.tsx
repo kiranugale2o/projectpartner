@@ -319,15 +319,27 @@ const PropertyCard: React.FC<Props> = ({ pdata }) => {
 };
 
 const styles = StyleSheet.create({
-  card: {
-    marginTop: 20,
-    width: '95%',
-    borderRadius: 12,
-    marginInline: 'auto',
-    margin: 'auto',
-    overflow: 'hidden',
-    backgroundColor: '#fff',
+ card: {
+  marginTop: 25,
+  width: '95%',
+  borderRadius: 12,
+  alignSelf: 'center', // better than margin: 'auto'
+  overflow: 'hidden',
+  backgroundColor: '#fff',
+
+  // Android shadow
+  elevation: 4,
+
+  // iOS shadow
+  shadowColor: '#000',
+  shadowOffset: {
+    width: 0,
+    height: 2,
   },
+  shadowOpacity: 0.2,
+  shadowRadius: 4,
+}
+,
   image: {
     width: '100%',
     height: 191,

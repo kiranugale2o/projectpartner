@@ -27,6 +27,7 @@ import Booking from '../Booking';
 import { AuthContext } from '../../context/AuthContext';
 import { useFocusEffect } from '@react-navigation/native';
 import Toast from 'react-native-toast-message';
+import Loader from '../../component/loader';
 
 // import BottomSheet from '@gorhom/bottom-sheet';
 // import {useMemo, useRef} from 'react';
@@ -195,9 +196,10 @@ const Tickets = () => {
       console.error('Error fetching departments:', err);
     }
   };
-
+const [loading,setLoading]=useState(false);
   const auth = useContext(AuthContext);
   const fetchTickets = async () => {
+    setLoading(true)
     try {
       const response = await fetch(`https://api.reparv.in/sales/tickets/`, {
         method: 'GET',
@@ -206,7 +208,9 @@ const Tickets = () => {
       const data = await response.json();
       setTickets(data);
       auth?.setTicketNumber(data.length);
+      setLoading(false)
     } catch (error) {
+        setLoading(false)
       console.error('Error fetching tickets:', error);
     }
   };
@@ -263,6 +267,7 @@ const Tickets = () => {
     fetchDepartmentData();
   }, []);
 
+  if(loading) return <Loader/>
   return (
     <View
       style={{

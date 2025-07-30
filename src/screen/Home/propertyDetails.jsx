@@ -414,6 +414,10 @@ const PropertyDetails = () => {
         </Modal>
 
         {/* Flat Selection & Wings */}
+     {typeof propertyData?.propertyCategory === 'string' &&
+            ['NewPlot', 'NewFlat', 'CommercialFlat', 'CommercialPlot'].includes(
+              propertyData.propertyCategory,
+            ) &&(
         <View
           style={{
             flex: 1,
@@ -443,7 +447,7 @@ const PropertyDetails = () => {
                 sid={salespersonid}
               />
             )}
-        </View>
+        </View>)}
 
         <View style={styles.cardContainer}>
           {/* Heading Section */}
@@ -1141,6 +1145,7 @@ const PropertyDetails = () => {
           propertyData.propertyCategory,
         ) && (
           <SafeAreaView style={styles.safeArea}>
+            {booktype!=='booked' &&(
             <View style={styles.buttonContainer}>
               <TouchableOpacity
                 style={styles.bookButton}
@@ -1154,7 +1159,7 @@ const PropertyDetails = () => {
               >
                 <Text style={styles.bookButtonText}>Book Now</Text>
               </TouchableOpacity>
-            </View>
+            </View>)}
           </SafeAreaView>
         )}
 

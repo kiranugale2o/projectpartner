@@ -65,3 +65,24 @@ export function FormatPrice({ price }) {
     maximumFractionDigits: 0,
   }).format(price);
 }
+
+export const formatDateTime = (isoString) => {
+  const dateObj = new Date(isoString);
+
+  // Date parts
+  const day = String(dateObj.getDate()).padStart(2, '0');
+  const month = String(dateObj.getMonth() + 1).padStart(2, '0');
+  const year = dateObj.getFullYear();
+
+  // Time parts (12-hour format)
+  let hours = dateObj.getHours();
+  const minutes = String(dateObj.getMinutes()).padStart(2, '0');
+  const ampm = hours >= 12 ? 'PM' : 'AM';
+  hours = hours % 12 || 12; // convert 0 -> 12, 13 -> 1
+
+  const formattedTime = `${hours}:${minutes}${ampm}`;
+  const formattedDate = `${day}-${month}-${year}`;
+
+  return `${formattedDate} ${formattedTime}`;
+};
+

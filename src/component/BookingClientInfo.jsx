@@ -20,7 +20,8 @@ import { launchImageLibrary } from 'react-native-image-picker';
 import { Loader, X } from 'lucide-react-native';
 import Toast from 'react-native-toast-message';
 import { AuthContext } from '../context/AuthContext';
-import { formatIndianAmount } from '../utils';
+import { formatDateTime, formatIndianAmount } from '../utils';
+import axios from 'axios';
 
 const optionsR = [
   { label: 'Pending', value: 'pending', color: '#FFCA00', select: false },
@@ -34,6 +35,7 @@ const optionsL = [
 
 const BookingClientInfoCard = ({ data }) => {
   const navigation = useNavigation();
+console.log(data,'ddddtaaaaaaa');
 
   const [customer, setCustomer] = useState(null);
   const [paymentList, setPaymentList] = useState([]);
@@ -50,7 +52,8 @@ const BookingClientInfoCard = ({ data }) => {
   const [submitDisabled, setSubmitDisabled] = useState(false);
   const [previewImage, setPreviewImage] = useState(null);
   const [imageShow, setimageShow] = useState(false);
-
+ const [propertyInfo, setPropertyInfo] = useState(null);
+  const [loading, setLoading] = useState(true);
   const selected =
     !optionsL.find(opt => opt.value === selectedValue)?.select ||
     !optionsR.find(opt => opt.value === selectedValue)?.select;
@@ -128,6 +131,8 @@ const BookingClientInfoCard = ({ data }) => {
       ).then(res =>
         res.json().then(res => {
           setCustomerPayments(res);
+        //  console.log('rescu',res);
+          
         }),
       );
     } catch (error) {
@@ -141,6 +146,22 @@ const BookingClientInfoCard = ({ data }) => {
     console.log(`Remaining balance: ₹${balance}`);
   };
 
+   useEffect(() => {
+    const fetchPropertyInfo = async () => {
+      try {
+        const response = await axios.get(`https://api.reparv.in/sales/propertyinfo/${data?.propertyid}`);
+        setPropertyInfo(response.data); // store data
+       
+        
+      } catch (error) {
+        console.error('Failed to fetch property info:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchPropertyInfo();
+  }, [data]);
   useEffect(() => {
     getCustomer();
     const interval = setInterval(getCustomer, 3000);
@@ -207,14 +228,49 @@ const BookingClientInfoCard = ({ data }) => {
     parseAmount(data?.tokenamount) +
     customerPayments.reduce((sum, p) => sum + parseAmount(p?.paymentAmount), 0);
 
+
+    const getFrontImageUrl = (frontView)=> {
+      
+    try {
+      const images = JSON.parse(frontView); // parses the string into an array
+      if (Array.isArray(images) && images.length > 0) {
+        return `${'https://api.reparv.in'}${images[0]}`;
+      }
+      return null;
+    } catch (e) {
+      console.error('Error parsing frontView:', e);
+      return null;
+    }
+  };
   return (
     <>
       {data.status === 'Token' ? (
         <View style={styles.container}>
           {/* Left section */}
+             <TouchableOpacity  onPress={() => {
+              if (data?.propertyid !== null) {
+                auth.setFlatName(propertyInfo?.projectName)
+                navigation.navigate('PropertyDetails', {
+                  propertyid: data?.propertyid,
+                  enquirersid: '',
+                  salespersonid: '',
+                  booktype: 'booked',
+                });
+              }}}>
+           {getFrontImageUrl(data?.frontView) ? (
+  <Image
+
+    source={{ uri: getFrontImageUrl(data?.frontView) }}
+    style={styles.propertyImage}
+    resizeMode="cover"
+  />
+) : (
+  <Text style={styles.projectName}>No Image</Text>
+)}</TouchableOpacity>
           <View style={styles.leftContainer}>
-            <View style={styles.userInfo}>
-              <Text style={styles.name}>{data?.fullname}</Text>
+             <View style={styles.userInfo}>
+             
+              <Text style={styles.name}>{data?.customer}</Text>
               <View style={styles.phoneWrapper}>
                 <View style={styles.iconBlueCircle}>
                   <Svg width="12" height="13" viewBox="0 0 12 13" fill="none">
@@ -232,12 +288,10 @@ const BookingClientInfoCard = ({ data }) => {
                   <Text style={styles.phone}>{data?.contact}</Text>
                 </TouchableOpacity>
               </View>
+                <Text style={{fontSize:11}}>{data?.created_at}</Text>
             </View>
-            <Text style={styles.projectName}>
-              {data?.propertyName === null
-                ? 'property name'
-                : data?.propertyName}
-            </Text>
+       
+ 
           </View>
 
           {/* Right section - Visit Schedule */}
@@ -506,10 +560,16 @@ const BookingClientInfoCard = ({ data }) => {
               <View style={styles.section}>
                 <Text style={styles.sectionTitle}>👤 Customer Info</Text>
                 <Text style={styles.itemText}>
-                  Name: <Text style={styles.value}>{data?.fullname}</Text>
+                  Name: <Text style={styles.value}>{data?.customer}</Text>
                 </Text>
                 <Text style={styles.itemText}>
                   Contact: <Text style={styles.value}>{data?.contact}</Text>
+                </Text>
+                 <Text style={styles.itemText}>
+                  Remark: <Text style={styles.value}>{data?.remark}</Text>
+                </Text>
+                 <Text style={styles.itemText}>
+                  Booking Date: <Text style={styles.value}>{(data?.created_at)}</Text>
                 </Text>
               </View>
               {/* Property Info */}
@@ -518,7 +578,31 @@ const BookingClientInfoCard = ({ data }) => {
                 <Text style={styles.itemText}>
                   Property:{' '}
                   <Text style={styles.value}>
-                    {data?.propertyName || 'N/A'}
+                    {propertyInfo?.propertyName || 'N/A'}
+                  </Text>
+                </Text>
+                 <Text style={styles.itemText}>
+                  Sales Partner:{' '}
+                  <Text style={styles.value}>
+                    {auth?.user?.username|| ''}
+                  </Text>
+                  </Text>
+                 <Text style={styles.itemText}>
+                  Sales Commission:{' '}
+                  <Text style={styles.value}>
+                    {data?.salescommission|| '0.0'}
+                  </Text>
+                </Text>
+                 <Text style={styles.itemText}>
+                  Territory Partner:{' '}
+                  <Text style={styles.value}>
+                    {data?.territoryName|| 'Not Assign'}
+                  </Text>
+                  </Text>
+                 <Text style={styles.itemText}>
+                  Territory Commission:{' '}
+                  <Text style={styles.value}>
+                    {data?.territorycommission|| '0.0'}
                   </Text>
                 </Text>
               </View>
@@ -672,7 +756,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     padding: 16,
-    gap: 15,
+    gap: 8,
     width: '100%',
     height: 72,
     borderBottomWidth: 0.5,
@@ -680,20 +764,19 @@ const styles = StyleSheet.create({
   },
   leftContainer: {
     flexDirection: 'row',
-    alignItems: 'center',
-    gap: 40,
-    width: 195,
     height: 40,
+    width:150
   },
   userInfo: {
     flexDirection: 'column',
     alignItems: 'flex-start',
-    gap: 5,
+    gap: 2,
+    
     //width: 105,
     height: 40,
   },
   name: {
-    fontSize: 12,
+    fontSize: 13,
     fontWeight: '500',
     color: '#000',
   },
@@ -719,7 +802,7 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: 'rgba(0, 0, 0, 0.4)',
     marginTop: 0,
-    width: 75,
+    width: 80,
   },
   paymentCard: {
     backgroundColor: '#F0F4F8',
@@ -788,7 +871,13 @@ const styles = StyleSheet.create({
     fontWeight: '500',
     color: '#0068FF',
   },
-
+propertyImage: {
+  width: 100, // adjust as needed
+  height: 60,
+  borderRadius: 8,
+  marginTop: 5,
+}
+,
   modalOverlay: {
     flex: 1,
     backgroundColor: 'rgba(0,0,0,0.4)',
