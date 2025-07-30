@@ -153,34 +153,46 @@ const Community: React.FC = () => {
     }
   };
 
-  const getPosts = async () => {
-    try {
-      const response = await fetch('https://api.reparv.in/salesapp/post/');
+ const getPosts = async () => {
+  try {
+    const urls = [
+      'https://api.reparv.in/territoryapp/post/',
+      'https://api.reparv.in/salesapp/post/',
+    ];
 
-      // Optional: Check for HTTP error (like 500, 404 etc.)
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+    const responses = await Promise.all(urls.map((url) => fetch(url)));
+
+    // Check if any response is not OK
+    for (let res of responses) {
+      if (!res.ok) {
+        throw new Error(`HTTP error! status: ${res.status}`);
       }
+    }
 
-      const data = await response.json();
+    const results = await Promise.all(responses.map((res) => res.json()));
 
-      // Check for API-level error in the response data
+    // Check for API errors in either response
+    results.forEach((data) => {
       if (data.message === 'Database error' && data.error) {
         throw new Error(`API error: ${data.message} (${data.error.code})`);
       }
+    });
 
-      // Only if it's a valid post list
-      const sortedPosts = sortPosts(data, auth?.user, following);
-      setPost(sortedPosts);
-      // console.log(sortedPosts,'sortt');
-      console.log(posts, 'ss');
-    } catch (error) {
-      console.error('Failed to fetch post:', error || error);
-      Alert.alert('Error', 'Something went wrong');
-    } finally {
-      setLoading(false);
-    }
-  };
+    // Combine and sort all posts
+    const combinedPosts = [...results[0], ...results[1]];
+    const sortedPosts = sortPosts(combinedPosts, auth?.user, following);
+
+    setPost(sortedPosts);
+    // console.log(sortedPosts, 'combined & sorted');
+
+  } catch (error) {
+    console.error('Failed to fetch posts:', error);
+    Alert.alert('Error', 'Something went wrong while fetching posts');
+  } finally {
+    setLoading(false);
+  }
+};
+
   const auth = useContext(AuthContext);
   const fetchFollowingPosts = async () => {
     try {
