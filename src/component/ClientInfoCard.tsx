@@ -1052,6 +1052,7 @@ const auth=useContext(AuthContext);
             style={styles.container}
             onPress={() => {
               if (enquiry?.propertyid !== null) {
+                 auth?.setPropertyName('');
                 navigation.navigate('PropertyDetails', {
                   propertyid: enquiry?.propertyid,
                   enquirersid: enquiry?.enquirersid,
