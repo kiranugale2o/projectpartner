@@ -99,8 +99,8 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   const [ticketNumber, setTicketNumber] = useState<number | null>(null);
 
  const login = async (token: string, user: UserType) => {
-  await AsyncStorage.setItem('salesPersonToken', token);
-  await AsyncStorage.setItem('salesPersonInfo', JSON.stringify(user));
+  await AsyncStorage.setItem('projectpartnerPersonToken', token);
+  await AsyncStorage.setItem('projectpartnerInfo', JSON.stringify(user));
   setToken(token);
   setUser(user);
   setIsLoggedIn(true);
@@ -108,8 +108,8 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
 
   const logout = () => {
-    AsyncStorage.removeItem('salesPersonToken');
-    AsyncStorage.removeItem('salesPersonInfo');
+    AsyncStorage.removeItem('projectpartnerPersonToken');
+    AsyncStorage.removeItem('projectpartnerInfo');
     setToken(null);
     setIsLoggedIn(false);
     setUser(null);
@@ -119,8 +119,8 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   const isLoggedInUser = async () => {
     try {
       setLoading(true);
-      const userToken = await AsyncStorage.getItem('salesPersonToken');
-      const userInfo = await AsyncStorage.getItem('salesPersonInfo');
+      const userToken = await AsyncStorage.getItem('projectpartnerPersonToken');
+      const userInfo = await AsyncStorage.getItem('projectpartnerInfo');
 
       if (userToken) {
         setToken(userToken);

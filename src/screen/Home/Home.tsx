@@ -37,9 +37,12 @@ import {
   FilterIcon,
   IndianRupee,
   ListFilterIcon,
+  MapPin,
   MessageSquare,
+  ProportionsIcon,
   Ruler,
   SearchIcon,
+  TableProperties,
   ThumbsUp,
   Ticket,
   Wallet,
@@ -48,6 +51,7 @@ import {
 import EnquiryCustomeDatePicker from '../../component/EnquiryCustomeDatePicker';
 //import {FlatList, GestureHandlerRootView} from 'react-native-gesture-handler';
 import { parse, isWithinInterval, isValid } from 'date-fns';
+import PropertyForm from '../../component/propertyListing/PropertyForm';
 const screenHeight = Dimensions.get('window').height;
 interface NewEnquiry {
   customer: string;
@@ -215,7 +219,7 @@ const Home: React.FC = () => {
     salesPersonName: auth?.user?.name ?? '',
     salesPersonContact: auth?.user?.contact ?? '',
   });
-  const [addEnquiryVisible, setaddEnquiryVisible] = useState(false);
+  const [addPropertyVisible, setProprtyVisible] = useState(false);
   const fetchCountData = async () => {
     try {
       const response = await fetch(
@@ -323,7 +327,7 @@ const Home: React.FC = () => {
       if (!response.ok) {
         throw new Error(`Failed to save enquiry. Status: ${response.status}`);
       } else {
-        setaddEnquiryVisible(false);
+        setProprtyVisible(false);
         Toast.show({
           type: 'success',
           text1: 'Success',
@@ -354,7 +358,7 @@ const Home: React.FC = () => {
 
   const getProfile = async () => {
     try {
-      const token = await AsyncStorage.getItem('salesPersonToken'); // Retrieve stored JWT
+      const token = await AsyncStorage.getItem('projectpartnerPersonToken'); // Retrieve stored JWT
 
       const response = await fetch('https://api.reparv.in/sales/profile/', {
         method: 'GET',
@@ -431,87 +435,10 @@ const Home: React.FC = () => {
   }, [newEnquiry.state]);
 
   // Filter logic for enquiries based on search
-  const filteredData = useMemo(() => {
-    const query = search.toLowerCase().trim();
-
-    const startRaw = auth?.dateRange?.startDate;
-    const endRaw = auth?.dateRange?.endDate;
-
-    const hasStart = !!startRaw;
-    const hasEnd = !!endRaw;
-
-    let startDate: Date | null = null;
-    let endDate: Date | null = null;
-
-    if (hasStart) {
-      startDate = new Date(startRaw); // e.g., '2025-08-07'
-      startDate.setHours(0, 0, 0, 0); // Ensure beginning of day
-    }
-
-    if (hasEnd) {
-      endDate = new Date(endRaw); // e.g., '2025-08-14'
-      endDate.setHours(23, 59, 59, 999); // Ensure end of day
-    }
-
-    const result = enquiries.filter(item => {
-      const matchesSearch =
-        query === '' ||
-        item.location?.toLowerCase().includes(query) ||
-        item.customer?.toLowerCase().includes(query) ||
-        item.status?.toLowerCase().includes(query);
-
-      let matchesDate = true;
-
-      if ((hasStart || hasEnd) && item.created_at) {
-        const rawDate = item.created_at.split('|')[0]?.trim(); // e.g. "07 Aug 2025"
-        const createdAt = parse(rawDate, 'dd MMM yyyy', new Date());
-
-        if (!isValid(createdAt)) return false;
-
-        if (hasStart && hasEnd) {
-          matchesDate = isWithinInterval(createdAt, {
-            start: startDate!,
-            end: endDate!,
-          });
-        } else if (hasStart) {
-          matchesDate = createdAt >= startDate!;
-        } else if (hasEnd) {
-          matchesDate = createdAt <= endDate!;
-        }
-      }
-
-      return matchesSearch && matchesDate;
-    });
-
-    // Optional fallback: if filtering returns nothing
-    if ((hasStart || hasEnd) && result.length === 0) {
-      return enquiries.filter(item => {
-        return (
-          query === '' ||
-          item.location?.toLowerCase().includes(query) ||
-          item.customer?.toLowerCase().includes(query) ||
-          item.status?.toLowerCase().includes(query)
-        );
-      });
-    }
-
-    console.log(result, 'Filtered Enquiries');
-    return result;
-  }, [search, enquiries, auth?.dateRange, auth?.setDateRange]);
-
-  if (loading) return <Loader />;
-  const fetchTickets = async () => {
-    try {
-      const response = await fetch(`https://api.reparv.in/sales/tickets/`, {
-        method: 'GET',
-      });
-
-      const data = await response.json();
-      auth?.setTicketNumber(data.length);
-    } catch (error) {
-      console.error('Error fetching tickets:', error);
-    }
-  };
+  
+    
+  // if (loading) return <Loader />;
+ 
 
   return (
     <View style={{ flex: 1, backgroundColor: 'white' }}>
@@ -583,28 +510,28 @@ const Home: React.FC = () => {
                 <View style={styles.card}>
                   <View style={styles.content}>
                     <View>
-                      <Text style={styles.label}>Self Earning</Text>
-                      <Text style={styles.label}>Amount</Text>
+                      <Text style={styles.label}>Deal in Sq. Ft.</Text>
+                     
                     </View>
                     <View style={styles.iconWrapper}>
-                      <Wallet size={24} color="white" />
+                      <Ruler size={24} color="white" />
                     </View>
                   </View>
                   <Text style={styles.amount}>
-                    ₹{formatIndianAmount(overviewCountData?.selfEarning)}
+                   0 Sq. Ft.
                   </Text>
                 </View>
 
                 {/* Card 4 */}
                 <View style={styles.card}>
                   <View style={styles.content}>
-                    <Text style={styles.label}>Deal in Sq. Ft.</Text>
+                    <Text style={styles.label}>Properties</Text>
                     <View style={styles.iconWrapper}>
-                      <Ruler size={24} color="white" />
+                      <ProportionsIcon size={24} color="white" />
                     </View>
                   </View>
                   <Text style={styles.amount}>
-                    {overviewCountData?.totalDealInSquareFeet} Sq. Ft.
+                   00
                   </Text>
                 </View>
               </View>
@@ -613,12 +540,14 @@ const Home: React.FC = () => {
                 {/* Card 5 */}
                 <View style={styles.card}>
                   <View style={styles.content}>
-                    <Text style={styles.label}>No of Enquiry</Text>
+                    <Text style={styles.label}>Builders</Text>
                     <View style={styles.iconWrapper}>
                       <MessageSquare size={24} color="white" />
                     </View>
                   </View>
-                  <Text style={styles.amount}>{enquiries.length}</Text>
+                  <Text style={styles.amount}>
+                    00
+                  </Text>
                 </View>
 
                 {/* Card 6 */}
@@ -666,7 +595,7 @@ const Home: React.FC = () => {
           <View
             style={{
               flexDirection: 'row',
-              gap: 10,
+              gap: 5,
             }}
           >
             <View style={styles.searchContainer}>
@@ -691,7 +620,7 @@ const Home: React.FC = () => {
               </View>
 
               <TextInput
-                placeholder="Search Enquiries..."
+                placeholder="Search Properties..."
                 placeholderTextColor="#BCBCBD"
                 value={search}
                 onChangeText={setSearch}
@@ -706,7 +635,7 @@ const Home: React.FC = () => {
             <EnquiryCustomeDatePicker />
             {/* Fliter ICons */}
             <TouchableOpacity
-              style={styles.button}
+              style={[styles.button,{display:'none'}]}
               onPress={() => setModalVisible(true)}
             >
               <FilterIcon strokeWidth={1} fill={'black'} />
@@ -720,13 +649,13 @@ const Home: React.FC = () => {
           {/* Inqury and Add Client */}
           <View style={styles.containerOfInqury}>
             {/* Inquiries Label */}
-            <Text style={styles.inquiryText}>Enquiries</Text>
+            <Text style={styles.inquiryText}>Properties List</Text>
 
             {/* Add Client Button */}
             <TouchableOpacity
               style={styles.addClientButton}
               onPress={() => {
-                setaddEnquiryVisible(true);
+                setProprtyVisible(true);
               }}
             >
               {/* Placeholder for icon (use Image or vector icon here if needed) */}
@@ -738,11 +667,12 @@ const Home: React.FC = () => {
                   />
                 </Svg>
               </View>
-              <Text style={styles.addClientText}>Add Enquiry</Text>
+              <Text style={styles.addClientText}>Add Property</Text>
             </TouchableOpacity>
           </View>
         </Animated.View>
       </View>
+    
       <Animated.ScrollView
         contentContainerStyle={{ flexGrow: 1 }}
         scrollEventThrottle={16} // Make scroll events smoother
@@ -755,7 +685,7 @@ const Home: React.FC = () => {
         )}
       >
         <View style={{ flexDirection: 'column' }}>
-          {enquiries !== null ? (
+          {/* {enquiries !== null ? (
             <>
               {filteredData.map(d => (
                 <ClientInfoCard key={d.enquirersid} enquiry={d} />
@@ -770,12 +700,25 @@ const Home: React.FC = () => {
                 marginTop: 10,
                 fontWeight: '600',
 
-                color: 'black',
+                color: 'gray',
               }}
             >
-              Not Found Any Enquiries !
+              There are no records to display !
             </Text>
-          )}
+          )} */}
+
+            <Text
+              style={{
+                fontSize: 13,
+                margin: 'auto',
+                marginTop: 10,
+                fontWeight: '600',
+
+                color: 'gray',
+              }}
+            >
+              There are no records to display !
+            </Text>
         </View>
         {enquiries?.length === 1 ? (
           <View
@@ -870,403 +813,12 @@ const Home: React.FC = () => {
         </View>
       </Modal>
 
-      {/* Add Enquiry Model */}
-      <Modal transparent visible={addEnquiryVisible} animationType="slide">
-        <View style={Sstyles.overlay}>
-          <View style={Sstyles.modal}>
-            <View
-              style={{
-                flexDirection: 'row',
-                justifyContent: 'space-between',
-              }}
-            >
-              <Text style={Sstyles.title}>Add Enquiry Details</Text>
-              <X
-                size={30}
-                color={'gray'}
-                onPress={() => {
-                  setaddEnquiryVisible(false);
-                }}
-              />
-            </View>
-            <View
-              style={{
-                width: '100%',
-                borderWidth: 0.2,
-                backgroundColor: 'black',
-                height: 0.5,
-              }}
-            ></View>
-
-            <ScrollView style={{ height: 500 }}>
-              <View style={{ gap: 16, padding: 12 }}>
-                <Text style={{ fontSize: 14, color: 'gray' }}>Full Name</Text>
-                <TextInput
-                  style={[Sstyles.input, { color: 'black' }]}
-                  placeholder="Enter full name"
-                  placeholderTextColor={'gray'}
-                  value={newEnquiry?.customer}
-                  onChangeText={text => {
-                    handleEnquiryChange('customer', text);
-                    if (!isValidName(text)) {
-                      setNameError(
-                        'Name should only contain letters and spaces',
-                      );
-                    } else {
-                      setNameError('');
-                    }
-                  }}
-                />
-                {nameError ? (
-                  <Text style={{ fontSize: 12, color: 'red' }}>
-                    {nameError}
-                  </Text>
-                ) : null}
-
-                <Text style={{ fontSize: 14, color: 'gray' }}>
-                  Contact Number
-                </Text>
-                <TextInput
-                  style={[Sstyles.input, { color: 'black' }]}
-                  value={newEnquiry?.contact}
-                  keyboardType="numeric"
-                  maxLength={10}
-                  placeholder="Enter 10-digit mobile number"
-                  placeholderTextColor={'gray'}
-                  onChangeText={text => {
-                    handleEnquiryChange('contact', text);
-                    if (!isValidMobileNumber(text)) {
-                      setContactError('Enter a valid 10-digit mobile number');
-                    } else {
-                      setContactError('');
-                    }
-                  }}
-                />
-                {contactError ? (
-                  <Text style={{ fontSize: 12, color: 'red' }}>
-                    {contactError}
-                  </Text>
-                ) : null}
-
-                <View style={{ width: '100%', marginBottom: 16 }}>
-                  <Text
-                    style={{
-                      fontSize: 14,
-                      fontWeight: '500',
-                      color: '#00000066',
-                    }}
-                  >
-                    Property Category
-                  </Text>
-                  <View
-                    style={{
-                      marginTop: 10,
-                      borderWidth: 0.5,
-                      borderColor: '#00000033',
-                      borderRadius: 4,
-                      backgroundColor: '#fff',
-                      overflow: 'hidden',
-                    }}
-                  >
-                    <Picker
-                      selectedValue={newEnquiry.category}
-                      onValueChange={itemValue =>
-                        handleEnquiryChange('category', itemValue)
-                      }
-                      style={{
-                        height: 50,
-                        fontSize: 16,
-                        fontWeight: '500',
-                        color: 'black',
-                      }}
-                    >
-                      <Picker.Item label="Select Property Category" value="" />
-                      <Picker.Item label="New Flat" value="NewFlat" />
-                      <Picker.Item label="New Plot" value="NewPlot" />
-                      <Picker.Item label="Rental Flat" value="RentalFlat" />
-                      <Picker.Item label="Rental Shop" value="RentalShop" />
-                      <Picker.Item label="Rental Office" value="RentalOffice" />
-                      <Picker.Item label="Resale" value="Resale" />
-                      <Picker.Item label="Row House" value="RowHouse" />
-                      <Picker.Item label="Lease" value="Lease" />
-                      <Picker.Item label="Farm Land" value="FarmLand" />
-                      <Picker.Item label="Farm House" value="FarmHouse" />
-                      <Picker.Item
-                        label="Commercial Flat"
-                        value="CommercialFlat"
-                      />
-                      <Picker.Item
-                        label="Commercial Plot"
-                        value="CommercialPlot"
-                      />
-                      <Picker.Item
-                        label="Industrial Space"
-                        value="IndustrialSpace"
-                      />
-                    </Picker>
-                  </View>
-                </View>
-
-                <View style={{ marginBottom: 20 }}>
-                  <Text style={{ fontSize: 14, color: 'gray' }}>
-                    Min-Budget
-                  </Text>
-                  <View
-                    style={{
-                      borderWidth: 0.5,
-                      borderColor: '#00000033',
-                      borderRadius: 4,
-                    }}
-                  >
-                    <Picker
-                      style={{ color: 'black' }}
-                      selectedValue={newEnquiry.minbudget}
-                      onValueChange={value => {
-                        setNewEnquiry({
-                          ...newEnquiry,
-                          minbudget: value,
-                          maxbudget:
-                            value != null &&
-                            newEnquiry.maxbudget != null &&
-                            newEnquiry.maxbudget <= value
-                              ? null
-                              : newEnquiry.maxbudget,
-                        });
-                      }}
-                    >
-                      <Picker.Item label="Select Min Budget..." value={null} />
-                      {currentMinBudgetOptions.map(option => (
-                        <Picker.Item
-                          key={option.value}
-                          label={option.label}
-                          value={option.value}
-                        />
-                      ))}
-                    </Picker>
-                  </View>
-                </View>
-
-                <View style={{ marginBottom: 20 }}>
-                  <Text style={{ fontSize: 14, color: 'gray' }}>
-                    Max-Budget
-                  </Text>
-                  <View
-                    style={{
-                      borderWidth: 0.5,
-                      borderColor: '#00000033',
-                      borderRadius: 4,
-                    }}
-                  >
-                    <Picker
-                      style={{ color: 'black' }}
-                      enabled={filteredMaxOptions.length > 0}
-                      selectedValue={newEnquiry.maxbudget}
-                      onValueChange={value =>
-                        setNewEnquiry({
-                          ...newEnquiry,
-                          maxbudget: value,
-                        })
-                      }
-                    >
-                      <Picker.Item
-                        label={
-                          filteredMaxOptions.length > 0
-                            ? 'Select Max Budget...'
-                            : 'No higher options available'
-                        }
-                        value={null}
-                      />
-                      {filteredMaxOptions.map(option => (
-                        <Picker.Item
-                          key={option.value}
-                          label={option.label}
-                          value={option.value}
-                        />
-                      ))}
-                    </Picker>
-                  </View>
-                </View>
-
-                <View style={{ width: '100%', marginBottom: 16 }}>
-                  <Text
-                    style={{
-                      fontSize: 14,
-                      fontWeight: '500',
-                      color: '#00000066',
-                    }}
-                  >
-                    Select State
-                  </Text>
-                  <View
-                    style={{
-                      marginTop: 10,
-                      borderWidth: 1,
-                      borderColor: '#00000033',
-                      borderRadius: 4,
-                      backgroundColor: '#fff',
-                      overflow: 'hidden',
-                    }}
-                  >
-                    <Picker
-                      selectedValue={newEnquiry.state}
-                      onValueChange={itemValue =>
-                        handleEnquiryChange('state', itemValue)
-                      }
-                      style={{
-                        height: 50,
-                        fontSize: 16,
-                        fontWeight: '500',
-                        color: 'black',
-                      }}
-                    >
-                      <Picker.Item label="Select Your State" value="" />
-                      {states?.map((state, index) => (
-                        <Picker.Item
-                          key={index}
-                          label={state?.state}
-                          value={state?.state}
-                        />
-                      ))}
-                    </Picker>
-                  </View>
-                </View>
-
-                <View style={{ width: '100%', marginBottom: 16 }}>
-                  <Text
-                    style={{ fontSize: 14, fontWeight: '500', color: 'gray' }}
-                  >
-                    Select City
-                  </Text>
-                  <View
-                    style={{
-                      marginTop: 10,
-                      borderWidth: 1,
-                      borderColor: '#00000033',
-                      borderRadius: 4,
-                      backgroundColor: '#fff',
-                      overflow: 'hidden',
-                    }}
-                  >
-                    <Picker
-                      selectedValue={newEnquiry.city}
-                      onValueChange={itemValue =>
-                        handleEnquiryChange('city', itemValue)
-                      }
-                      style={{
-                        height: 50,
-                        fontSize: 16,
-                        fontWeight: '500',
-                        color: 'black',
-                      }}
-                    >
-                      <Picker.Item label="Select Your City" value="" />
-                      {cities?.map((city, index) => (
-                        <Picker.Item
-                          key={index}
-                          label={city?.city}
-                          value={city?.city}
-                        />
-                      ))}
-                    </Picker>
-                  </View>
-                </View>
-
-                <Text style={{ fontSize: 14, color: 'gray' }}>Location</Text>
-                <TextInput
-                  style={[Sstyles.input, { color: 'black' }]}
-                  placeholder="Enter location"
-                  placeholderTextColor={'gray'}
-                  value={newEnquiry?.location}
-                  onChangeText={text => {
-                    handleEnquiryChange('location', text);
-                    if (!text.trim()) {
-                      setLocationError('Location cannot be empty');
-                    } else {
-                      setLocationError('');
-                    }
-                  }}
-                />
-                {locationError ? (
-                  <Text style={{ fontSize: 12, color: 'red' }}>
-                    {locationError}
-                  </Text>
-                ) : null}
-                <Text style={{ fontSize: 14, color: 'gray' }}>Message</Text>
-                <TextInput
-                  style={[Sstyles.input, { color: 'black' }]}
-                  placeholder="Enter your message"
-                  placeholderTextColor={'gray'}
-                  value={newEnquiry?.message}
-                  onChangeText={text => {
-                    handleEnquiryChange('message', text);
-                    if (!text.trim()) {
-                      setMessageError('Message cannot be empty');
-                    } else {
-                      setMessageError('');
-                    }
-                  }}
-                />
-                {messageError ? (
-                  <Text style={{ fontSize: 12, color: 'red' }}>
-                    {messageError}
-                  </Text>
-                ) : null}
-
-                {/* Optional All fields required message */}
-                {(newEnquiry?.category === '' ||
-                  newEnquiry?.city === '' ||
-                  newEnquiry?.contact === '' ||
-                  newEnquiry?.customer === '' ||
-                  newEnquiry?.location === '' ||
-                  newEnquiry?.maxbudget === null ||
-                  newEnquiry?.minbudget === null ||
-                  newEnquiry?.message === '' ||
-                  newEnquiry?.state === '') && (
-                  <Text style={{ fontSize: 14, color: 'red' }}>
-                    All Values Are Required*
-                  </Text>
-                )}
-
-                <View style={Sstyles.buttonContainer}>
-                  <TouchableOpacity
-                    style={Sstyles.cancel}
-                    onPress={() => {
-                      setNewEnquiry({
-                        customer: '',
-                        contact: '',
-                        minbudget: null,
-                        maxbudget: null,
-                        category: '',
-                        state: '',
-                        city: '',
-                        location: '',
-                        message: '',
-                        salesPersonName: auth?.user?.name ?? '',
-                        salesPersonContact: auth?.user?.contact ?? '',
-                      });
-                      setaddEnquiryVisible(false);
-                    }}
-                  >
-                    <Text style={Sstyles.buttonText}>Cancel</Text>
-                  </TouchableOpacity>
-
-                  <TouchableOpacity
-                    style={[Sstyles.save, { opacity: isFormValid ? 1 : 0.5 }]}
-                    disabled={!isFormValid}
-                    onPress={() => {
-                      if (!isFormValid) return;
-                      addEnquiry();
-                    }}
-                  >
-                    <Text style={Sstyles.buttonText}>Save</Text>
-                  </TouchableOpacity>
-                </View>
-              </View>
-            </ScrollView>
-          </View>
-        </View>
-      </Modal>
-      <Toast />
+      {/* Add Proerty Model */}
+       <PropertyForm
+        isVisible={addPropertyVisible}
+        onClose={() => setProprtyVisible(false)}
+      />
+     <Toast />
     </View>
   );
 };
@@ -1352,7 +904,7 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 2, // Android shadow
     zIndex: 1,
-    padding: 5,
+    padding: 8,
   },
 
   searchContainer: {
@@ -1361,7 +913,7 @@ const styles = StyleSheet.create({
     marginTop: 0,
     margin: 'auto',
     gap: 8, // Not supported in all RN versions; use margin as fallback if needed
-    width: '70%',
+    width: '80%',
     justifyContent: 'flex-start',
     backgroundColor: 'rgba(0, 0, 0, 0.01)',
     borderWidth: 1,

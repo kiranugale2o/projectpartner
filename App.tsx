@@ -98,7 +98,7 @@ function MainApp() {
       if (auth?.user?.id && auth.token) {
         try {
           const res = await fetch(
-            `https://api.reparv.in/admin/salespersons/get/${auth.user.id}`,
+            `https://api.reparv.in/admin/projectpartner/get/${auth.user.id}`,
             {
               method: 'GET',
               headers: { 'Content-Type': 'application/json' },

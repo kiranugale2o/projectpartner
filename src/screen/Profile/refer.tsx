@@ -65,7 +65,7 @@ const Refer: React.FC = () => {
   const [referData,setReferData]=useState(null)
    const getProfile = async () => {
     try {
-      const token = await AsyncStorage.getItem('salesPersonToken'); // Retrieve stored JWT
+      const token = await AsyncStorage.getItem('projectpartnerPersonToken'); // Retrieve stored JWT
 
       const response = await fetch('https://api.reparv.in/sales/profile/', {
         method: 'GET',

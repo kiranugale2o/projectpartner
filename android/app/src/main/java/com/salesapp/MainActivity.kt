@@ -1,4 +1,4 @@
-package com.salesapp
+package com.reparvprojectpartner
 
 import com.facebook.react.ReactActivity
 import com.facebook.react.ReactActivityDelegate

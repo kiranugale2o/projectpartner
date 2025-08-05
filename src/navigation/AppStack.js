@@ -17,7 +17,7 @@ import ConfirmMeetingCard from '../screen/Home/ConfirmMeetingCard';
 import SuccessScreen from '../screen/Home/SuccessScreen';
 import FlatInfo from '../screen/Booking/FlatInfo';
 import CalenderComponent from '../screen/Calender';
-import Svg, { Path, Rect } from 'react-native-svg';
+import Svg, { Circle, Path, Rect } from 'react-native-svg';
 import React, { useContext, useEffect, useState } from 'react';
 import {
   Image,
@@ -33,7 +33,7 @@ import LinearGradient from 'react-native-linear-gradient';
 import ProjectLocation from '../screen/Home/projectLocation';
 import EnquiryDetailScreen from '../screen/Home/EnauiryDetails';
 import PropertyDetails from '../screen/Home/propertyDetails';
-import { Printer } from 'lucide-react-native';
+import { PersonStanding, Printer, Users } from 'lucide-react-native';
 import ProfileUpdateSuccess from '../screen/Profile/ProfileUpdateSuccess';
 import KYC from '../screen/Profile/kyc';
 import PostDetailScreen from '../screen/Community/PostDetails';
@@ -41,6 +41,7 @@ import FollowersScreen from '../screen/Community/FollowersScreen';
 import FollowingScreen from '../screen/Community/FollowingScreen';
 import EligibilityForm from '../screen/Booking/EligibilityForm';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import Builders from '../screen/Builders';
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -52,7 +53,7 @@ function MyTabs() {
 
   const getProfile = async () => {
     try {
-      const token = await AsyncStorage.getItem('salesPersonToken'); // Retrieve stored JWT
+      const token = await AsyncStorage.getItem('projectpartnerPersonToken'); // Retrieve stored JWT
 
       const response = await fetch('https://api.reparv.in/sales/profile/', {
         method: 'GET',
@@ -161,10 +162,10 @@ function MyTabs() {
         }}
       />
       <Tab.Screen
-        name="Booking"
-        component={Booking}
+        name="Builders"
+        component={Builders}
         options={{
-          headerTitle: 'Booking',
+          headerTitle: 'Builders',
           headerShadowVisible: false,
 
           headerStyle: {
@@ -180,7 +181,7 @@ function MyTabs() {
                 />
               </Svg> */}
 
-              <Svg
+              {/* <Svg
                 width={size}
                 height={size}
                 viewBox="0 0 24 24"
@@ -194,13 +195,21 @@ function MyTabs() {
                 <Rect width="18" height="18" x="3" y="3" rx="2" />
                 <Path d="M21 9H3" />
                 <Path d="M21 15H3" />
-              </Svg>
+              </Svg> */}
+              <Svg xmlns="http://www.w3.org/2000/svg"  width={size}
+                height={size}
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke={color}
+                strokeWidth={2}
+                strokeLinecap="round"
+                strokeLinejoin="round" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-handshake-icon lucide-handshake"><Path d="m11 17 2 2a1 1 0 1 0 3-3"/><Path d="m14 14 2.5 2.5a1 1 0 1 0 3-3l-3.88-3.88a3 3 0 0 0-4.24 0l-.88.88a1 1 0 1 1-3-3l2.81-2.81a5.79 5.79 0 0 1 7.06-.87l.47.28a2 2 0 0 0 1.42.25L21 4"/><Path d="m21 3 1 11h-2"/><Path d="M3 3 2 14l6.5 6.5a1 1 0 1 0 3-3"/><Path d="M3 4h8"/></Svg>
             </View>
           ),
         }}
       />
       <Tab.Screen
-        name="Calender"
+        name="Customers"
         component={CalenderComponent}
         options={{
           headerTitle: 'Calender',
@@ -211,15 +220,16 @@ function MyTabs() {
           },
           tabBarIcon: ({ color, size }) => (
             <View>
-              <Svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+              {/* <Svg width="24" height="24" viewBox="0 0 24 24" fill="none">
                 <Path
                   d="M2 19C2 20.7 3.3 22 5 22H19C20.7 22 22 20.7 22 19V11H2V19ZM19 4H17V3C17 2.4 16.6 2 16 2C15.4 2 15 2.4 15 3V4H9V3C9 2.4 8.6 2 8 2C7.4 2 7 2.4 7 3V4H5C3.3 4 2 5.3 2 7V9H22V7C22 5.3 20.7 4 19 4Z"
                   fill={color}
                 />
-              </Svg>
+              </Svg> */}
+        <Svg xmlns="http://www.w3.org/2000/svg" width="32" height="24" viewBox="0 0 24 24" fill="none"  stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-users-icon lucide-users"><Path  fill={color} d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><Path  fill={color} d="M16 3.128a4 4 0 0 1 0 7.744"/><Path  fill={color} d="M22 21v-2a4 4 0 0 0-3-3.87"/><Circle  fill={color} cx="9" cy="7" r="4"/></Svg>
             </View>
           ),
-          headerTitle: 'Calender',
+          headerTitle: 'Customer',
           headerShadowVisible: false,
 
           headerStyle: {
@@ -227,6 +237,7 @@ function MyTabs() {
           },
         }}
       />
+      
       <Tab.Screen
         name="Community"
         component={Community}

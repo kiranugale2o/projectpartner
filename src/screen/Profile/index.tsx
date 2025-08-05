@@ -74,7 +74,7 @@ const Profile: React.FC = () => {
 
   const handleUpdate = async (datas: any) => {
     try {
-      const token = await AsyncStorage.getItem('salesPersonToken');
+      const token = await AsyncStorage.getItem('projectpartnerPersonToken');
 
       const formData = new FormData();
       formData.append('username', userName);
@@ -111,7 +111,7 @@ const Profile: React.FC = () => {
 
   const getProfile = async () => {
     try {
-      const token = await AsyncStorage.getItem('salesPersonToken'); // Retrieve stored JWT
+      const token = await AsyncStorage.getItem('projectpartnerPersonToken'); // Retrieve stored JWT
 
       const response = await fetch('https://api.reparv.in/sales/profile/', {
         method: 'GET',

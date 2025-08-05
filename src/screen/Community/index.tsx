@@ -327,7 +327,7 @@ const Community: React.FC = () => {
   const [userData, setData] = useState<SalesPerson>();
   const getProfile = async () => {
     try {
-      //  const token = await AsyncStorage.getItem('salesPersonToken'); // Retrieve stored JWT
+      //  const token = await AsyncStorage.getItem('projectpartnerPersonToken'); // Retrieve stored JWT
 
       const response = await fetch('https://api.reparv.in/sales/profile/', {
         method: 'GET',

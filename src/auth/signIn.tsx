@@ -77,7 +77,7 @@ const SignIn = (): JSX.Element => {
 
     // if (validateEmail()) {
     try {
-      const response = await fetch('https://api.reparv.in/sales/login', {
+      const response = await fetch('https://api.reparv.in/project-partner/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -102,11 +102,11 @@ const SignIn = (): JSX.Element => {
       await showToast(data.user?.name);
       setTimeout(async () => {
         auth?.setToken(data?.user?.id);
-        AsyncStorage.setItem('salesPersonToken', String(data?.user?.id));
+        AsyncStorage.setItem('projectpartnerPersonToken', String(data?.user?.id));
         auth?.setUser(data.user);
         auth?.setIsLoggedIn(true);
         await AsyncStorage.setItem(
-          'salesPersonInfo',
+          'projectpartnerInfo',
           JSON.stringify(data?.user),
         );
       }, 500); // Delay slightly (500ms) to allow toast to display
