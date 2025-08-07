@@ -2,21 +2,13 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 
 import Home from '../screen/Home/Home';
-import ClientInfoCard from '../component/ClientInfoCard';
-import Booking from '../screen/Booking';
+
 import Community from '../screen/Community';
 import Profile from '../screen/Profile';
-import BookingFlats from '../screen/Booking/Flat';
 import UserProfile from '../screen/Community/Profile';
 import NewPost from '../screen/Community/NewPost';
 import Refer from '../screen/Profile/refer';
 import Tickets from '../screen/Profile/tickets';
-import TerritoryPartner from '../screen/Home/TerritoryPartner';
-import SelectTerritoryPartner from '../screen/Home/SelectPartner';
-import ConfirmMeetingCard from '../screen/Home/ConfirmMeetingCard';
-import SuccessScreen from '../screen/Home/SuccessScreen';
-import FlatInfo from '../screen/Booking/FlatInfo';
-import CalenderComponent from '../screen/Calender';
 import Svg, { Circle, Path, Rect } from 'react-native-svg';
 import React, { useContext, useEffect, useState } from 'react';
 import {
@@ -30,18 +22,16 @@ import {
 import { NavigationContainer, useNavigation } from '@react-navigation/native';
 import { AuthContext } from '../context/AuthContext';
 import LinearGradient from 'react-native-linear-gradient';
-import ProjectLocation from '../screen/Home/projectLocation';
-import EnquiryDetailScreen from '../screen/Home/EnauiryDetails';
-import PropertyDetails from '../screen/Home/propertyDetails';
 import { PersonStanding, Printer, Users } from 'lucide-react-native';
 import ProfileUpdateSuccess from '../screen/Profile/ProfileUpdateSuccess';
 import KYC from '../screen/Profile/kyc';
-import PostDetailScreen from '../screen/Community/PostDetails';
-import FollowersScreen from '../screen/Community/FollowersScreen';
-import FollowingScreen from '../screen/Community/FollowingScreen';
-import EligibilityForm from '../screen/Booking/EligibilityForm';
+// import PostDetailScreen from '../screen/Community/PostDetails';
+// import FollowersScreen from '../screen/Community/FollowersScreen';
+// import FollowingScreen from '../screen/Community/FollowingScreen';
+// import EligibilityForm from '../screen/Booking/EligibilityForm';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Builders from '../screen/Builders';
+import ProductScreen from '../screen/BrandAccessories';
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -209,11 +199,11 @@ function MyTabs() {
         }}
       />
       <Tab.Screen
-        name="Customers"
-        component={CalenderComponent}
+        name="Brand_Accessories"
+        component={ProductScreen}
         options={{
-          headerTitle: 'Calender',
-          headerShadowVisible: false,
+          headerTitle: 'Brand Accessories',
+         headerShadowVisible: false,
 
           headerStyle: {
             backgroundColor: 'white',
@@ -313,9 +303,9 @@ const AppStack = ({ initialRouteName = 'MainTabs' }) => {
           headerShown: false, // Hide stack header to avoid double headers
         }}
       />
-      <Stack.Screen
+      {/* <Stack.Screen
         name="FindTerritory"
-        component={TerritoryPartner}
+        component={<></>}
         options={{
           headerTitle: 'Schedule Meeting With Partner',
           headerTitleStyle: {
@@ -324,62 +314,8 @@ const AppStack = ({ initialRouteName = 'MainTabs' }) => {
           },
         }}
       />
-      <Stack.Screen name="EnquiryDetail" component={EnquiryDetailScreen} />
-      <Stack.Screen
-        name="PropertyDetails"
-        component={PropertyDetails}
-        options={{ headerTitle: `${capitalizeWords(auth?.propertyName)}` }}
-      />
-      <Stack.Screen
-        name="SelectTerritoryPartner"
-        component={SelectTerritoryPartner}
-        options={{ headerTitle: 'Select Territory Partner' }}
-      />
-      <Stack.Screen
-        name="ProjectLocation"
-        component={ProjectLocation}
-        options={{ headerTitle: 'Project Location' }}
-      />
-      <Stack.Screen
-        name="ConfirmSchedule"
-        component={ConfirmMeetingCard}
-        options={{ headerTitle: 'Confirm Your Meeting' }}
-      />
-
-      <Stack.Screen
-        name="EligibilityForm"
-        component={EligibilityForm}
-        options={{ headerTitle: 'Check EMI Eligibility' }}
-      />
-      <Stack.Screen
-        name="SuccessScreen"
-        component={SuccessScreen}
-        options={{ headerShown: false }}
-      />
-      <Stack.Screen
-        name="Flat"
-        component={BookingFlats}
-        options={{ headerTitle: `${auth.flatName}` }}
-      />
-      <Stack.Screen
-        name="FlatInfo"
-        component={FlatInfo}
-        options={{ headerTitle: `${auth.flatName}` }}
-      />
-      <Stack.Screen
-        name="UserProfile"
-        component={UserProfile}
-        options={{ headerTitle: 'Profile' }}
-      />
-      <Stack.Screen
-        name="ProfileUpdateSuccess"
-        component={ProfileUpdateSuccess}
-      />
-      <Stack.Screen
-        name="NewPost"
-        component={NewPost}
-        options={{ headerTitle: 'New Post' }}
-      />
+      <Stack.Screen name="EnquiryDetail" component={<></>} />
+      */}
       <Stack.Screen
         name="Referral"
         component={Refer}
@@ -401,12 +337,8 @@ const AppStack = ({ initialRouteName = 'MainTabs' }) => {
           headerTintColor: 'white', // back arrow & title color
         }}
       />
-      <Stack.Screen
-        name="PostDetailScreen"
-        component={PostDetailScreen}
-        options={{ headerTitle: 'Post Details' }}
-      />
-      <Stack.Screen
+     
+      {/* <Stack.Screen
         name="FollowersScreen"
         component={FollowersScreen}
         options={{
@@ -421,7 +353,7 @@ const AppStack = ({ initialRouteName = 'MainTabs' }) => {
           headerTitle: 'Followings',
           headerShadowVisible: false, // React Navigation v6+
         }}
-      />
+      /> */}
       <Stack.Screen
         name="Tickets"
         component={Tickets}

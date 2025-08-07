@@ -18,12 +18,11 @@ import Svg, { ClipPath, Path } from 'react-native-svg';
 import TicketCard from '../../component/TicketCard';
 // import BottomDrawer from '../../component/BottomDrawer';
 import { useCallback, useContext, useEffect, useRef, useState } from 'react';
-import { Picker } from '@react-native-picker/picker';
-import CustomPicker from '../../component/CustomPicker';
+;
 // import {createDrawerNavigator} from '@react-navigation/drawer';
 import { createDrawerNavigator } from '@react-navigation/drawer';
 import Home from '../Home/Home';
-import Booking from '../Booking';
+
 import { AuthContext } from '../../context/AuthContext';
 import { useFocusEffect } from '@react-navigation/native';
 import Toast from 'react-native-toast-message';

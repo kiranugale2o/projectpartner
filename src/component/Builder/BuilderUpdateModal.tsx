@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   Modal,
   View,
@@ -9,6 +9,7 @@ import {
   StyleSheet,
 } from 'react-native';
 import { X } from 'lucide-react-native';
+import DateSelectPopup from '../DateSelectedPopup';
 
 interface BuilderData {
   company_name?: string;
@@ -21,6 +22,7 @@ interface BuilderData {
   status?: string;
   loginstatus?: string;
   notes?: string;
+  dor?:string;
   created_at?: string;
   updated_at?: string;
   builderadder?: string;
@@ -34,17 +36,69 @@ interface Props {
 }
 
 const BuilderUpdateModal: React.FC<Props> = ({ visible, onClose, data, onSave }) => {
-  const [form, setForm] = useState<BuilderData>({});
+const [form, setForm] = useState<BuilderData>(data);
+const [showPicker, setShowPicker] = useState(false);
+const [selectedDate, setSelectedDate] = useState<any>(null);
+ // Utility function
+ const dateConvert = (mydate: string) => {
+  if (!mydate) return ''; // Guard against empty input
+  const date = new Date(mydate);
+  if (isNaN(date.getTime())) return ''; // Guard against invalid date
+
+  const formatted = `${String(date.getMonth() + 1).padStart(2, '0')}/${
+    String(date.getDate()).padStart(2, '0')
+  }/${date.getFullYear()}`;
+  return formatted;
+};
+
+const convertToDate = (dateObj: { day: string; month: string; year: string }): string => {
+  const monthMap: { [key: string]: string } = {
+    Jan: '01',
+    Feb: '02',
+    Mar: '03',
+    Apr: '04',
+    May: '05',
+    Jun: '06',
+    Jul: '07',
+    Aug: '08',
+    Sep: '09',
+    Oct: '10',
+    Nov: '11',
+    Dec: '12',
+  };
+
+  const month = monthMap[dateObj.month];
+  return `${dateObj.year}-${month}-${dateObj.day}`;
+};
 
   useEffect(() => {
     setForm(data);
   }, [data]);
 
-  const handleChange = (key: keyof BuilderData, value: string) => {
-    setForm((prev) => ({ ...prev, [key]: value }));
-  };
+// const handleChange = useCallback(
+//   (key: keyof BuilderData, value: string) => {
+//     setForm((prev) => ({ ...prev, [key]: value }));
+//     console.log(form,'updated');
+    
+//   },
+//   []
+  
+// );
+
+const handleChange = (
+  (key: keyof BuilderData, value: string) => {
+    setForm((prev) => {
+      const updated = { ...prev, [key]: value };
+      console.log('Updated Form:', updated); // ✅ Add this log
+      return updated;
+    });
+  }
+);
+
 
   const handleSave = () => {
+    console.log(form,'fff');
+    
     onSave(form);
     onClose();
   };
@@ -73,13 +127,41 @@ const BuilderUpdateModal: React.FC<Props> = ({ visible, onClose, data, onSave })
              
             ].map((field) => (
               <View key={field} style={styles.inputContainer}>
-                <Text style={styles.label}>{field.replace(/_/g, ' ')}</Text>
+                {field==='dor' || field==='Dor'?<>
+    <Text style={styles.label}>Date Of Registration</Text>
+    <TouchableOpacity onPress={() => setShowPicker(true)} style={styles.input}>
+      <Text style={{ color: form.dor ? 'black' : 'gray' }}>
+        {/* {form.dor ? dateConvert(form.dor) : 'Select date'} */}
+         {dateConvert(form.dor)}
+      </Text>
+    </TouchableOpacity>
+
+    {showPicker && (
+     <DateSelectPopup
+  visible={showPicker}
+  onCancel={() => setShowPicker(false)}
+  onOk={(dateObj: any) => {
+    const formatted = convertToDate(dateObj);
+    handleChange('dor', formatted); // already updates form state
+    // REMOVE this redundant setForm
+    // setForm({ ...form, dor: formatted });
+    setShowPicker(false);
+  }}
+
+
+      />
+    )}
+  </>
+                :<>
+                  <Text style={styles.label}>{field.replace(/_/g, ' ')}</Text>
                 <TextInput
                   style={styles.input}
                   value={form[field as keyof BuilderData] || ''}
                   onChangeText={(text) => handleChange(field as keyof BuilderData, text)}
                   placeholder={`Enter ${field.replace(/_/g, ' ')}`}
                 />
+                </>}
+              
               </View>
             ))}
           </ScrollView>

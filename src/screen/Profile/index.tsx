@@ -24,7 +24,7 @@ import {
 } from 'react-native-image-picker';
 import { Edit, Lock, SquarePen } from 'lucide-react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import PasswordUpdateModal from '../../component/PasswordUpdateModel';
+//import PasswordUpdateModal from '../../component/PasswordUpdateModel';
 const { width } = Dimensions.get('window');
 
 const Profile: React.FC = () => {
@@ -494,14 +494,14 @@ const Profile: React.FC = () => {
 
       {/* Password Update */}
 
-      <PasswordUpdateModal
+      {/* <PasswordUpdateModal
         visible={isPasswordModalVisible}
         onClose={() => setPasswordModalVisible(false)}
         onUpdatePassword={data => {
           console.log('Password data:', data);
           // Call API here
         }}
-      />
+      /> */}
       {/* update Profile model */}
       <Modal
         visible={isModalVisible}

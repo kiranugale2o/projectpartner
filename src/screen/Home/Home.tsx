@@ -23,7 +23,6 @@ import {
 import { useNavigation } from '@react-navigation/native';
 // import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import { Enquirer, RootStackParamList, SalesPerson } from '../../types';
-import ClientInfoCard from '../../component/ClientInfoCard';
 import Svg, { Path } from 'react-native-svg';
 import { formatIndianAmount, optionsL, optionsR } from '../../utils';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -48,10 +47,9 @@ import {
   Wallet,
   X,
 } from 'lucide-react-native';
-import EnquiryCustomeDatePicker from '../../component/EnquiryCustomeDatePicker';
-//import {FlatList, GestureHandlerRootView} from 'react-native-gesture-handler';
+
 import { parse, isWithinInterval, isValid } from 'date-fns';
-import PropertyForm from '../../component/propertyListing/PropertyForm';
+
 const screenHeight = Dimensions.get('window').height;
 interface NewEnquiry {
   customer: string;
@@ -443,8 +441,6 @@ const Home: React.FC = () => {
   return (
     <View style={{ flex: 1, backgroundColor: 'white' }}>
       {/* Main ScrollView for the entire screen */}
-
-      {/* Cards Section */}
       {/* Cards Section */}
       <Animated.View
         style={{
@@ -632,7 +628,7 @@ const Home: React.FC = () => {
                 }}
               />
             </View>
-            <EnquiryCustomeDatePicker />
+            {/* <EnquiryCustomeDatePicker /> */}
             {/* Fliter ICons */}
             <TouchableOpacity
               style={[styles.button,{display:'none'}]}
@@ -813,11 +809,7 @@ const Home: React.FC = () => {
         </View>
       </Modal>
 
-      {/* Add Proerty Model */}
-       <PropertyForm
-        isVisible={addPropertyVisible}
-        onClose={() => setProprtyVisible(false)}
-      />
+     
      <Toast />
     </View>
   );

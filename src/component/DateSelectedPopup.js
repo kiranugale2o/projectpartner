@@ -57,35 +57,29 @@ const DateSelectPopup = ({ visible, onCancel, onOk }) => {
   const yearRef = useRef(null);
 
   /* ---------- dynamic data ---------- */
-  /** years: thisYear … 2027 */
+  /** years:  … 2027 */
   const years = useMemo(
-    () =>
-      Array.from({ length: 2027 - thisYear + 1 }, (_, i) =>
-        (thisYear + i).toString(),
-      ),
-    [thisYear],
-  );
+  () =>
+    Array.from({ length: 2028 - 1980 }, (_, i) =>
+      (1980+ i).toString(),
+    ),
+  [],
+);
+
+
 
   /** months depends on the selected year */
-  const months = useMemo(() => {
-    if (parseInt(year, 10) === thisYear) {
-      return monthLabels.slice(thisMonthIx); // current month → Dec
-    }
-    return monthLabels; // all months
-  }, [year, thisYear, thisMonthIx]);
+ const months = useMemo(() => monthLabels, []);
 
   /** days depend on selected month & year */
   const days = useMemo(() => {
-    const monthIx = monthLabels.indexOf(month);
-    const totalDays = daysInMonth(monthIx, parseInt(year, 10));
-    const startFrom =
-      parseInt(year, 10) === thisYear && monthIx === thisMonthIx
-        ? thisDay // today, not past
-        : 1;
-    return Array.from({ length: totalDays - startFrom + 1 }, (_, i) =>
-      String(startFrom + i).padStart(2, '0'),
-    );
-  }, [month, year, daysInMonth, thisYear, thisMonthIx, thisDay]);
+  const monthIx = monthLabels.indexOf(month);
+  const totalDays = daysInMonth(monthIx, parseInt(year, 10));
+  const startFrom = 1;
+  return Array.from({ length: totalDays }, (_, i) =>
+    String(startFrom + i).padStart(2, '0'),
+  );
+}, [month, year, daysInMonth]);
 
   /* ---------- keep selection valid ---------- */
   useEffect(() => {
